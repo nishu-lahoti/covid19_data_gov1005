@@ -1,5 +1,5 @@
 ---
-title: "Spread and Density of COVID-19"
+title: "Testing and Treatment for COVID-19"
 author: "Rebecca Xi"
 date: "4/1/2020"
 output: html_document
