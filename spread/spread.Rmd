@@ -27,18 +27,19 @@ worldometer <- worldometer[[1]] %>% html_table
 worldometer <- worldometer %>% clean_names()
 
 # Loading NYTimes Datasets, which have been pulled into our repository under nyt_covid_data.
+# These datasets track number of cases and number of deaths by state or county by day, 
+# starting with end of January until present.
 
-nytimes_states <- read.csv("nyt_covid_data/us-states.csv")
-nytimes_counties <- read.csv("nyt_covid_data/us-counties.csv")
+nytimes_states <- read.csv("spread/nyt_covid_data/us-states.csv")
+nytimes_counties <- read.csv("spread/nyt_covid_data/us-counties.csv")
 
 ```
 
 ```{r}
 
 nytimes_states %>%
-  group_by(date) %>%
+  group_by(date, state) %>%
   arrange(desc(date))
-
 ```
 
 
