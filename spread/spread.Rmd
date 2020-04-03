@@ -33,9 +33,22 @@ worldometer <- worldometer %>% clean_names()
 nytimes_states <- read.csv("spread/nyt_covid_data/us-states.csv")
 nytimes_counties <- read.csv("spread/nyt_covid_data/us-counties.csv")
 
+# Importing time series data from the Johns Hopkins dataset. The first three variables are timeseries datasets for
+# global cases of COVID-19.
+
+jhu_confirmed_series <- read.csv("jhu_covid_data/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv")
+jhu_deaths_series <- read.csv("jhu_covid_data/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv")
+jhu_recovered_series <- read.csv("jhu_covid_data/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_recovered_global.csv")
+
+# These two datasets, also from Johns Hopkins, are time series datasets for the US specifically.
+
+jhu_us_confirmed_series <- read.csv("jhu_covid_data/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_US.csv")
+jhu_us_deaths_series <- read.csv("jhu_covid_data/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_US.csv")
+
 ```
 
 ```{r}
+
 
 
 ```
