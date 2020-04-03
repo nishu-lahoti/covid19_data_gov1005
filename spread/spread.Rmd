@@ -51,26 +51,36 @@ nytimes_counties <- read.csv("nyt_covid_data/us-counties.csv")
 
 jhu_confirmed_series <- read.csv(
   "jhu_covid_data/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv"
-  ) %>% clean_names()
+  ) %>% 
+  clean_names()
+
 jhu_deaths_series <- read.csv(
   "jhu_covid_data/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv"
-  ) %>% clean_names()
+  ) %>% 
+  clean_names()
+
 jhu_recovered_series <- read.csv(
   "jhu_covid_data/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_recovered_global.csv"
-  ) %>% clean_names()
+  ) %>% 
+  clean_names()
+
 
 # These two datasets, also from Johns Hopkins, are time series datasets for the US specifically.
 
 jhu_us_confirmed_series <- read.csv(
   "jhu_covid_data/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_US.csv"
-  ) %>% clean_names()
+  ) %>% 
+  clean_names()
+
 jhu_us_deaths_series <- read.csv(
   "jhu_covid_data/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_US.csv"
-  ) %>% clean_names()
+  ) %>% 
+  clean_names()
+
 ```
 
 
-```{r}
+```{r tidy_jhu, echo = FALSE}
 
 # Pivoting the JHU data to get country, date, and confirmed cases side-by-side. Note, this dataset
 # excludes results in the United States.
@@ -83,10 +93,24 @@ tidy_jhu_confirmed <- jhu_confirmed_series %>%
 tidy_jhu_confirmed %>%
   skim()
 
-# Attempting to remove the x string from my JHU confirmed dataset.
+tidy_jhu_deaths <- jhu_deaths_series %>%
+  pivot_longer(cols = c(x1_22_20:x4_2_20), names_to = "date", values_to = "deaths") %>%
+  select(country_region, date, deaths) %>%
+  group_by(date)
 
-# jhu_confirmed <- tidy_jhu_confirmed$date %>%
-#   str_replace(pattern = "x", replacement = "")
+tidy_jhu_deaths %>%
+  skim()
+
+tidy_jhu_recovered <- jhu_recovered_series %>%
+  pivot_longer(cols = c(x1_22_20:x4_2_20), names_to = "date", values_to = "recovered") %>%
+  select(country_region, date, recovered) %>%
+  group_by(date)
+
+tidy_jhu_recovered %>%
+  skim()
+
+
+# Pivoting the US data from JHU in a similar fashion to above.
 
 tidy_jhu_us_confirmed <- jhu_us_confirmed_series %>%
   pivot_longer(cols = c(x1_22_20:x4_2_20), names_to = "date", values_to = "confirmed") %>%
@@ -95,6 +119,20 @@ tidy_jhu_us_confirmed <- jhu_us_confirmed_series %>%
 tidy_jhu_us_confirmed %>%
   group_by(combined_key, date) %>%
   arrange(desc(confirmed))
+
+tidy_jhu_us_deaths <- jhu_us_deaths_series %>%
+  pivot_longer(cols = c(x1_22_20:x4_2_20), names_to = "date", values_to = "deaths") %>%
+  select(country_region, combined_key, date, deaths)
+
+tidy_jhu_us_deaths %>%
+  group_by(combined_key, date) %>%
+  arrange(desc(deaths))
+
+
+# Attempting to remove the x string from my JHU confirmed dataset.
+
+# jhu_confirmed <- tidy_jhu_confirmed$date %>%
+#   str_replace(pattern = "x", replacement = "")
 
 ```
 
