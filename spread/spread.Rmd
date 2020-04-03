@@ -14,6 +14,11 @@ library(rvest)
 library(gt)
 library(janitor)
 library(infer)
+library(skimr)
+
+```
+
+```{r worldometer_scrape, include = FALSE}
 
 # Web scraping from worldometer dataset, which aggregates total cases, total deaths,
 # and total recoveries by country.
@@ -26,40 +31,70 @@ worldometer <- worldometer_html %>%
 worldometer <- worldometer[[1]] %>% html_table
 worldometer <- worldometer %>% clean_names()
 
+```
+
+```{r nytimes_import, include = FALSE}
+
 # Loading NYTimes Datasets, which have been pulled into our repository under nyt_covid_data.
 # These datasets track number of cases and number of deaths by state or county by day, 
 # starting with end of January until present.
 
-nytimes_states <- read.csv("spread/nyt_covid_data/us-states.csv")
-nytimes_counties <- read.csv("spread/nyt_covid_data/us-counties.csv")
+nytimes_states <- read.csv("nyt_covid_data/us-states.csv")
+nytimes_counties <- read.csv("nyt_covid_data/us-counties.csv")
+
+```
+
+```{r johns_hopkins, include = FALSE}
 
 # Importing time series data from the Johns Hopkins dataset. The first three variables are timeseries datasets for
 # global cases of COVID-19.
 
 jhu_confirmed_series <- read.csv(
   "jhu_covid_data/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv"
-  )
+  ) %>% clean_names()
 jhu_deaths_series <- read.csv(
   "jhu_covid_data/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv"
-  )
+  ) %>% clean_names()
 jhu_recovered_series <- read.csv(
   "jhu_covid_data/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_recovered_global.csv"
-  )
+  ) %>% clean_names()
 
 # These two datasets, also from Johns Hopkins, are time series datasets for the US specifically.
 
 jhu_us_confirmed_series <- read.csv(
   "jhu_covid_data/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_US.csv"
-  )
+  ) %>% clean_names()
 jhu_us_deaths_series <- read.csv(
   "jhu_covid_data/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_US.csv"
-  )
-
+  ) %>% clean_names()
 ```
+
 
 ```{r}
 
+# Pivoting the JHU data to get country, date, and confirmed cases side-by-side. Note, this dataset
+# excludes results in the United States.
 
+tidy_jhu_confirmed <- jhu_confirmed_series %>%
+  pivot_longer(cols = c(x1_22_20:x4_2_20), names_to = "date", values_to = "confirmed") %>%
+  select(country_region, date, confirmed) %>%
+  group_by(date)
+
+tidy_jhu_confirmed %>%
+  skim()
+
+# Attempting to remove the x string from my JHU confirmed dataset.
+
+# jhu_confirmed <- tidy_jhu_confirmed$date %>%
+#   str_replace(pattern = "x", replacement = "")
+
+tidy_jhu_us_confirmed <- jhu_us_confirmed_series %>%
+  pivot_longer(cols = c(x1_22_20:x4_2_20), names_to = "date", values_to = "confirmed") %>%
+  select(country_region, combined_key, date, confirmed)
+
+tidy_jhu_us_confirmed %>%
+  group_by(combined_key, date) %>%
+  arrange(desc(confirmed))
 
 ```
 
