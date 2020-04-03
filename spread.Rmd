@@ -1,0 +1,46 @@
+---
+title: "Spread and Density of COVID-19"
+author: "Rebecca Xi"
+date: "4/1/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(dplyr)
+library(rvest)
+library(gt)
+library(janitor)
+library(infer)
+
+# Web scraping from worldometer dataset, which aggregates total cases, total deaths,
+# and total recoveries by country.
+
+worldometer_url <- paste0("https://www.worldometers.info/coronavirus/")
+worldometer_html <- read_html(worldometer_url)
+
+worldometer <- worldometer_html %>% 
+               html_nodes("table")
+worldometer <- worldometer[[1]] %>% html_table
+worldometer <- worldometer %>% clean_names()
+
+# Loading NYTimes Datasets, which have been pulled into our repository under nyt_covid_data.
+# These datasets track number of cases and number of deaths by state or county by day, 
+# starting with end of January until present.
+
+nytimes_states <- read.csv("spread/nyt_covid_data/us-states.csv")
+nytimes_counties <- read.csv("spread/nyt_covid_data/us-counties.csv")
+
+```
+
+```{r}
+
+nytimes_states %>%
+  group_by(date) %>%
+  arrange(desc(date))
+
+```
+
+
