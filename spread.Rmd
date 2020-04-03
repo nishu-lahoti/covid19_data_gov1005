@@ -38,9 +38,8 @@ nytimes_counties <- read.csv("spread/nyt_covid_data/us-counties.csv")
 ```{r}
 
 nytimes_states %>%
-  group_by(date) %>%
+  group_by(date, state) %>%
   arrange(desc(date))
-
 ```
 
 
