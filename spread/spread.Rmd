@@ -85,7 +85,7 @@ jhu_us_deaths_series <- read.csv(
 
 ```
 
-```{r tidy_jhu, echo = FALSE}
+```{r tidy_jhu, echo = FALSE, include = FALSE}
 
 # Pivoting the JHU data to get country, date, and confirmed cases side-by-side. Note, this dataset
 # excludes results in the United States.
@@ -181,6 +181,8 @@ cases_by_state %>%
        caption = "Source: NYTimes",
        fill = "Confirmed Cases") +
   theme_void()
+
+ggsave("us-covid19.png")
 
 ```
 
