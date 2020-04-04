@@ -141,7 +141,11 @@ tidy_jhu_us_deaths %>%
 ```
 
 
-```{r}
+```{r case_visualization, echo = FALSE}
+
+# Function to capitalize the first letter of a string. Useful for capitalizing the
+# first letter of each state pulled from the maps library, which will be joined
+# on the NYTimes dataset.
 
 CapStr <- function(y) {
   c <- strsplit(y, " ")[[1]]
@@ -149,29 +153,34 @@ CapStr <- function(y) {
       sep="", collapse=" ")
 }
 
+# Using a mix of the sf, tibble, and maps library to pull the geometry
+# data by state into a table which we can join on the nytimes data.
+
 us <- st_as_sf(map("state", plot = FALSE, fill = TRUE))
 us_tbl <- as_tibble(us) %>%
   mutate(state_chr = as.character(ID)) %>%
   mutate(state = map_chr(state_chr, ~ CapStr(.))) %>%
   select(state, geom)
 
-# Trying to join NYTimes Dataset on state_data
+# Trying to join NYTimes Dataset on us_tbl data.
 
-
-combined_data <- nytimes_states %>%
+cases_by_state <- nytimes_states %>%
   left_join(us_tbl, by = "state") %>%
   select(date, state, cases, geom)
 
+# Plotting a visualization of cases as of April 1st in the US.
 
-combined_data %>%
+cases_by_state %>%
+  filter(date == "2020-04-01") %>%
   ggplot(aes(geometry = geom, fill = cases)) +
   geom_sf() +
   scale_fill_viridis_c(option = "plasma",
                        direction = -1) +
-  labs(title = "Spread of Covid-19 in the United States",
-       caption = "Source: NYTimes") +
+  labs(title = "Covid-19 Cases by State",
+       subtitle = "Confirmed as of April 1st",
+       caption = "Source: NYTimes",
+       fill = "Confirmed Cases") +
   theme_void()
-
 
 ```
 
