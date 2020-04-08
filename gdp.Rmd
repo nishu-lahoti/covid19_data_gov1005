@@ -31,7 +31,29 @@ worldometer_html <- read_html(worldometer_url)
 worldometer <- worldometer_html %>% 
                html_nodes("table")
 worldometer <- worldometer[[1]] %>% html_table
-worldometer <- worldometer %>% clean_names()
+worldometer <- worldometer %>% 
+  clean_names() %>% 
+  rename(country_name = "country_other")
+
+#worldometer$total_cases <- gsub(',', '', worldometer$total_cases)
+
+worldometer <- apply(worldometer, 2, function(x){gsub(',|\\+', '', x)})
+worldometer <- as.data.frame(worldometer)
+worldometer[, -1] <- apply(worldometer[, -1], 2, as.numeric)
+
+
+
+
+
+#apply repeats process for rows or columns 
+#first arg is subject (so data, where you wanna apply)
+#second argument is row or column (1 is row, 2 is column)
+#last is process that you want repeated 
+#get rid of the comma first
+#then get rid of the + bc it has a special place in regular expression
+#escape it with backspace, or double backspace in gsub to remove it 
+#apply changes to matrix, so you have to do some work to convert to dataframe, numerics, etc 
+#worldometer[, -1] --> if empty, pulls everything. comes after: selects columns, -1 means ignore 1st column 
 
 
 ```
@@ -43,38 +65,69 @@ population_data_18 <- read_csv("data_misc/API_pop.csv", skip = 3) %>%
   clean_names() %>% 
   select(country_name, x2018) %>% 
   rename(pop_2018 = x2018)
+
+#world bank population data 2018
   
 gdp_data_18 <- read_csv("data_misc/API_gdp.csv", skip = 3) %>%
   clean_names() %>% 
   select(country_name, x2018) %>% 
   rename(gdp_2018 = x2018)
 
+#world bank gdp data, most recent as of 2018
+
 gdp_pop_2018 <- gdp_data_18 %>% 
   left_join(population_data_18, by = "country_name") %>% 
   mutate(gdp_per_capita = round(gdp_2018 / pop_2018, digits = 2))
+
+#combined, then found gdp per capita 
+
 
 ```
 
 ```{r econ_indicators, include = FALSE}
 
-indices_url <- paste0("https://markets.businessinsider.com/indices")
-indices_html <- read_html(indices_url)
+#indices_url <- paste0("https://markets.businessinsider.com/indices")
+#indices_html <- read_html(indices_url)
 
-indices <- indices_html %>% 
+#indices <- indices_html %>% 
+        #       html_nodes("table")
+
+#indices <- indices[[2]] %>% 
+ # html_table
+
+#indices <- indices %>% 
+ # clean_names()
+
+
+
+
+marketwatch_url <- paste0("https://www.marketwatch.com/tools/stockresearch/globalmarkets/intIndices.asp")
+marketwatch_html <- read_html(marketwatch_url)
+
+marketwatch <- marketwatch_html %>% 
                html_nodes("table")
 
-indices <- indices[[2]] %>% 
-  html_table
-
-indices <- indices %>% 
+## 5 bracketed things
+marketwatch <- rbind(marketwatch[[1]] %>% html_table, marketwatch[[2]] %>% html_table, marketwatch[[3]] %>% html_table, marketwatch[[4]] %>% html_table, marketwatch[[5]] %>% html_table) %>% 
   clean_names()
 
-misc_data <- read_excel("data_misc/msci0406.xls", skip = 5) %>% 
+
+# use gsub to take out plus, percent (percent would be same thing as plus to take out)
+
+
+gdow_data <- read_csv("data_misc/HistoricalPrices.csv") %>% 
   clean_names()
+
+
+#potentially combine gdow data for the day from marketwatch with historical? idk 
 
 nasdaq <- read_csv("data_misc/nasdaq0406.csv") %>% 
   clean_names()
   
+
+unemployment <- read_excel("data_misc/statistic_id1107247_unemployment-insurance_-initial-claims-per-week-us-march-2020.xlsx", 
+    sheet = "Data")
+
 
 #jhu_us_confirmed_series <- read.csv(
 #  "jhu_covid_data/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_US.csv"
@@ -95,8 +148,17 @@ nasdaq <- read_csv("data_misc/nasdaq0406.csv") %>%
  # arrange(desc(confirmed))
 
 
+
+#colnames(worldometer)[1] <- 'country_name'
+#test2 <- worldometer[!(worldometer$country_name %in% test$country_name), ]
+
+#shows entries worldometer data that was not matched 
+#probably have to manually change 
+
+#test <- merge.data.frame(gdp_pop_2018, worldometer, 'country_name', all = F)
+
 tidy_gdp_pop <- gdp_pop_2018 %>% 
-  left_join(worldometer, by = c("country_name" = "country_other")) %>% 
+  left_join(worldometer, by = "country_name") %>% 
   select(country_name, pop_2018, gdp_2018, gdp_per_capita, total_cases, total_deaths, total_recovered) %>% 
   na.omit()
 ```
@@ -104,17 +166,31 @@ tidy_gdp_pop <- gdp_pop_2018 %>%
 ```{r plots, echo = FALSE}
 
 cases_gdp_capita <- tidy_gdp_pop %>% 
-  ggplot(aes(x = total_cases, y = gdp_per_capita)) + 
-  geom_point()
+  filter(country_name != "World") %>% 
+  ggplot(aes(x = log(gdp_per_capita), y = log(total_cases), fill = total_deaths)) + 
+  geom_point() 
 
-# plot is coming out really whack. 
+#log scale accounts for outliers 
+
+cases_gdp_capita
+# plot is coming out really whack.will ask June
+#geom_sf? 
 
 deaths_gdp_capita <- tidy_gdp_pop %>% 
   ggplot(aes(x = total_deaths, y = gdp_per_capita)) + 
   geom_point()
 ```
 
+stocks: TL of them (significant events) 
 
-How can I match daily / weekly / monthly data with each other when they're not the same? 
-
+***CONSOLIDATE DATA INTO CONSISTENT FORMAT
+***BUILT IN R FUNCTION THAT ALLOWS YOU TO MAYBE FORMAT DATES? 
+stock gdow analysis: big global events 
+stocks: total change, total death, r/o/change, r/o/death
+Load in unemployment data!! 
+Unemployment data other countries ** 
+- map out stock performance over past month, vertical line for days of policy measures (i.e. stimulus package, US, initial pandemic, kinda annotating a chart, what events might have influenced peaks/troughs)
+How can I match daily / weekly / monthly data with each other when they're not the same? i.e. daily growth rates vs unemployment reporting for US, or GDP quarterly data, or economic consumer reports released weekly/monthly
+How can I clean indices stock data? DONE
+How can I fix the per_capita plots? 
 
