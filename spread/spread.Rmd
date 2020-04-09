@@ -11,7 +11,6 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(dplyr)
 library(rvest)
-library(gt)
 library(janitor)
 library(infer)
 library(skimr)
@@ -20,6 +19,8 @@ library(maps)
 library(sf)
 library(tibble)
 library(stringr)
+library(readr)
+library(broom)
 
 census_api_key("5f0d2eb1b585094cfc7f8f68b50358b62af109b1")
 
@@ -32,11 +33,51 @@ census_api_key("5f0d2eb1b585094cfc7f8f68b50358b62af109b1")
 
 worldometer_url <- paste0("https://www.worldometers.info/coronavirus/")
 worldometer_html <- read_html(worldometer_url)
-
 worldometer <- worldometer_html %>% 
                html_nodes("table")
 worldometer <- worldometer[[1]] %>% html_table
 worldometer <- worldometer %>% clean_names()
+
+# parse_number function to get the numbers
+# transformations of time series, linear, and exponential
+
+worldometer <- worldometer %>%
+  mutate(total_cases = parse_number(total_cases),
+         new_cases = parse_number(new_cases),
+         total_deaths = parse_number(total_deaths),
+         new_deaths = parse_number(new_deaths),
+         total_recovered = parse_number(total_recovered),
+         active_cases = parse_number(active_cases),
+         serious_critical = parse_number(serious_critical),
+         total_tests = parse_number(total_tests),
+         tests_1m_pop = parse_number(tests_1m_pop)) %>%
+  filter(! country_other %in% c("World", "Total:", "Europe", "North America", "Asia", "South America", 
+                                "Africa", "Oceania", "")) %>%
+  arrange(desc(total_cases))
+
+cases_to_deaths <- lm(total_deaths ~ total_cases, data = worldometer)
+cases_to_deaths %>%
+  tidy(conf.int = TRUE)
+
+ranked_worldometer <- worldometer %>%
+  mutate(world_rank_cases = rank(desc(total_cases)),
+         world_rank_deaths = rank(desc(total_deaths)),
+         world_rank_tests = rank(desc(total_tests))) %>%
+  select(country_other, total_cases, total_deaths, total_tests, world_rank_cases, world_rank_deaths,
+         world_rank_tests)
+
+ggplot(ranked_worldometer, aes(x = world_rank_tests, y = total_deaths)) + geom_point()
+tests_to_deaths <- lm(total_deaths ~ total_tests, data = worldometer)
+tests_to_deaths %>%
+  tidy()
+
+ggplot(ranked_worldometer, aes(x = world_rank_tests, y = total_cases)) + geom_point()
+cases_to_tests <- lm(total_cases ~ total_tests, data = worldometer)
+cases_to_tests %>%
+  tidy()
+
+ranked_worldometer %>%
+  select(country_other, total_cases, total_deaths, world_rank_tests)
 
 ```
 
@@ -46,8 +87,13 @@ worldometer <- worldometer %>% clean_names()
 # These datasets track number of cases and number of deaths by state or county by day, 
 # starting with end of January until present.
 
-nytimes_states <- read.csv("nyt_covid_data/us-states.csv")
-nytimes_counties <- read.csv("nyt_covid_data/us-counties.csv")
+nytimes_states <- read.csv(url("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv"))
+nytimes_counties <- read.csv(url("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv"))
+
+
+nytimes_counties %>%
+  filter(county == "San Francisco")
+
 
 ```
 
@@ -132,6 +178,19 @@ tidy_jhu_us_deaths <- jhu_us_deaths_series %>%
 tidy_jhu_us_deaths %>%
   group_by(combined_key, date) %>%
   arrange(desc(deaths))
+
+new_jhu_deaths <- tidy_jhu_us_deaths %>%
+  # filter(combined_key == "Los Angeles, California, US") %>%
+  mutate(new_date = sub(".", "", date)) %>%
+  mutate(new_new_date = as.Date(new_date, format = "%m_%d_%y")) %>%
+  select(combined_key, new_new_date, deaths) %>%
+  mutate(helper = c(new_jhu_deaths$deaths[1], new_jhu_deaths$deaths[1:(nrow(new_jhu_deaths)-1)])) %>%
+  mutate(increment = deaths - helper) %>%
+  group_by(combined_key)
+
+new_set <- new_jhu_deaths %>%
+  filter(increment > 0)
+
 
 # Attempting to remove the x string from my JHU confirmed dataset.
 
