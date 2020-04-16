@@ -46,11 +46,37 @@ global_recovered <- read.csv(url("https://raw.githubusercontent.com/CSSEGISandDa
   pivot_longer(cols = c(x1_22_20:x4_15_20), names_to = "date", values_to = "recovered") %>%
   select(country_region, date, recovered)
 
+
+# Webscrape Worldometer Data
+
+worldometer_url <- paste0("https://www.worldometers.info/coronavirus/")
+worldometer_html <- read_html(worldometer_url)
+worldometer <- worldometer_html %>% 
+               html_nodes("table")
+worldometer <- worldometer[[1]] %>% html_table
+worldometer <- worldometer %>% clean_names()
+
+# Clean worldometer data, changing column types to reflect numbers where necessary.
+
+worldometer <- worldometer %>%
+  mutate(total_cases = parse_number(total_cases),
+         new_cases = parse_number(new_cases),
+         total_deaths = parse_number(total_deaths),
+         new_deaths = parse_number(new_deaths),
+         total_recovered = parse_number(total_recovered),
+         active_cases = parse_number(active_cases),
+         serious_critical = parse_number(serious_critical),
+         total_tests = parse_number(total_tests),
+         tests_1m_pop = parse_number(tests_1m_pop)) %>%
+  filter(! country_other %in% c("World", "Total:", "Europe", "North America", "Asia", "South America", 
+                                "Africa", "Oceania", "")) %>%
+  arrange(desc(total_cases))
+
 ```
 
 ### Creating increments
 
-```{r}
+```{r increments, echo = FALSE}
 
 # Updating the date and creating an increment column for the confirmed cases in the US.
 
@@ -114,6 +140,26 @@ recoveredCovidGlobal <- recoveredCovidGlobal %>%
                     recoveredCovidGlobal$recovered[1:(nrow(recoveredCovidGlobal)-1)])) %>%
   mutate(increment = recovered - helper) %>%
   group_by(country_region)
+
+```
+
+## Exploratory Data Analysis
+
+```{r exploration, echo = FALSE}
+
+worldometer %>%
+  skim()
+
+summary(confirmedCovidUS)
+summary(deathsCovidUS)
+
+summary(us_counties)
+summary(us_states)
+
+summary(confirmedCovidGlobal)
+summary(deathsCovidGlobal)
+summary(recoveredCovidGlobal)
+
 
 ```
 
