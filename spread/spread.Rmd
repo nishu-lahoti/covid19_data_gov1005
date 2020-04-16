@@ -189,7 +189,7 @@ new_jhu_deaths <- tidy_jhu_us_deaths %>%
   group_by(combined_key)
 
 new_set <- new_jhu_deaths %>%
-  filter(increment > 0)
+  filter(increment >= 0)
 
 
 # Attempting to remove the x string from my JHU confirmed dataset.
