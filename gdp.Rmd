@@ -149,8 +149,8 @@ unemployment <- read_excel("data_misc/statistic_id1107247_unemployment-insurance
 
 
 
-#colnames(worldometer)[1] <- 'country_name'
-#test2 <- worldometer[!(worldometer$country_name %in% test$country_name), ]
+colnames(worldometer)[1] <- 'country_name'
+test2 <- worldometer[!(worldometer$country_name %in% test$country_name), ]
 
 #shows entries worldometer data that was not matched 
 #probably have to manually change 
@@ -165,6 +165,11 @@ tidy_gdp_pop <- gdp_pop_2018 %>%
 
 ```{r plots, echo = FALSE}
 
+citymapper <- download.file("https://cdn.citymapper.com/data/cmi/Citymapper_Mobility_Index_20200413.csv", destfile = "./data_misc/citymapper.csv", quiet = TRUE)
+
+citymapper <- read_csv("data_misc/citymapper.csv", skip = 3)
+  
+  
 cases_gdp_capita <- tidy_gdp_pop %>% 
   filter(country_name != "World") %>% 
   ggplot(aes(x = log(gdp_per_capita), y = log(total_cases), fill = total_deaths)) + 
@@ -177,7 +182,7 @@ cases_gdp_capita
 #geom_sf? 
 
 deaths_gdp_capita <- tidy_gdp_pop %>% 
-  ggplot(aes(x = total_deaths, y = gdp_per_capita)) + 
+  ggplot(aes(x = log(total_deaths), y = log(gdp_per_capita), fill = total_deaths)) + 
   geom_point()
 ```
 
@@ -193,4 +198,17 @@ Unemployment data other countries **
 How can I match daily / weekly / monthly data with each other when they're not the same? i.e. daily growth rates vs unemployment reporting for US, or GDP quarterly data, or economic consumer reports released weekly/monthly
 How can I clean indices stock data? DONE
 How can I fix the per_capita plots? 
+
+
+#rscript
+#readcsv takes link, reading in link 
+#download.file
+#good ways to handle rapidly updating data
+
+
+Writing lots of code that replace korea w south korea, etc --> everyone has own set of names 
+
+
+ways to merge country names in R 
+--> maybe someone who has written script 
 
