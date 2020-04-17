@@ -1,0 +1,165 @@
+---
+title: "spread_final"
+author: "Nishu Lahoti"
+date: "4/16/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(dplyr)
+library(readr)
+library(rvest)
+library(janitor)
+
+# Import NYTimes Data
+
+us_states <- read.csv(url("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv"))
+us_counties <- read.csv(url("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv"))
+
+# Import & Clean Johns Hopkins Data
+
+us_confirmed <- read.csv(url("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_US.csv")) %>% 
+  clean_names() %>%
+  pivot_longer(cols = c(x1_22_20:x4_15_20), names_to = "date", values_to = "confirmed") %>%
+  select(combined_key, date, confirmed)
+
+us_deaths <- read.csv(url("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_US.csv")) %>% 
+  clean_names() %>%
+  pivot_longer(cols = c(x1_22_20:x4_15_20), names_to = "date", values_to = "deaths") %>%
+  select(combined_key, date, deaths)
+
+global_confirmed <- read.csv(url("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv")) %>% 
+  clean_names() %>%
+  pivot_longer(cols = c(x1_22_20:x4_15_20), names_to = "date", values_to = "confirmed") %>%
+  select(country_region, date, confirmed)
+
+global_deaths <- read.csv(url("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv")) %>% 
+  clean_names() %>%
+  pivot_longer(cols = c(x1_22_20:x4_15_20), names_to = "date", values_to = "deaths") %>%
+  select(country_region, date, deaths)
+
+global_recovered <- read.csv(url("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_recovered_global.csv")) %>% 
+  clean_names() %>%
+  pivot_longer(cols = c(x1_22_20:x4_15_20), names_to = "date", values_to = "recovered") %>%
+  select(country_region, date, recovered)
+
+
+# Webscrape Worldometer Data
+
+worldometer_url <- paste0("https://www.worldometers.info/coronavirus/")
+worldometer_html <- read_html(worldometer_url)
+worldometer <- worldometer_html %>% 
+               html_nodes("table")
+worldometer <- worldometer[[1]] %>% html_table
+worldometer <- worldometer %>% clean_names()
+
+# Clean worldometer data, changing column types to reflect numbers where necessary.
+
+worldometer <- worldometer %>%
+  mutate(total_cases = parse_number(total_cases),
+         new_cases = parse_number(new_cases),
+         total_deaths = parse_number(total_deaths),
+         new_deaths = parse_number(new_deaths),
+         total_recovered = parse_number(total_recovered),
+         active_cases = parse_number(active_cases),
+         serious_critical = parse_number(serious_critical),
+         total_tests = parse_number(total_tests),
+         tests_1m_pop = parse_number(tests_1m_pop)) %>%
+  filter(! country_other %in% c("World", "Total:", "Europe", "North America", "Asia", "South America", 
+                                "Africa", "Oceania", "")) %>%
+  arrange(desc(total_cases))
+
+```
+
+### Creating increments
+
+```{r increments, echo = FALSE}
+
+# Updating the date and creating an increment column for the confirmed cases in the US.
+
+confirmedCovidUS <- us_confirmed %>%
+  mutate(sep_date = sub(".", "", date)) %>%
+  mutate(new_date = as.Date(sep_date, format = "%m_%d_%y")) %>%
+  select(combined_key, new_date, confirmed)
+
+confirmedCovidUS <- confirmedCovidUS %>%
+  mutate(helper = c(confirmedCovidUS$confirmed[1], confirmedCovidUS$confirmed[1:(nrow(confirmedCovidUS)-1)])) %>%
+  mutate(increment = confirmed - helper) %>%
+  group_by(combined_key)
+
+# Updating the date and creating an increment column for the confirmed cases in the US.
+
+deathsCovidUS <- us_deaths %>%
+  mutate(sep_date = sub(".", "", date)) %>%
+  mutate(new_date = as.Date(sep_date, format = "%m_%d_%y")) %>%
+  select(combined_key, new_date, deaths)
+
+deathsCovidUS <- deathsCovidUS %>%
+  mutate(helper = c(deathsCovidUS$deaths[1], deathsCovidUS$deaths[1:(nrow(deathsCovidUS)-1)])) %>%
+  mutate(increment = deaths - helper) %>%
+  group_by(combined_key)
+
+# Updating the date and creating an increment column for the confirmed cases across the globe
+
+confirmedCovidGlobal <- global_confirmed %>%
+  mutate(sep_date = sub(".", "", date)) %>%
+  mutate(new_date = as.Date(sep_date, format = "%m_%d_%y")) %>%
+  select(country_region, new_date, confirmed)
+
+confirmedCovidGlobal <- confirmedCovidGlobal %>%
+  mutate(helper = c(confirmedCovidGlobal$confirmed[1],
+                    confirmedCovidGlobal$confirmed[1:(nrow(confirmedCovidGlobal)-1)])) %>%
+  mutate(increment = confirmed - helper) %>%
+  group_by(country_region)
+
+# Updating the date and creating an increment column for the deaths  across the globe
+
+deathsCovidGlobal <- global_deaths %>%
+  mutate(sep_date = sub(".", "", date)) %>%
+  mutate(new_date = as.Date(sep_date, format = "%m_%d_%y")) %>%
+  select(country_region, new_date, deaths)
+
+deathsCovidGlobal <- deathsCovidGlobal %>%
+  mutate(helper = c(deathsCovidGlobal$deaths[1],
+                    deathsCovidGlobal$deaths[1:(nrow(deathsCovidGlobal)-1)])) %>%
+  mutate(increment = deaths - helper) %>%
+  group_by(country_region)
+
+# Updating the date and creating an increment column for the recovered cases across the globe
+
+recoveredCovidGlobal <- global_recovered %>%
+  mutate(sep_date = sub(".", "", date)) %>%
+  mutate(new_date = as.Date(sep_date, format = "%m_%d_%y")) %>%
+  select(country_region, new_date, recovered)
+
+recoveredCovidGlobal <- recoveredCovidGlobal %>%
+  mutate(helper = c(recoveredCovidGlobal$recovered[1],
+                    recoveredCovidGlobal$recovered[1:(nrow(recoveredCovidGlobal)-1)])) %>%
+  mutate(increment = recovered - helper) %>%
+  group_by(country_region)
+
+```
+
+## Exploratory Data Analysis
+
+```{r exploration, echo = FALSE}
+
+worldometer %>%
+  skim()
+
+summary(confirmedCovidUS)
+summary(deathsCovidUS)
+
+summary(us_counties)
+summary(us_states)
+
+summary(confirmedCovidGlobal)
+summary(deathsCovidGlobal)
+summary(recoveredCovidGlobal)
+
+
+```
+
