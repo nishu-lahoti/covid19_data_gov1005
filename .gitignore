@@ -3,4 +3,8 @@
 .RData
 .Ruserdata
 
+<<<<<<< HEAD
 covid19_data_gov1005.Rproj
+=======
+*.Rproj
+>>>>>>> 7b9f1650f4b9ed3b7bda4e649689db0ea234e22b
