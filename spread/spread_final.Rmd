@@ -19,6 +19,10 @@ library(janitor)
 us_states <- read.csv(url("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv"))
 us_counties <- read.csv(url("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv"))
 
+saveRDS(us_states, file = "../team_data/nytimes_states.RDS")
+saveRDS(us_counties, file = "../team_data/nytimes_counties.RDS")
+
+
 # Import & Clean Johns Hopkins Data
 
 us_confirmed <- read.csv(url("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_US.csv")) %>% 
@@ -71,6 +75,8 @@ worldometer <- worldometer %>%
   filter(! country_other %in% c("World", "Total:", "Europe", "North America", "Asia", "South America", 
                                 "Africa", "Oceania", "")) %>%
   arrange(desc(total_cases))
+
+saveRDS(worldometer, file = "../team_data/worldometer.RDS")
 
 ```
 
@@ -141,6 +147,19 @@ recoveredCovidGlobal <- recoveredCovidGlobal %>%
   mutate(increment = recovered - helper) %>%
   group_by(country_region)
 
+# Joined Data US & Global
+
+covidUS <- confirmedCovidUS %>%
+  inner_join(deathsCovidUS, by = c("combined_key", "new_date"), suffix = c("_confirmed", "_deaths")) %>%
+  select(combined_key, new_date, confirmed, increment_confirmed, deaths, increment_deaths)
+
+covidGlobal <- confirmedCovidGlobal %>%
+  inner_join(deathsCovidGlobal, by = c("country_region", "new_date"), suffix = c("_confirmed", "_deaths")) %>%
+  inner_join(recoveredCovidGlobal, by = c("country_region", "new_date"), suffix = c("_confirmed", "_recovered")) %>%
+  select(country_region, new_date, confirmed, increment_confirmed, deaths, increment_deaths, recovered, increment)
+
+saveRDS(covidUS, file = "../team_data/covidUS.RDS")
+saveRDS(covidGlobal, file = "../team_data/covidGlobal.RDS")
 ```
 
 ## Exploratory Data Analysis
