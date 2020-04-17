@@ -1,30 +1,243 @@
 ---
-title: "Impact of COVID-19 on GDP"
-author: "Rebecca Xi"
+title: "Impact of COVID-19, Economies"
+author: "Jun-Yong Kim"
 date: "4/1/2020"
 output: html_document
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(dplyr)
+library(rvest)
+library(gt)
+library(janitor)
+library(infer)
+library(skimr)
+library(tidycensus)
+library(maps)
+library(sf)
+library(tibble)
+library(stringr)
+library(readxl)
 ```
 
-## R Markdown
+```{r covid-19, include = FALSE}
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+# Downloading country-level stats on cases of COVID-19 from Worldometers
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+worldometer_url <- paste0("https://www.worldometers.info/coronavirus/")
+worldometer_html <- read_html(worldometer_url)
 
-```{r cars}
-summary(cars)
+worldometer <- worldometer_html %>% 
+  html_nodes("table")
+worldometer <- worldometer[[1]] %>% 
+  html_table
+worldometer <- worldometer %>% 
+  clean_names() %>% 
+  rename(country_name = "country_other")
+
+# worldometer$total_cases <- gsub(',', '', worldometer$total_cases)
+
+#apply repeats process for rows or columns. First argument is subject (so the
+#data set that we are applying to). Second argument is row or column (1 for row,
+#2 for column). Last argument is the process we want repeated: get rid of the
+#comma first, then get rid of the + bc (it has a special place in regular
+#expression). Escape it with backspace or double backspace in gsub to remove it.
+#We want to apply changes to matrix, so we have to do some work to convert to
+#dataframe, numerics, etc. 
+
+# worldometer[, -1] --> if empty, pulls everything. comes after: selects
+# columns, -1 means ignore 1st column
+
+worldometer <- apply(worldometer, 2, function(x){gsub(',|\\+', '', x)})
+worldometer <- as.data.frame(worldometer)
+worldometer[, -1] <- apply(worldometer[, -1], 2, as.numeric)
+
+
+# Downloading, cleaning, and merging JHU CSSE data for day-by-day case breakdown 
+# CHECK IF NISHU HAS ALREADY DOWNLOADED THIS!!
+
+confirmed <- read_csv("raw-data/time_series_19-covid-Confirmed.csv") %>% 
+  select(-"Lat", -"Long") %>% 
+  pivot_longer(names_to = "date",
+               values_to = "confirmed",
+               cols = -c(province, country)) %>% 
+  rename("date" = "date")
+# saveRDS(confirmed, file = "confirmed.RDS")
+# confirmed <- readRDS("confirmed.RDS")
+
+deaths <- read_csv("raw-data/time_series_19-covid-Deaths.csv") %>% 
+  select(-"Lat", -"Long") %>% 
+  pivot_longer(names_to = "date",
+               values_to = "deaths",
+               cols = -c(province, country)) %>% 
+  rename("date" = "date")
+# saveRDS(deaths, file = "deaths.RDS")
+# deaths <- readRDS("deaths.RDS")
+
+recovered <- read_csv("raw-data/time_series_19-covid-Recovered.csv") %>% 
+  select(-"Lat", -"Long") %>% 
+  pivot_longer(names_to = "date",
+               values_to = "recovered",
+               cols = -c(province, country)) %>% 
+  rename("date" = "date")
+# saveRDS(recovered, file = "recovered.RDS")
+# recovered <- readRDS("recovered.RDS")
+
+jhu <- confirmed %>% 
+  inner_join(deaths) %>% 
+  inner_join(recovered)
+# saveRDS(jhu, file = "jhu.RDS")
 ```
 
-## Including Plots
 
-You can also embed plots, for example:
+```{r gdp_pop_data, include = FALSE}
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+# Get World Bank population data, most recent as of 2018
+
+population_data_18 <- read_csv("gdp/API_pop.csv", skip = 3) %>% 
+  clean_names() %>% 
+  select(country_name, x2018) %>% 
+  rename(pop_2018 = x2018)
+
+# Get World Bank GDP data, most recent as of 2018
+  
+gdp_data_18 <- read_csv("gdp/API_gdp.csv", skip = 3) %>%
+  clean_names() %>% 
+  select(country_name, x2018) %>% 
+  rename(gdp_2018 = x2018)
+
+# Combine and create variable for GDP per capita
+
+gdp_pop_2018 <- gdp_data_18 %>% 
+  left_join(population_data_18, by = "country_name") %>% 
+  mutate(gdp_per_capita = round(gdp_2018 / pop_2018, digits = 2))
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+```{r econ_indicators, include = FALSE}
+
+#indices_url <- paste0("https://markets.businessinsider.com/indices")
+#indices_html <- read_html(indices_url)
+
+#indices <- indices_html %>% 
+# html_nodes("table")
+
+#indices <- indices[[2]] %>% 
+# html_table
+
+#indices <- indices %>% 
+# clean_names()
+
+# Download international indices from MarketWatch
+
+marketwatch_url <- paste0("https://www.marketwatch.com/tools/stockresearch/globalmarkets/intIndices.asp")
+marketwatch_html <- read_html(marketwatch_url)
+
+marketwatch <- marketwatch_html %>% 
+               html_nodes("table")
+
+## 5 bracketed things
+
+marketwatch <- rbind(marketwatch[[1]] %>% html_table, marketwatch[[2]] %>% html_table, marketwatch[[3]] %>% html_table, marketwatch[[4]] %>% html_table, marketwatch[[5]] %>% html_table) %>% 
+  clean_names()
+
+# Use gsub to take out plus, percent (percent would be same thing as plus to take out)
+
+gdow_data <- read_csv("data_misc/HistoricalPrices.csv") %>% 
+  clean_names()
+
+# Potentially combine gdow data for the day from marketwatch with historical? idk 
+
+nasdaq <- read_csv("data_misc/nasdaq0406.csv") %>% 
+  clean_names()
+  
+
+unemployment <- read_excel("data_misc/statistic_id1107247_unemployment-insurance_-initial-claims-per-week-us-march-2020.xlsx", 
+    sheet = "Data")
+
+
+#jhu_us_confirmed_series <- read.csv(
+#  "jhu_covid_data/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_US.csv"
+#  ) %>% 
+ # clean_names()
+
+
+```
+
+```{r combining, include= FALSE}
+
+#tidy_jhu_us_confirmed <- jhu_us_confirmed_series %>%
+#  pivot_longer(cols = c(x1_22_20:x4_2_20), names_to = "date", values_to = "confirmed") %>%
+#  select(country_region, fips, combined_key, date, confirmed)
+
+#tidy_jhu_us_confirmed %>%
+ # group_by(combined_key, date) %>%
+ # arrange(desc(confirmed))
+
+
+
+colnames(worldometer)[1] <- 'country_name'
+test2 <- worldometer[!(worldometer$country_name %in% test$country_name), ]
+
+# shows entries worldometer data that was not matched 
+# probably have to manually change 
+
+#test <- merge.data.frame(gdp_pop_2018, worldometer, 'country_name', all = F)
+
+tidy_gdp_pop <- gdp_pop_2018 %>% 
+  left_join(worldometer, by = "country_name") %>% 
+  select(country_name, pop_2018, gdp_2018, gdp_per_capita, total_cases, total_deaths, total_recovered) %>% 
+  na.omit()
+```
+
+```{r plots, echo = FALSE}
+
+citymapper <- download.file("https://cdn.citymapper.com/data/cmi/Citymapper_Mobility_Index_20200413.csv", destfile = "./data_misc/citymapper.csv", quiet = TRUE)
+
+citymapper <- read_csv("data_misc/citymapper.csv", skip = 3)
+  
+  
+cases_gdp_capita <- tidy_gdp_pop %>% 
+  filter(country_name != "World") %>% 
+  ggplot(aes(x = log(gdp_per_capita), y = log(total_cases), fill = total_deaths)) + 
+  geom_point() 
+
+#log scale accounts for outliers 
+
+cases_gdp_capita
+# plot is coming out really whack.will ask June
+#geom_sf? 
+
+deaths_gdp_capita <- tidy_gdp_pop %>% 
+  ggplot(aes(x = log(total_deaths), y = log(gdp_per_capita), fill = total_deaths)) + 
+  geom_point()
+```
+
+stocks: TL of them (significant events) 
+
+***CONSOLIDATE DATA INTO CONSISTENT FORMAT
+***BUILT IN R FUNCTION THAT ALLOWS YOU TO MAYBE FORMAT DATES? 
+stock gdow analysis: big global events 
+stocks: total change, total death, r/o/change, r/o/death
+Load in unemployment data!! 
+Unemployment data other countries ** 
+- map out stock performance over past month, vertical line for days of policy measures (i.e. stimulus package, US, initial pandemic, kinda annotating a chart, what events might have influenced peaks/troughs)
+How can I match daily / weekly / monthly data with each other when they're not the same? i.e. daily growth rates vs unemployment reporting for US, or GDP quarterly data, or economic consumer reports released weekly/monthly
+How can I clean indices stock data? DONE
+How can I fix the per_capita plots? 
+
+
+#rscript
+#readcsv takes link, reading in link 
+#download.file
+#good ways to handle rapidly updating data
+
+
+Writing lots of code that replace korea w south korea, etc --> everyone has own set of names 
+
+
+ways to merge country names in R 
+--> maybe someone who has written script 
+
