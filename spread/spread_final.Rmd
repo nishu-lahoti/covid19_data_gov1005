@@ -169,16 +169,45 @@ saveRDS(covidGlobal, file = "../team_data/covidGlobal.RDS")
 worldometer %>%
   skim()
 
-summary(confirmedCovidUS)
-summary(deathsCovidUS)
+summary(covidUS)
+summary(covidGlobal)
 
-summary(us_counties)
-summary(us_states)
+# Creating a visualization of the spread across different countries by mapping new_date against increment. Could create this as a drop-down selector for any country's confirmed and deaths. Maybe even compare side-by-side.
 
-summary(confirmedCovidGlobal)
-summary(deathsCovidGlobal)
-summary(recoveredCovidGlobal)
+# Confirmed
 
+countries_of_interest <- covidGlobal %>%
+  filter(country_region %in% c("US", "Spain", "Italy"), increment_confirmed >= 0)
+
+ggplot(countries_of_interest, aes(new_date, increment_confirmed)) + 
+  geom_col() +
+  facet_wrap(~ country_region) +
+  theme_classic()
+
+# Deaths
+
+countries_of_interest <- covidGlobal %>%
+  filter(country_region %in% c("US", "Spain", "Italy"), increment_deaths >= 0)
+
+ggplot(countries_of_interest, aes(new_date, increment_deaths)) + 
+  geom_col() +
+  facet_wrap(~ country_region) +
+  theme_classic()
+
+
+# Visualizing total cases and total deaths against total tests. A good next step may be to filter by countries of interest and to get a good enough
+# sample of countries that have tested. Qualify a country based on total number of cases (>1000). Maybe there is a weak positive correlation.
+
+worldometer_tests <- worldometer %>%
+  filter(total_cases >= 1000, 
+         !is.na(total_tests))
+
+options(scipen = 999)
+ggplot(worldometer_tests, aes(total_cases, total_tests, color = country_other)) + 
+  geom_point() +
+  geom_jitter() +
+  theme_classic() +
+  theme(legend.position = "none")
 
 ```
 
