@@ -81,14 +81,14 @@ nytimes_states <- readRDS("../team_data/nytimes_states.RDS")
 
 ```{r gdp_pop_data, include = FALSE}
 
-# Get World Bank population data, most recent as of 2018
+# Get static World Bank population data, most recent as of 2018
 
 population_data_18 <- read_csv("gdp/API_pop.csv", skip = 3) %>% 
   clean_names() %>% 
   select(country_name, x2018) %>% 
   rename(pop_2018 = x2018)
 
-# Get World Bank GDP data, most recent as of 2018
+# Get static World Bank GDP data, most recent as of 2018
   
 gdp_data_18 <- read_csv("gdp/API_gdp.csv", skip = 3) %>%
   clean_names() %>% 
