@@ -29,18 +29,16 @@ library(chron)
 
 # Downloading country-level stats on cases of COVID-19 from Worldometers
 
-worldometer_url <- paste0("https://www.worldometers.info/coronavirus/")
-worldometer_html <- read_html(worldometer_url)
+# worldometer_url <- paste0("https://www.worldometers.info/coronavirus/")
+# worldometer_html <- read_html(worldometer_url)
+# worldometer <- worldometer_html %>% 
+#   html_nodes("table")
+# worldometer <- worldometer[[1]] %>% 
+#  html_table
+# worldometer <- worldometer %>% 
+#   clean_names() %>% 
+#  rename(country_name = "country_other")
 
-worldometer <- worldometer_html %>% 
-  html_nodes("table")
-worldometer <- worldometer[[1]] %>% 
-  html_table
-worldometer <- worldometer %>% 
-  clean_names() %>% 
-  rename(country_name = "country_other")
-
-<<<<<<< HEAD
 # worldometer$total_cases <- gsub(',', '', worldometer$total_cases)
 
 #apply repeats process for rows or columns. First argument is subject (so the
@@ -53,53 +51,15 @@ worldometer <- worldometer %>%
 
 # worldometer[, -1] --> if empty, pulls everything. comes after: selects
 # columns, -1 means ignore 1st column
-=======
+
 #total cases, deaths, etc scraped
 
 #worldometer$total_cases <- gsub(',', '', worldometer$total_cases)
->>>>>>> 6369d94c01607f4c6d1e13e9931bb37f8b1237f0
 
-worldometer <- apply(worldometer, 2, function(x){gsub(',|\\+', '', x)})
-worldometer <- as.data.frame(worldometer)
-worldometer[, -1] <- apply(worldometer[, -1], 2, as.numeric)
+# worldometer <- apply(worldometer, 2, function(x){gsub(',|\\+', '', x)})
+# worldometer <- as.data.frame(worldometer)
+# worldometer[, -1] <- apply(worldometer[, -1], 2, as.numeric)
 
-<<<<<<< HEAD
-
-# Downloading, cleaning, and merging JHU CSSE data for day-by-day case breakdown 
-# CHECK IF NISHU HAS ALREADY DOWNLOADED THIS!!
-
-confirmed <- read_csv("raw-data/time_series_19-covid-Confirmed.csv") %>% 
-  select(-"Lat", -"Long") %>% 
-  pivot_longer(names_to = "date",
-               values_to = "confirmed",
-               cols = -c(province, country)) %>% 
-  rename("date" = "date")
-# saveRDS(confirmed, file = "confirmed.RDS")
-# confirmed <- readRDS("confirmed.RDS")
-
-deaths <- read_csv("raw-data/time_series_19-covid-Deaths.csv") %>% 
-  select(-"Lat", -"Long") %>% 
-  pivot_longer(names_to = "date",
-               values_to = "deaths",
-               cols = -c(province, country)) %>% 
-  rename("date" = "date")
-# saveRDS(deaths, file = "deaths.RDS")
-# deaths <- readRDS("deaths.RDS")
-
-recovered <- read_csv("raw-data/time_series_19-covid-Recovered.csv") %>% 
-  select(-"Lat", -"Long") %>% 
-  pivot_longer(names_to = "date",
-               values_to = "recovered",
-               cols = -c(province, country)) %>% 
-  rename("date" = "date")
-# saveRDS(recovered, file = "recovered.RDS")
-# recovered <- readRDS("recovered.RDS")
-
-jhu <- confirmed %>% 
-  inner_join(deaths) %>% 
-  inner_join(recovered)
-# saveRDS(jhu, file = "jhu.RDS")
-=======
 #apply repeats process for rows or columns 
 #first arg is subject (so data, where you wanna apply)
 #second argument is row or column (1 is row, 2 is column)
@@ -110,7 +70,12 @@ jhu <- confirmed %>%
 #apply changes to matrix, so you have to do some work to convert to dataframe, numerics, etc 
 #worldometer[, -1] --> if empty, pulls everything. comes after: selects columns, -1 means ignore 1st column 
 
->>>>>>> 6369d94c01607f4c6d1e13e9931bb37f8b1237f0
+# Reading in the cleaned, prepared data from team_data
+
+worldometer <- readRDS("../team_data/worldometer.RDS")
+covidGlobal <- readRDS("../team_data/covidGlobal.RDS")
+covidUS <- readRDS("../team_data/covidUS.RDS")
+nytimes_states <- readRDS("../team_data/nytimes_states.RDS")
 ```
 
 
@@ -149,7 +114,7 @@ gdp_pop_2018 <- gdp_data_18 %>%
 # html_table
 
 #indices <- indices %>% 
-<<<<<<< HEAD
+
 # clean_names()
 
 # Download international indices from MarketWatch
@@ -164,19 +129,6 @@ marketwatch <- marketwatch_html %>%
 
 marketwatch <- rbind(marketwatch[[1]] %>% html_table, marketwatch[[2]] %>% html_table, marketwatch[[3]] %>% html_table, marketwatch[[4]] %>% html_table, marketwatch[[5]] %>% html_table) %>% 
   clean_names()
-=======
- # clean_names()
-
-#marketwatch_url <- paste0("https://www.marketwatch.com/tools/stockresearch/globalmarkets/intIndices.asp")
-#marketwatch_html <- read_html(marketwatch_url)
-
-#marketwatch <- marketwatch_html %>% 
-              # html_nodes("table")
-
-## 5 bracketed things
-#marketwatch <- rbind(marketwatch[[1]] %>% html_table, marketwatch[[2]] %>% html_table, marketwatch[[3]] %>% html_table, #marketwatch[[4]] %>% html_table, marketwatch[[5]] %>% html_table) %>% 
- # clean_names()
->>>>>>> 6369d94c01607f4c6d1e13e9931bb37f8b1237f0
 
 # Use gsub to take out plus, percent (percent would be same thing as plus to take out)
 
@@ -184,13 +136,11 @@ gdow_data <- read_csv("gdp/HistoricalPrices.csv") %>%
   clean_names() 
 gdow_data$date <- as.Date(gdow_data$date, format = "%m/%d/%y") 
 
-<<<<<<< HEAD
 # Potentially combine gdow data for the day from marketwatch with historical? idk 
-=======
+
 #FINALLY GOT AS DATE TO WORK 
 
 #potentially combine gdow data for the day from marketwatch with historical? idk 
->>>>>>> 6369d94c01607f4c6d1e13e9931bb37f8b1237f0
 
 nasdaq <- read_csv("gdp/nasdaq0406.csv") %>% 
   clean_names()
@@ -199,20 +149,6 @@ nasdaq$date <- as.Date(nasdaq$date, format = "%m/%d/%Y")
 
 #unemployment <- read_excel("gdp/statistic_id1107247_unemployment-insurance_-initial-claims-per-week-us-march-2020.xlsx", 
    # sheet = "Data")
-
-
-jhu_confirmed_series <- read_csv("gdp/GitHub/COVID-19/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv") %>% 
-  clean_names()
-
-tidy_jhu_confirmed <- jhu_confirmed_series %>%
-  pivot_longer(cols = c(x1_22_20:x4_13_20), names_to = "date", values_to = "confirmed") %>%
-  select(country_region, date, confirmed) %>%
-  group_by(date)
-
-tidy_jhu_confirmed$date <- as.Date(tidy_jhu_confirmed$date , format = "x%m_%d_%y") 
-
-tidy_jhu_confirmed %>%
-  skim()
 ```
 
 ```{r combining, include= FALSE}

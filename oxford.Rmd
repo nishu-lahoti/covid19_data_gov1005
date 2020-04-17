@@ -1,0 +1,44 @@
+---
+title: "Oxford"
+author: "Rebecca Xi"
+date: "4/17/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(dplyr)
+library(rvest)
+library(gt)
+library(janitor)
+library(infer)
+library(skimr)
+library(tidycensus)
+library(maps)
+library(sf)
+library(tibble)
+library(stringr)
+library(readxl)
+library(date)
+library(chron)
+```
+
+```{r data, include=FALSE}
+
+# 
+
+"https://github.com/OxCGRT/covid-policy-tracker/tree/master/data/timeseries"
+
+load_url <- function(url) {
+    temp_file <- tempfile(fileext = ".xlsx")
+    download.file(url = url, destfile = temp_file, mode = "wb", quiet = TRUE)
+    loadWorkbook(temp_file)
+}
+
+oxford <- load_url("https://github.com/OxCGRT/covid-policy-tracker/tree/master/data/timeseries")
+
+
+```
+
