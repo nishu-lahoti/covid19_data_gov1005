@@ -13,6 +13,10 @@ library(dplyr)
 library(readr)
 library(rvest)
 library(janitor)
+library(skimr)
+library(sf)
+library(maps)
+library(tibble)
 
 # Import NYTimes Data
 
@@ -49,6 +53,8 @@ global_recovered <- read.csv(url("https://raw.githubusercontent.com/CSSEGISandDa
   clean_names() %>%
   pivot_longer(cols = c(x1_22_20:x4_15_20), names_to = "date", values_to = "recovered") %>%
   select(country_region, date, recovered)
+
+us_daily_reports <- read.csv(url("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports_us/04-17-2020.csv")) %>% clean_names()
 
 
 # Webscrape Worldometer Data
@@ -158,8 +164,16 @@ covidGlobal <- confirmedCovidGlobal %>%
   inner_join(recoveredCovidGlobal, by = c("country_region", "new_date"), suffix = c("_confirmed", "_recovered")) %>%
   select(country_region, new_date, confirmed, increment_confirmed, deaths, increment_deaths, recovered, increment)
 
+# Johns Hopkins US Daily Report. Used to gather testing rates by State.
+
+testing_by_state <- us_daily_reports %>%
+  filter(!is.na(people_tested))
+
+# Saving files for team use
+
 saveRDS(covidUS, file = "../team_data/covidUS.RDS")
 saveRDS(covidGlobal, file = "../team_data/covidGlobal.RDS")
+saveRDS(testing_by_state, file = "../team_data/tests_per_state")
 ```
 
 ## Exploratory Data Analysis
@@ -172,7 +186,14 @@ worldometer %>%
 summary(covidUS)
 summary(covidGlobal)
 
-# Creating a visualization of the spread across different countries by mapping new_date against increment. Could create this as a drop-down selector for any country's confirmed and deaths. Maybe even compare side-by-side.
+```
+
+### Global Exploration
+
+#### Johns Hopkins Data
+```{r exploring_global_visuals, echo = FALSE}
+
+# Creating a visualization of the spread across different countries by mapping new_date against increment confirmed and deaths. Could create this as a drop-down selector for any country's confirmed and deaths. Maybe even compare side-by-side.
 
 # Confirmed
 
@@ -192,22 +213,92 @@ countries_of_interest <- covidGlobal %>%
 ggplot(countries_of_interest, aes(new_date, increment_deaths)) + 
   geom_col() +
   facet_wrap(~ country_region) +
-  theme_classic()
+  theme_classic() +
+  labs(
+    title = "Visualizing Spread in Western Europe"
+  )
 
+```
 
+#### Worldometer Data
+```{r worldometer_exploration, echo = FALSE}
 # Visualizing total cases and total deaths against total tests. A good next step may be to filter by countries of interest and to get a good enough
 # sample of countries that have tested. Qualify a country based on total number of cases (>1000). Maybe there is a weak positive correlation.
 
 worldometer_tests <- worldometer %>%
-  filter(total_cases >= 1000, 
+  filter(total_cases >= 15000, 
          !is.na(total_tests))
 
 options(scipen = 999)
+
 ggplot(worldometer_tests, aes(total_cases, total_tests, color = country_other)) + 
   geom_point() +
   geom_jitter() +
   theme_classic() +
-  theme(legend.position = "none")
+  theme(legend.position = "top") +
+  labs(
+    title = "Comparing COVID-19 Cases versus Total Tests",
+    subtitle = "Comparing total conducted tests \nfor countries with over 15,000 reported cases.",
+    x = "Total Cases",
+    y = "Tests per 1M",
+    color = "Country"
+  )
+
+ggplot(worldometer_tests, aes(total_cases, tests_1m_pop, color = country_other)) + 
+  geom_point() +
+  geom_jitter() +
+  theme_classic() +
+  theme(legend.position = "top") +
+  labs(
+    title = "COVID-19 Country Testing Capacity",
+    subtitle = "Visualizing a country's case rate against testing rate\nfor countries with over 15,000 reported cases.",
+    x = "Total Cases",
+    y = "Tests per 1M",
+    color = "Country"
+  )
+
+```
+
+### US Exploration
+#### Johns Hopkins Data
+```{r exploration_visualizing_US, echo = FALSE}
+
+# Visualizing total tests per state using Johns Hopkins data.
+
+# This function capitalizes the first letter of a string. Necessary because the data from the maps library
+# which is used to collect geometry information from states needs to be augmented such that it can be joined.
+
+CapStr <- function(y) {
+  c <- strsplit(y, " ")[[1]]
+  paste(toupper(substring(c, 1,1)), substring(c, 2),
+      sep="", collapse=" ")
+}
+
+# Using a mix of the sf, tibble, and maps library to pull the geometry data by state into a table 
+# which we can join on the Johns Hopkins data.
+
+us <- st_as_sf(map("state", plot = FALSE, fill = TRUE))
+us_tbl <- as_tibble(us) %>%
+  mutate(state_chr = as.character(ID)) %>%
+  mutate(state = map_chr(state_chr, ~ CapStr(.))) %>%
+  select(state, geom)
+
+tests_visual_data <- testing_by_state %>%
+  left_join(us_tbl, by = c("province_state" = "state")) %>%
+  select(province_state, confirmed, deaths, recovered, active, fips, people_tested, people_hospitalized, hospitalization_rate, geom)
+
+# Plotting a visualization of cases as of April 1st in the US.
+
+tests_visual_data %>%
+  ggplot(aes(geometry = geom, fill = people_tested)) +
+  geom_sf() +
+  scale_fill_viridis_c(option = "plasma",
+                       direction = -1) +
+  labs(title = "Covid-19 Tests by State",
+       caption = "Source: Johns Hopkins CSSE",
+       fill = "Total Tests") +
+  theme_void()
+
 
 ```
 
