@@ -1,0 +1,337 @@
+---
+title: "spread_final"
+author: "Nishu Lahoti"
+date: "4/16/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(dplyr)
+library(readr)
+library(rvest)
+library(janitor)
+library(skimr)
+library(sf)
+library(maps)
+library(tibble)
+
+# Import NYTimes Data
+
+us_states <- read.csv(url("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv"))
+us_counties <- read.csv(url("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv"))
+
+saveRDS(us_states, file = "../team_data/nytimes_states.RDS")
+saveRDS(us_counties, file = "../team_data/nytimes_counties.RDS")
+
+
+# Import & Clean Johns Hopkins Data
+
+us_confirmed <- read.csv(url("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_US.csv")) %>% 
+  clean_names() %>%
+  pivot_longer(cols = c(x1_22_20:x4_15_20), names_to = "date", values_to = "confirmed") %>%
+  select(combined_key, date, confirmed)
+
+us_deaths <- read.csv(url("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_US.csv")) %>% 
+  clean_names() %>%
+  pivot_longer(cols = c(x1_22_20:x4_15_20), names_to = "date", values_to = "deaths") %>%
+  select(combined_key, date, deaths)
+
+global_confirmed <- read.csv(url("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv")) %>% 
+  clean_names() %>%
+  pivot_longer(cols = c(x1_22_20:x4_15_20), names_to = "date", values_to = "confirmed") %>%
+  select(country_region, date, confirmed)
+
+global_deaths <- read.csv(url("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv")) %>% 
+  clean_names() %>%
+  pivot_longer(cols = c(x1_22_20:x4_15_20), names_to = "date", values_to = "deaths") %>%
+  select(country_region, date, deaths)
+
+global_recovered <- read.csv(url("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_recovered_global.csv")) %>% 
+  clean_names() %>%
+  pivot_longer(cols = c(x1_22_20:x4_15_20), names_to = "date", values_to = "recovered") %>%
+  select(country_region, date, recovered)
+
+us_daily_reports <- read.csv(url("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports_us/04-17-2020.csv")) %>% clean_names()
+
+
+# Webscrape Worldometer Data
+
+worldometer_url <- paste0("https://www.worldometers.info/coronavirus/")
+worldometer_html <- read_html(worldometer_url)
+worldometer <- worldometer_html %>% 
+               html_nodes("table")
+worldometer <- worldometer[[1]] %>% html_table
+worldometer <- worldometer %>% clean_names()
+
+# Clean worldometer data, changing column types to reflect numbers where necessary.
+
+worldometer <- worldometer %>%
+  mutate(total_cases = parse_number(total_cases),
+         new_cases = parse_number(new_cases),
+         total_deaths = parse_number(total_deaths),
+         new_deaths = parse_number(new_deaths),
+         total_recovered = parse_number(total_recovered),
+         active_cases = parse_number(active_cases),
+         serious_critical = parse_number(serious_critical),
+         total_tests = parse_number(total_tests),
+         tests_1m_pop = parse_number(tests_1m_pop)) %>%
+  filter(! country_other %in% c("World", "Total:", "Europe", "North America", "Asia", "South America", 
+                                "Africa", "Oceania", "")) %>%
+  arrange(desc(total_cases))
+
+saveRDS(worldometer, file = "../team_data/worldometer.RDS")
+
+```
+
+### Creating increments
+
+```{r increments, echo = FALSE}
+
+# Updating the date and creating an increment column for the confirmed cases in the US.
+
+confirmedCovidUS <- us_confirmed %>%
+  mutate(sep_date = sub(".", "", date)) %>%
+  mutate(new_date = as.Date(sep_date, format = "%m_%d_%y")) %>%
+  select(combined_key, new_date, confirmed)
+
+confirmedCovidUS <- confirmedCovidUS %>%
+  mutate(helper = c(confirmedCovidUS$confirmed[1], confirmedCovidUS$confirmed[1:(nrow(confirmedCovidUS)-1)])) %>%
+  mutate(increment = confirmed - helper) %>%
+  group_by(combined_key)
+
+# Updating the date and creating an increment column for the confirmed cases in the US.
+
+deathsCovidUS <- us_deaths %>%
+  mutate(sep_date = sub(".", "", date)) %>%
+  mutate(new_date = as.Date(sep_date, format = "%m_%d_%y")) %>%
+  select(combined_key, new_date, deaths)
+
+deathsCovidUS <- deathsCovidUS %>%
+  mutate(helper = c(deathsCovidUS$deaths[1], deathsCovidUS$deaths[1:(nrow(deathsCovidUS)-1)])) %>%
+  mutate(increment = deaths - helper) %>%
+  group_by(combined_key)
+
+# Updating the date and creating an increment column for the confirmed cases across the globe
+
+confirmedCovidGlobal <- global_confirmed %>%
+  mutate(sep_date = sub(".", "", date)) %>%
+  mutate(new_date = as.Date(sep_date, format = "%m_%d_%y")) %>%
+  select(country_region, new_date, confirmed)
+
+confirmedCovidGlobal <- confirmedCovidGlobal %>%
+  mutate(helper = c(confirmedCovidGlobal$confirmed[1],
+                    confirmedCovidGlobal$confirmed[1:(nrow(confirmedCovidGlobal)-1)])) %>%
+  mutate(increment = confirmed - helper) %>%
+  group_by(country_region)
+
+# Updating the date and creating an increment column for the deaths  across the globe
+
+deathsCovidGlobal <- global_deaths %>%
+  mutate(sep_date = sub(".", "", date)) %>%
+  mutate(new_date = as.Date(sep_date, format = "%m_%d_%y")) %>%
+  select(country_region, new_date, deaths)
+
+deathsCovidGlobal <- deathsCovidGlobal %>%
+  mutate(helper = c(deathsCovidGlobal$deaths[1],
+                    deathsCovidGlobal$deaths[1:(nrow(deathsCovidGlobal)-1)])) %>%
+  mutate(increment = deaths - helper) %>%
+  group_by(country_region)
+
+# Updating the date and creating an increment column for the recovered cases across the globe
+
+recoveredCovidGlobal <- global_recovered %>%
+  mutate(sep_date = sub(".", "", date)) %>%
+  mutate(new_date = as.Date(sep_date, format = "%m_%d_%y")) %>%
+  select(country_region, new_date, recovered)
+
+recoveredCovidGlobal <- recoveredCovidGlobal %>%
+  mutate(helper = c(recoveredCovidGlobal$recovered[1],
+                    recoveredCovidGlobal$recovered[1:(nrow(recoveredCovidGlobal)-1)])) %>%
+  mutate(increment = recovered - helper) %>%
+  group_by(country_region)
+
+# Joined Data US & Global
+
+covidUS <- confirmedCovidUS %>%
+  inner_join(deathsCovidUS, by = c("combined_key", "new_date"), suffix = c("_confirmed", "_deaths")) %>%
+  select(combined_key, new_date, confirmed, increment_confirmed, deaths, increment_deaths)
+
+covidGlobal <- confirmedCovidGlobal %>%
+  inner_join(deathsCovidGlobal, by = c("country_region", "new_date"), suffix = c("_confirmed", "_deaths")) %>%
+  inner_join(recoveredCovidGlobal, by = c("country_region", "new_date"), suffix = c("_confirmed", "_recovered")) %>%
+  select(country_region, new_date, confirmed, increment_confirmed, deaths, increment_deaths, recovered, increment)
+
+# Johns Hopkins US Daily Report. Used to gather testing rates by State.
+
+testing_by_state <- us_daily_reports %>%
+  filter(!is.na(people_tested))
+
+# Saving files for team use
+
+saveRDS(covidUS, file = "../team_data/covidUS.RDS")
+saveRDS(covidGlobal, file = "../team_data/covidGlobal.RDS")
+saveRDS(testing_by_state, file = "../team_data/tests_per_state")
+```
+
+## Exploratory Data Analysis
+
+```{r exploration, echo = FALSE}
+
+worldometer %>%
+  skim()
+
+summary(covidUS)
+summary(covidGlobal)
+
+```
+
+### Global Exploration
+
+#### Johns Hopkins Data
+```{r exploring_global_visuals, echo = FALSE}
+
+# Creating a visualization of the spread across different countries by mapping new_date against increment confirmed and deaths. Could create this as a drop-down selector for any country's confirmed and deaths. Maybe even compare side-by-side.
+
+# Confirmed
+
+countries_of_interest <- covidGlobal %>%
+  filter(country_region %in% c("US", "Spain", "Italy"), increment_confirmed >= 0)
+
+ggplot(countries_of_interest, aes(new_date, increment_confirmed)) + 
+  geom_col() +
+  facet_wrap(~ country_region) +
+  theme_classic()
+
+# Deaths
+
+countries_of_interest <- covidGlobal %>%
+  filter(country_region %in% c("US", "Spain", "Italy"), increment_deaths >= 0)
+
+ggplot(countries_of_interest, aes(new_date, increment_deaths)) + 
+  geom_col() +
+  facet_wrap(~ country_region) +
+  theme_classic() +
+  labs(
+    title = "Visualizing Spread in Western Europe"
+  )
+
+```
+
+#### Worldometer Data
+```{r worldometer_exploration, echo = FALSE}
+# Visualizing total cases and total deaths against total tests. A good next step may be to filter by countries of interest and to get a good enough
+# sample of countries that have tested. Qualify a country based on total number of cases (>1000). Maybe there is a weak positive correlation.
+
+options(scipen = 999)
+
+# Normal
+worldometer_tests <- worldometer %>%
+  filter(total_cases >= 15000, 
+         !is.na(total_tests))
+
+
+# Logarithmic
+
+worldometer_log <- worldometer %>%
+  mutate(log_cases = log(total_cases),
+         log_deaths = log(total_deaths),
+         log_recovered = log(total_recovered),
+         log_tests = log(total_tests),
+         log_tests_1m = log(tests_1m_pop))
+
+ggplot(worldometer_tests, aes(total_cases, total_tests, color = country_other)) + 
+  geom_point() +
+  geom_jitter() +
+  theme_classic() +
+  theme(legend.position = "top") +
+  labs(
+    title = "Comparing COVID-19 Cases versus Total Tests",
+    subtitle = "Comparing total conducted tests \nfor countries with over 15,000 reported cases.",
+    x = "Total Cases",
+    y = "Tests per 1M",
+    color = "Country"
+  )
+
+ggplot(worldometer_tests, aes(total_cases, tests_1m_pop, color = country_other)) + 
+  geom_point() +
+  geom_jitter() +
+  theme_classic() +
+  theme(legend.position = "top") +
+  labs(
+    title = "COVID-19 Country Testing Capacity",
+    subtitle = "Visualizing a country's case rate against testing rate\nfor countries with over 15,000 reported cases.",
+    x = "Total Cases",
+    y = "Tests per 1M",
+    color = "Country"
+  )
+
+# Logarithmic plot of total tests
+
+ggplot(worldometer_log, aes(log_cases, log_tests, color = country_other)) +
+  geom_point() +
+  theme(legend.position = "none") +
+  labs(
+    title = "Logarithmic comparison of cases to tests",
+    x = "Cases \n(x10,000)",
+    y = "Tests \n(x10,000)"
+  )
+
+# Logarithmic plot of tests per 1m
+
+ggplot(worldometer_log, aes(log_cases, log_tests_1m, color = country_other)) +
+  geom_point() +
+  theme(legend.position = "none") +
+  labs(
+    title = "Logarithmic comparison of cases to tests",
+    x = "Cases \n(x10,000)",
+    y = "Tests per 1M \n(x10,000)"
+  )
+
+```
+
+### US Exploration
+#### Johns Hopkins Data
+```{r exploration_visualizing_US, echo = FALSE}
+
+# Visualizing total tests per state using Johns Hopkins data.
+
+# This function capitalizes the first letter of a string. Necessary because the data from the maps library
+# which is used to collect geometry information from states needs to be augmented such that it can be joined.
+
+CapStr <- function(y) {
+  c <- strsplit(y, " ")[[1]]
+  paste(toupper(substring(c, 1,1)), substring(c, 2),
+      sep="", collapse=" ")
+}
+
+# Using a mix of the sf, tibble, and maps library to pull the geometry data by state into a table 
+# which we can join on the Johns Hopkins data.
+
+us <- st_as_sf(map("state", plot = FALSE, fill = TRUE))
+us_tbl <- as_tibble(us) %>%
+  mutate(state_chr = as.character(ID)) %>%
+  mutate(state = map_chr(state_chr, ~ CapStr(.))) %>%
+  select(state, geom)
+
+tests_visual_data <- testing_by_state %>%
+  left_join(us_tbl, by = c("province_state" = "state")) %>%
+  select(province_state, confirmed, deaths, recovered, active, fips, people_tested, people_hospitalized, hospitalization_rate, geom)
+
+# Plotting a visualization of cases as of April 1st in the US.
+
+tests_visual_data %>%
+  ggplot(aes(geometry = geom, fill = people_tested)) +
+  geom_sf() +
+  scale_fill_viridis_c(option = "plasma",
+                       direction = -1) +
+  labs(title = "Covid-19 Tests by State",
+       caption = "Source: Johns Hopkins CSSE",
+       fill = "Total Tests") +
+  theme_void()
+
+
+```
+
