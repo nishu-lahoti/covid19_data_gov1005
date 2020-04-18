@@ -225,11 +225,22 @@ ggplot(countries_of_interest, aes(new_date, increment_deaths)) +
 # Visualizing total cases and total deaths against total tests. A good next step may be to filter by countries of interest and to get a good enough
 # sample of countries that have tested. Qualify a country based on total number of cases (>1000). Maybe there is a weak positive correlation.
 
+options(scipen = 999)
+
+# Normal
 worldometer_tests <- worldometer %>%
   filter(total_cases >= 15000, 
          !is.na(total_tests))
 
-options(scipen = 999)
+
+# Logarithmic
+
+worldometer_log <- worldometer %>%
+  mutate(log_cases = log(total_cases),
+         log_deaths = log(total_deaths),
+         log_recovered = log(total_recovered),
+         log_tests = log(total_tests),
+         log_tests_1m = log(tests_1m_pop))
 
 ggplot(worldometer_tests, aes(total_cases, total_tests, color = country_other)) + 
   geom_point() +
@@ -255,6 +266,28 @@ ggplot(worldometer_tests, aes(total_cases, tests_1m_pop, color = country_other))
     x = "Total Cases",
     y = "Tests per 1M",
     color = "Country"
+  )
+
+# Logarithmic plot of total tests
+
+ggplot(worldometer_log, aes(log_cases, log_tests, color = country_other)) +
+  geom_point() +
+  theme(legend.position = "none") +
+  labs(
+    title = "Logarithmic comparison of cases to tests",
+    x = "Cases \n(x10,000)",
+    y = "Tests \n(x10,000)"
+  )
+
+# Logarithmic plot of tests per 1m
+
+ggplot(worldometer_log, aes(log_cases, log_tests_1m, color = country_other)) +
+  geom_point() +
+  theme(legend.position = "none") +
+  labs(
+    title = "Logarithmic comparison of cases to tests",
+    x = "Cases \n(x10,000)",
+    y = "Tests per 1M \n(x10,000)"
   )
 
 ```
