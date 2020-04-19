@@ -83,14 +83,14 @@ nytimes_states <- readRDS("../team_data/nytimes_states.RDS")
 
 # Get static World Bank population data, most recent as of 2018
 
-population_data_18 <- read_csv("gdp/API_pop.csv", skip = 3) %>% 
+population_data_18 <- read_csv("API_pop.csv", skip = 3) %>% 
   clean_names() %>% 
   select(country_name, x2018) %>% 
   rename(pop_2018 = x2018)
 
 # Get static World Bank GDP data, most recent as of 2018
   
-gdp_data_18 <- read_csv("gdp/API_gdp.csv", skip = 3) %>%
+gdp_data_18 <- read_csv("API_gdp.csv", skip = 3) %>%
   clean_names() %>% 
   select(country_name, x2018) %>% 
   rename(gdp_2018 = x2018)
@@ -104,52 +104,88 @@ gdp_pop_2018 <- gdp_data_18 %>%
 
 ```{r econ_indicators, include = FALSE}
 
-#indices_url <- paste0("https://markets.businessinsider.com/indices")
-#indices_html <- read_html(indices_url)
+#function to take stock indices from yahoo and scrape data every time its run (updated daily)
 
-#indices <- indices_html %>% 
-# html_nodes("table")
+stock <- function(url) {
+  stock_source <- paste0(url)
+  stock_html <- read_html(stock_source)
+  stock_data <- stock_html %>% 
+  html_nodes("table")
+stock_data <- stock_data[[1]] %>% 
+  html_table
+stock_data <- stock_data %>% 
+  clean_names() %>% 
+  select(date, close)
+}
 
-#indices <- indices[[2]] %>% 
-# html_table
-
-#indices <- indices %>% 
-
-# clean_names()
-
-# Download international indices from MarketWatch
-
-marketwatch_url <- paste0("https://www.marketwatch.com/tools/stockresearch/globalmarkets/intIndices.asp")
-marketwatch_html <- read_html(marketwatch_url)
-
-marketwatch <- marketwatch_html %>% 
-               html_nodes("table")
-
-## 5 bracketed things
-
-marketwatch <- rbind(marketwatch[[1]] %>% html_table, marketwatch[[2]] %>% html_table, marketwatch[[3]] %>% html_table, marketwatch[[4]] %>% html_table, marketwatch[[5]] %>% html_table) %>% 
-  clean_names()
-
-# Use gsub to take out plus, percent (percent would be same thing as plus to take out)
-
-gdow_data <- read_csv("gdp/HistoricalPrices.csv") %>% 
-  clean_names() 
-gdow_data$date <- as.Date(gdow_data$date, format = "%m/%d/%y") 
-
-# Potentially combine gdow data for the day from marketwatch with historical? idk 
-
-#FINALLY GOT AS DATE TO WORK 
-
-#potentially combine gdow data for the day from marketwatch with historical? idk 
-
-nasdaq <- read_csv("gdp/nasdaq0406.csv") %>% 
-  clean_names()
-nasdaq$date <- as.Date(nasdaq$date, format = "%m/%d/%Y") 
   
+#korea
 
-#unemployment <- read_excel("gdp/statistic_id1107247_unemployment-insurance_-initial-claims-per-week-us-march-2020.xlsx", 
-   # sheet = "Data")
+kospi <- stock("https://finance.yahoo.com/quote/%5EKS11/history?p=%5EKS11") %>% 
+  rename(KOSPI = close)
+kospi$date <- as.Date(kospi$date, format = "%B %d,%Y") 
+
+#usa
+
+nasdaq <- stock("https://finance.yahoo.com/quote/%5EIXIC/history?p=%5EIXIC") %>% 
+  rename(NASDAQ = close)
+nasdaq$date <- as.Date(nasdaq$date, format = "%B %d,%Y") 
+
+#world
+
+msci <- stock("https://finance.yahoo.com/quote/MSCI/history?p=MSCI") %>% 
+  rename(MSCI = close)
+msci$date <- as.Date(msci$date, format = "%B %d,%Y") 
+
+#china
+
+sse_china <- stock("https://finance.yahoo.com/quote/000001.SS/history?p=000001.SS") %>% 
+  rename(SSE_China = close)
+sse_china$date <- as.Date(sse_china$date, format = "%B %d,%Y") 
+
+#europe as a whole 
+
+stxe600_europe <- stock("https://finance.yahoo.com/quote/%5ESTOXX/history?p=%5ESTOXX") %>% 
+  rename(stxe600_europe = close)
+stxe600_europe$date <- as.Date(stxe600_europe$date, format = "%B %d,%Y") 
+
+#italy
+
+ftse_italy <- stock("https://finance.yahoo.com/quote/%5EFTSE%3FP%3DFTSE/history/") %>% 
+  rename(ftse_italy = close)
+ftse_italy$date <- as.Date(ftse_italy$date, format = "%B %d,%Y") 
+
+#spain
+
+ibex_spain <- stock("https://finance.yahoo.com/quote/%5EIBEX/history?p=%5EIBEX") %>% 
+  rename(ibex_spain = close)
+ibex_spain$date <- as.Date(ibex_spain$date, format = "%B %d,%Y") 
+
+#willing to add more countries here. Perhaps France / Germany ? Iran? Singapore? 
+
+
 ```
+
+```{r jhu, include = FALSE}
+
+#jhu_confirmed_series <- read_csv("./GitHub/COVID-19/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv") %>% 
+#  clean_names()
+
+#tidy_jhu_confirmed <- jhu_confirmed_series %>%
+ # pivot_longer(cols = c(x1_22_20:x4_13_20), names_to = "date", values_to = "confirmed") %>%
+#  select(country_region, date, confirmed) %>%
+#  group_by(date)
+
+#tidy_jhu_confirmed$date <- as.Date(tidy_jhu_confirmed$date , format = "x%m_%d_%y") 
+
+#tidy_jhu_confirmed %>%
+ # skim()
+
+
+#commenting out most code for now. Just if we are going to be using the rds data, then we should look to incorporate that (haven't looked into using it with rmarkdown yet) 
+
+```
+
 
 ```{r combining, include= FALSE}
 
@@ -172,15 +208,15 @@ nasdaq$date <- as.Date(nasdaq$date, format = "%m/%d/%Y")
 #test <- merge.data.frame(gdp_pop_2018, worldometer, 'country_name', all = F)
 
 tidy_gdp_pop <- gdp_pop_2018 %>% 
-  left_join(worldometer, by = "country_name") %>% 
-  select(country_name, pop_2018, gdp_2018, gdp_per_capita, total_cases, total_deaths, total_recovered) %>% 
-  na.omit()
+ left_join(worldometer, by = c("country_name" = "country_other")) %>% 
+ select(country_name, pop_2018, gdp_2018, gdp_per_capita, total_cases, total_deaths, total_recovered) %>% 
+ na.omit()
 
 
 
-total_daily_covid_deaths <- read_csv("gdp/total-daily-covid-deaths.csv") %>%  
-  clean_names()
-total_daily_covid_deaths$date <- as.Date(total_daily_covid_deaths$date, format = "%B %d,%Y")
+#total_daily_covid_deaths <- read_csv("./total-daily-covid-deaths.csv") %>%  
+ # clean_names()
+#total_daily_covid_deaths$date <- as.Date(total_daily_covid_deaths$date, format = "%B %d,%Y")
 
 
 #ask for help 
@@ -190,14 +226,24 @@ total_daily_covid_deaths$date <- as.Date(total_daily_covid_deaths$date, format =
 
 ```{r plots, echo = FALSE}
 
-citymapper <- download.file("https://cdn.citymapper.com/data/cmi/Citymapper_Mobility_Index_20200413.csv", destfile = "./gdp/citymapper.csv", quiet = TRUE)
+#gets today's date for downloading file
 
-citymapper <- read_csv("gdp/citymapper.csv", skip = 3)
-  
+date <- today <- format(Sys.time(), "%Y%m%d")
+
+#crafting url by splitting up 
+citymapper_url <- "https://cdn.citymapper.com/data/cmi/Citymapper_Mobility_Index_"
+
+#pasting together to piece it together 
+citymapper_url <- paste(citymapper_url, date, ".csv")
+
+#downloading file from internet
+citymapper <- download.file(citymapper_url, destfile = "./citymapper.csv", quiet = TRUE)
+
+#creating citymapper database
+citymapper <- read_csv("./citymapper.csv", skip = 3)
 
 
-  
-cases_gdp_capita <- tidy_gdp_pop %>% 
+  cases_gdp_capita <- tidy_gdp_pop %>% 
   filter(country_name != "World") %>% 
   ggplot(aes(x = log(gdp_per_capita), y = log(total_cases), fill = total_deaths)) + 
   geom_point() 
@@ -215,8 +261,4 @@ deaths_gdp_capita <- tidy_gdp_pop %>%
 deaths_gdp_capita
 ```
 
-Writing lots of code that replace korea w south korea, etc --> everyone has own set of names 
 
-
-ways to merge country names in R 
---> maybe someone who has written script 
