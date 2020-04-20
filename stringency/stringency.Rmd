@@ -1,0 +1,67 @@
+---
+title: "Stringency of Country Responses"
+author: "Rebecca Xi"
+date: "4/17/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(dplyr)
+library(readr)
+library(rvest)
+library(janitor)
+library(skimr)
+library(sf)
+library(maps)
+library(tibble)
+```
+
+```{r data, include=FALSE}
+
+# https://github.com/OxCGRT/covid-policy-tracker
+
+# Import and clean Oxford Covid-Policy-Tracker data. Both sets are downloaded
+# here, but we will likely only need the first (the second is for our own
+# reference, as it contains detailed explanatory notes).
+
+oxford <- read.csv(url("https://raw.githubusercontent.com/OxCGRT/covid-policy-tracker/master/data/OxCGRT_latest.csv"))
+  
+oxford_detailed <- read.csv(url("https://raw.githubusercontent.com/OxCGRT/covid-policy-tracker/master/data/OxCGRT_latest_withnotes.csv"))
+
+# Read in global JHU CSSE data
+
+global_confirmed <- read.csv(url("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv")) %>% 
+  clean_names() %>%
+  pivot_longer(cols = c(x1_22_20:x4_15_20), names_to = "date", values_to = "confirmed") %>%
+  select(country_region, date, confirmed)
+
+global_deaths <- read.csv(url("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv")) %>% 
+  clean_names() %>%
+  pivot_longer(cols = c(x1_22_20:x4_15_20), names_to = "date", values_to = "deaths") %>%
+  select(country_region, date, deaths)
+
+global_recovered <- read.csv(url("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_recovered_global.csv")) %>% 
+  clean_names() %>%
+  pivot_longer(cols = c(x1_22_20:x4_15_20), names_to = "date", values_to = "recovered") %>%
+  select(country_region, date, recovered)
+
+# Join JHU data
+
+covidGlobal <- confirmedCovidGlobal %>%
+  inner_join(deathsCovidGlobal, by = c("country_region", "new_date"), suffix = c("_confirmed", "_deaths")) %>%
+  inner_join(recoveredCovidGlobal, by = c("country_region", "new_date"), suffix = c("_confirmed", "_recovered")) %>%
+  select(country_region, new_date, confirmed, increment_confirmed, deaths, increment_deaths, recovered, increment)
+```
+
+```{r plots, }
+
+# 
+
+
+
+
+```
+
