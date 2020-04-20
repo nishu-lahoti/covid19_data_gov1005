@@ -10,47 +10,31 @@ knitr::opts_chunk$set(echo = TRUE)
 
 library(tidyverse)
 library(dplyr)
+library(readr)
 library(rvest)
-library(gt)
 library(janitor)
-library(infer)
 library(skimr)
-library(tidycensus)
-library(maps)
 library(sf)
+library(maps)
 library(tibble)
-library(stringr)
-library(readxl)
-library(date)
-library(chron)
 ```
 
 ```{r data, include=FALSE}
 
-# 
+# https://github.com/OxCGRT/covid-policy-tracker/tree/master/data/timeseries
 
-"https://github.com/OxCGRT/covid-policy-tracker/tree/master/data/timeseries"
+# Import and clean Oxford Covid-Policy-Tracker data
 
-#load_url <- function(url) {
-    #temp_file <- tempfile(fileext = ".xlsx")
-    #download.file(url = url, destfile = temp_file, mode = "wb", quiet = TRUE)
-    #loadWorkbook(temp_file)
-#}
+oxford <- read.csv(url("https://raw.githubusercontent.com/OxCGRT/covid-policy-tracker/master/data/OxCGRT_latest.csv"))
+  
+  
+oxford_detailed <- read.csv(url("https://raw.githubusercontent.com/OxCGRT/covid-policy-tracker/master/data/OxCGRT_latest_withnotes.csv"))
 
-#oxford <- load_url("https://github.com/OxCGRT/covid-policy-tracker/tree/master/data/timeseries")
+# Read in JHU data
 
-
-
-#here's a way that worked for me (above wouldn't work for me for some reason)
-
-oxford <- download.file("https://ocgptweb.azurewebsites.net/CSVDownload", destfile = "./oxford.csv", quiet = TRUE)
-oxford <- read_csv("./oxford.csv")
-
-oxford_time <- download.file("https://github.com/OxCGRT/covid-policy-tracker/raw/master/data/timeseries/OxCGRT_timeseries_all.xlsx", destfile = "./oxford_time.xlsx", quiet = TRUE, mode = "wb")
-oxford_time <- read_excel("./oxford_time.xlsx")
-
-
-
+readRDS("../team-data/covidGlobal.RDS")
+```
+```{r plots, }
 
 ```
 
