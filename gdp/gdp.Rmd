@@ -163,7 +163,14 @@ ibex_spain$date <- as.Date(ibex_spain$date, format = "%B %d,%Y")
 
 #willing to add more countries here. Perhaps France / Germany ? Iran? Singapore? 
 
-
+stock_data <- kospi %>% 
+  left_join(nasdaq, by = "date", na.rm = TRUE) %>% 
+  left_join(msci, by = "date", na.rm = TRUE) %>% 
+  left_join(sse_china, by = "date", na.rm = TRUE) %>% 
+  left_join(stxe600_europe, by = "date", na.rm = TRUE) %>% 
+  left_join(ftse_italy, by = "date", na.rm = TRUE) %>% 
+  left_join(ibex_spain, by = "date", na.rm = TRUE) 
+  
 ```
 
 ```{r jhu, include = FALSE}
@@ -240,7 +247,15 @@ citymapper_url <- paste(citymapper_url, date, ".csv")
 citymapper <- download.file(citymapper_url, destfile = "./citymapper.csv", quiet = TRUE)
 
 #creating citymapper database
-citymapper <- read_csv("./citymapper.csv", skip = 3)
+citymapper <- read_csv("./citymapper.csv", skip = 3) %>% 
+  clean_names()
+
+citymapper <- citymapper %>% 
+  pivot_longer(cols = c("amsterdam", "barcelona", "berlin", "birmingham", "boston", "brussels", "chicago", "copenhagen", "hamburg", "hong_kong", "istanbul", "lisbon", "london", "los_angeles", "lyon", "madrid", "manchester", "melbourne", "mexico_city", "milan", "monaco", "montreal", "moscow", "new_york_city", "paris", "philadelphia", "rhine_ruhr", "rome", "san_francisco", "seattle", "seoul", "singapore", "st_petersburg", "stockholm", "sydney", "sao_paulo", "tokyo", "toronto", "vancouver", "vienna", "washington_dc"), names_to = "city", names_prefix = "city", values_to = "movement") %>% 
+  group_by(city) %>% 
+  nest()
+
+
 
 
   cases_gdp_capita <- tidy_gdp_pop %>% 
