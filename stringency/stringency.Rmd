@@ -18,6 +18,7 @@ library(sf)
 library(maps)
 library(tibble)
 library(countrycode)
+library(gganimate)
 library(d3rain)
 ```
 
@@ -52,7 +53,7 @@ entire jurisdiction).
 2 - require closing
 
 ### S3: Cancel public events (Record cancelling public events)
-0- No measures
+0 - No measures
 1 - Recommend cancelling
 2 - Require cancelling
 
@@ -187,7 +188,8 @@ covidGlobal <- global_confirmed %>%
 # with Oxford data (which comes with CountryCode column)
 
 covidGlobal <- covidGlobal %>% 
-  mutate(CountryCode = countrycode(Country, origin = 'country.name', destination = 'iso3c'))
+  mutate(CountryCode = countrycode(Country, origin = 'country.name', destination = 'iso3c')) %>% 
+  filter(Country != "Diamond Princess", Country != "MS Zaandam")
 
 # Diamond Princess, Kosovo, MS Zaandam
 ```
@@ -204,11 +206,17 @@ stringency <- oxford %>%
     CountryCode, 
     new_date, 
     S1_School.closing,
+    S1_IsGeneral,
     S2_Workplace.closing,
+    S2_IsGeneral,
     S3_Cancel.public.events,
+    S3_IsGeneral,
     S4_Close.public.transport,
+    S4_IsGeneral,
     S5_Public.information.campaigns,
+    S5_IsGeneral,
     S6_Restrictions.on.internal.movement,
+    S6_IsGeneral,
     S7_International.travel.controls,
     S8_Fiscal.measures,
     S9_Monetary.measures,
@@ -226,19 +234,62 @@ stringency <- oxford %>%
     )
 ```
 
+```{r regions, echo=FALSE}
+
+regions <- read.csv(url("https://raw.githubusercontent.com/lukes/ISO-3166-Countries-with-Regional-Codes/master/all/all.csv")) %>% 
+  select(name, region, sub.region) %>% 
+  rename(Country = name)
+
+# joining with existing dataset
+
+stringency_regions <- stringency %>% 
+  full_join(regions, by = "Country")
+```
+
 ```{r visualizations, echo=FALSE}
 
-# Compare 
+# S1-S7
 
-cases_stringency <- stringency %>% 
-  filter(Country == "United States") %>% 
-  ggplot(aes(x = new_date, y = StringencyIndexForDisplay)) +
-    geom_point()
-cases_stringency
+# S8-S11
+
+# S12-13
+
+# Country level (compare 2-3 countries side by side)
+
+usa <- stringency %>% 
+  filter(CountryCode == "USA") %>% 
+  ggplot(aes(x = new_date)) +
+    geom_line(aes(y = confirmed, color = "Confirmed")) +
+    geom_line(aes(y = deaths, color = "Deaths")) +
+    geom_line(aes(y = recovered, color = "Recovered")) +
+    transition_reveal(new_date) +
+    scale_color_manual(
+      "", 
+      breaks = c("Confirmed", "Deaths", "Recovered"),
+      values = c("black", "darkred", "steelblue")
+    ) +
+    labs(
+      title = "Spread and Stringency Response in USA",
+      x = "Time",
+      y = "Count"
+    ) +
+    scale_x_date(
+      date_breaks = "1 week", 
+      date_labels = "%b %d"
+    ) 
+usa
   
 # Country-level
+
+
   
 # Countries within regions, region-wide trends
+
+
+
+# Compare regions
+
+# Compare sub-regions
   
 
 
