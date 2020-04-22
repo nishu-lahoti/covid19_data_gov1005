@@ -231,9 +231,10 @@ stringency <- oxford %>%
 # Compare 
 
 cases_stringency <- stringency %>% 
-  group_by()
-  ggplot(aes(x = confirmed, y = ))
-  
+  filter(Country == "United States") %>% 
+  ggplot(aes(x = new_date, y = StringencyIndexForDisplay)) +
+    geom_point()
+cases_stringency
   
 # Country-level
   
