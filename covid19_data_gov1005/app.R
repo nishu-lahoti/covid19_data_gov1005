@@ -18,15 +18,23 @@ ui <- navbarPage("COVID-19",
                  theme = shinytheme("flatly"),
                  
                  tabPanel("About",
-                          column(6,
                                  h1("Background"),
-                                 p("The goal of this project is..."))),
+                                 p("The goal of this project is..."),
+                                 sidebarLayout(
+                                   sidebarPanel(
+                                     helpText("Do something interesting with spread data!"),
+                                     h3("Search something"),
+                                     selectInput("country_region", NULL,
+                                                 choices = list("US" = "US",
+                                                                "Spain" = "Spain",
+                                                                "Italy" = "Italy"))),
+                                     plotOutput("covidSpread"))),
                  tabPanel("Spread",
                           column(6,
                                  h1("Information on COVID-19 Spread"),
                                  p("More information on Spread...")),
                           column(6,
-                                 plotOutput("worldometer_log"))),
+                                 plotOutput("worldometer_log")),
                  tabPanel("Policy",
                           column(6,
                                  h1("How Countries Have Responded with Policy"),
@@ -42,7 +50,7 @@ ui <- navbarPage("COVID-19",
                           column(6,
                                  h1("Sources"),
                                  p("Information on Sources")))
-                 )
+                 ))
   
 # Define server logic required to draw a histogram
 server <- function(input, output) {
@@ -68,22 +76,11 @@ server <- function(input, output) {
     })
     
     output$covidSpread <- renderPlot({
-      
-      worldometer_log <- worldometer_data %>%
-        mutate(log_cases = log(total_cases),
-               log_deaths = log(total_deaths),
-               log_recovered = log(total_recovered),
-               log_tests = log(total_tests),
-               log_tests_1m = log(tests_1m_pop))
-      
-      ggplot(worldometer_log, aes(log_cases, log_tests_1m, color = country_other)) +
-        geom_point() +
-        theme(legend.position = "none") +
-        labs(
-          title = "Logarithmic comparison of cases to tests",
-          x = "Cases \n(x10,000)",
-          y = "Tests per 1M \n(x10,000)"
-        )
+    
+    covidGlobal %>%
+        filter(country_region == input$country_region,
+               increment_confirmed >= 0) %>%
+        ggplot(aes(x = new_date, y = increment_confirmed)) + geom_col()
       
     })
     
