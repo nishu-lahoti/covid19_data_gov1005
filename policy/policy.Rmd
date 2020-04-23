@@ -19,6 +19,8 @@ library(maps)
 library(tibble)
 library(countrycode)
 library(gganimate)
+
+options(scipen = 999)
 ```
 
 ```{r oxford data, include=FALSE}
@@ -255,9 +257,7 @@ stringency_regions <- stringency %>%
 
 # Compare 
 
-options(scipen = 999)
-
-usa <- stringency %>% 
+usa <- stringency_regions %>% 
   filter(CountryCode == "USA") %>% 
   filter(new_date > "2020-02-24") %>%
   ggplot(aes(x = new_date, color = as.factor(S6_Restrictions.on.internal.movement))) +
@@ -282,21 +282,11 @@ usa <- stringency %>%
   theme_minimal() 
 usa
   
-# Country-level
-
-
-  
-# Countries within regions, region-wide trends
-
-
-
-# Compare regions
-
-# Compare sub-regions
+# Country-level - compare 2-3 side by side
 
 # how to change background color over time, mapping to stringency
   
-
+# Add animation
 ```
 
 
@@ -308,15 +298,56 @@ usa
 # figure out how to have time separate from plot (with a slider)
 # how to highlight a certain country
 
+# log transformation OR cases per capita
+
+# Downloading population data from World Bank
+
+population_data_18 <- read_csv("API_pop.csv", skip = 3) %>% 
+  clean_names() %>% 
+ select(country_code, x2018) %>% 
+  rename(pop_2018 = x2018)
+
+policy <- stringency_regions %>% 
+  full_join(population_data_18, by = c("CountryCode" = "country_code")) %>% 
+  mutate(confirmed_per_capita = confirmed / pop_2018,
+         deaths_per_confirmed = deaths / confirmed,
+         recovered_per_confirmed = recovered / confirmed)
+
+# log transformation (log base 10)
+
+policy_log <- policy %>% 
+  mutate(log_confirmed = log10(confirmed), 
+         log_deaths = log10(deaths),
+         log_recovered = log10(recovered))
+
+# scatterplot
+
+global_scatter <- policy_log %>% 
+  filter(new_date == "2020-04-01") %>% 
+  ggplot(aes(x = log_confirmed, y = StringencyIndexForDisplay, label = CountryCode)) +
+    geom_point() +
+    geom_text()
+global_scatter
+
+# regression: correlation between cases and stringency index
 
 ```
 
 
+```{r regions, echo=FALSE}
 
-```{r}
+
+
+```
+
+```{r globalmap}
 # https://covidtracker.bsg.ox.ac.uk/stringency-map
 
-# figure out how to get the map (hopefully get stringency as a continuous variable)
+# figure out how to get the map --- leaflet
+# https://bookdown.org/robinlovelace/geocompr/adv-map.html
+
+
+# (hopefully get stringency as a continuous variable)
 
 
 
