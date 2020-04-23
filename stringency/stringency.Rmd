@@ -255,6 +255,8 @@ stringency_regions <- stringency %>%
 
 # Country level (compare 2-3 countries side by side)
 
+options(scipen = 999)
+
 usa <- stringency %>% 
   filter(CountryCode == "USA") %>% 
   filter(new_date > "2020-02-24") %>%
@@ -277,7 +279,7 @@ usa <- stringency %>%
       date_breaks = "1 week", 
       date_labels = "%b %d"
     ) +
-  theme_minimal()
+  theme_minimal() 
 usa
   
 # Country-level
@@ -296,8 +298,6 @@ usa
   
 
 ```
-
-
 
 
 ```{r}
