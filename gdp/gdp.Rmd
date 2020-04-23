@@ -23,6 +23,7 @@ library(tibble)
 library(stringr)
 library(readxl)
 library(date)
+library(gganimate)
 library(chron)
 ```
 
@@ -153,19 +154,19 @@ sse_china$date <- as.Date(sse_china$date, format = "%B %d,%Y")
 #europe as a whole 
 
 stxe600_europe <- stock("https://finance.yahoo.com/quote/%5ESTOXX/history?p=%5ESTOXX") %>% 
-  rename(stxe600_europe = close)
+  rename(STXE600_Europe = close)
 stxe600_europe$date <- as.Date(stxe600_europe$date, format = "%B %d,%Y") 
 
 #italy
 
 ftse_italy <- stock("https://finance.yahoo.com/quote/%5EFTSE%3FP%3DFTSE/history/") %>% 
-  rename(ftse_italy = close)
+  rename(FTSE_Italy = close)
 ftse_italy$date <- as.Date(ftse_italy$date, format = "%B %d,%Y") 
 
 #spain
 
 ibex_spain <- stock("https://finance.yahoo.com/quote/%5EIBEX/history?p=%5EIBEX") %>% 
-  rename(ibex_spain = close)
+  rename(IBEX_Spain = close)
 ibex_spain$date <- as.Date(ibex_spain$date, format = "%B %d,%Y") 
 
 #willing to add more countries here. Perhaps France / Germany ? Iran? Singapore? 
@@ -177,11 +178,20 @@ stock_data <- kospi %>%
   left_join(stxe600_europe, by = "date", na.rm = TRUE) %>% 
   left_join(ftse_italy, by = "date", na.rm = TRUE) %>% 
   left_join(ibex_spain, by = "date", na.rm = TRUE) 
+stock_data$KOSPI <- gsub(',', '', stock_data$KOSPI) %>% as.numeric(stock_data$KOSPI)
+stock_data$NASDAQ <- gsub(',', '', stock_data$NASDAQ) %>% as.numeric(stock_data$NASDAQ)
+stock_data$MSCI <- gsub(',', '', stock_data$MSCI) %>% as.numeric(stock_data$MSCI)
+stock_data$SSE_China <- gsub(',', '', stock_data$SSE_China) %>% as.numeric(stock_data$SSE_China)
+stock_data$STXE600_Europe <- gsub(',', '', stock_data$STXE600_Europe) %>% as.numeric(stock_data$STXE600_Europe)
+stock_data$FTSE_Italy <- gsub(',', '', stock_data$FTSE_Italy) %>% as.numeric(stock_data$FTSE_Italy)
+stock_data$IBEX_Spain <- gsub(',', '', stock_data$IBEX_Spain) %>% as.numeric(stock_data$IBEX_Spain)
+
+  
   
 ```
 
 
-```{r combining, include= FALSE}
+```{r combining, include = FALSE}
 
 
 tidy_gdp_pop <- gdp_pop_2018 %>% 
@@ -196,25 +206,26 @@ tidy_gdp_pop <- gdp_pop_2018 %>%
 
 #gets today's date for downloading file
 
-date <- today <- format(Sys.time(), "%Y%m%d")
+#date <- today <- format(Sys.time(), "%Y%m%d")
 
 #crafting url by splitting up 
-citymapper_url <- "https://cdn.citymapper.com/data/cmi/Citymapper_Mobility_Index_"
+#citymapper_url <- "https://cdn.citymapper.com/data/cmi/Citymapper_Mobility_Index_"
 
 #pasting together to piece it together 
-citymapper_url <- paste(citymapper_url, date, ".csv")
+#citymapper_url <- paste(citymapper_url, date, ".csv")
 
 #downloading file from internet
-citymapper <- download.file(citymapper_url, destfile = "./citymapper.csv", quiet = TRUE)
+#citymapper <- download.file(citymapper_url, destfile = "./citymapper.csv", quiet = TRUE)
 
 #creating citymapper database
-citymapper <- read_csv("./citymapper.csv", skip = 3) %>% 
-  clean_names()
+#citymapper <- read_csv("./citymapper.csv", skip = 3) %>% 
+#  clean_names()
 
-citymapper <- citymapper %>% 
-  pivot_longer(-date, names_to = "city", values_to = "movement") %>%
-  group_by(city) %>% 
-  nest() #%>% 
+#citymapper <- citymapper %>% 
+ # pivot_longer(-date, names_to = "city", values_to = "movement") %>%
+ # left_join(msci, by = "date")
+ # group_by(city) %>% 
+ # nest() #%>% 
  # mutate(country = c("Netherlands", "Spain", "Germany", ))
   #do it this way annoying great
 
@@ -245,14 +256,27 @@ deaths_gdp_capita
 #alternatively msci is for all countries
 
 covid_global_stock <- covidGlobal %>% 
-  left_join(stock_data, by = c("new_date" = "date"))
+  left_join(stock_data, by = c("new_date" = "date")) %>% 
+  rename(country = "country_region")
 
+
+
+            
 #summarized_world <- lm(MSCI ~ increment_confirmed * as.vector(country_region), data = covid_global_stock)
 
 
 ```
 
 
-affect not just markets in major hubs but also in other places 
-put some interaction models, interaction terms 
+```{r}
 
+usa <- covid_global_stock %>%
+  filter(NASDAQ != "NA", country == "USA") %>%
+  ggplot(aes(x = log(confirmed))) +
+  transition_reveal(new_date) + 
+  geom_line(aes(y = NASDAQ), na.rm = TRUE) 
+
+usa
+
+
+```
