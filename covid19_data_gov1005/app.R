@@ -17,6 +17,9 @@ tests_per_state <- readRDS("../team_data/tests_per_state.RDS")
 ui <- navbarPage("COVID-19",
                  theme = shinytheme("flatly"),
                  
+                 # Add narrative about overall project. One - three paragraphs
+                 # Add top two visualizations.
+                 
                  tabPanel("About",
                                  h1("Background"),
                                  p("The goal of this project is..."),
@@ -29,16 +32,28 @@ ui <- navbarPage("COVID-19",
                                                                 "Spain" = "Spain",
                                                                 "Italy" = "Italy"))),
                                      plotOutput("covidSpread"))),
+                 
+                 # Add narrative about spread data processing. One - three paragraphs.
+                 # Add top two visualizations.
+                 
                  tabPanel("Spread",
                           column(6,
                                  h1("Information on COVID-19 Spread"),
                                  p("More information on Spread...")),
                           column(6,
                                  plotOutput("worldometer_log")),
+                          
+                # Add narrative about policy. One - three paragraphs.
+                # Add top two visualizations.
+                
                  tabPanel("Policy",
                           column(6,
                                  h1("How Countries Have Responded with Policy"),
                                  p("More information on Policy..."))),
+                
+                # Add narrative about economics. One - three paragraphs.
+                # Add top two visualizations.
+                
                  tabPanel("Economics",
                           column(6,
                                  h1("Economic Impact of COVID-19"),
