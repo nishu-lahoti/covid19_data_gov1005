@@ -18,11 +18,11 @@ library(sf)
 library(maps)
 library(tibble)
 library(countrycode)
-<<<<<<< HEAD
-library(d3rain)
-=======
+library(rworldmap)
+#<<<<<<< HEAD
+#=======
 library(gganimate)
->>>>>>> c3f5c051c9816f449691e1095e955a006ed475e4
+#>>>>>>> c3f5c051c9816f449691e1095e955a006ed475e4
 ```
 
 ```{r oxford data, include=FALSE}
