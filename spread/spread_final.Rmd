@@ -17,6 +17,8 @@ library(skimr)
 library(sf)
 library(maps)
 library(tibble)
+library(stringr)
+library(tibble)
 
 # Import NYTimes Data
 
@@ -53,6 +55,11 @@ global_recovered <- read.csv(url("https://raw.githubusercontent.com/CSSEGISandDa
   clean_names() %>%
   pivot_longer(cols = c(x1_22_20:x4_15_20), names_to = "date", values_to = "recovered") %>%
   select(country_region, date, recovered)
+
+# global_recovered_2 <- read.csv(url("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_recovered_global.csv")) %>%
+#   clean_names() %>%
+#   pivot_longer(cols = -c(province_state, country_region, lat, long), names_to = "date",
+#                values_to = "confirmed")
 
 us_daily_reports <- read.csv(url("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports_us/04-17-2020.csv")) %>% clean_names()
 
@@ -173,7 +180,7 @@ testing_by_state <- us_daily_reports %>%
 
 saveRDS(covidUS, file = "../team_data/covidUS.RDS")
 saveRDS(covidGlobal, file = "../team_data/covidGlobal.RDS")
-saveRDS(testing_by_state, file = "../team_data/tests_per_state")
+saveRDS(testing_by_state, file = "../team_data/tests_per_state.RDS")
 ```
 
 ## Exploratory Data Analysis
@@ -217,6 +224,22 @@ ggplot(countries_of_interest, aes(new_date, increment_deaths)) +
   labs(
     title = "Visualizing Spread in Western Europe"
   )
+
+
+us_data <- covidGlobal %>%
+        filter(country_region == "US", 
+               increment_confirmed >= 0,
+               increment_deaths >= 0,
+               increment >= 0)
+  
+ 
+# Will come back to this...
+
+     ggplot(us_data, aes(x = new_date)) +
+        geom_histogram(data = us_data$increment_confirmed, fill = "blue", alpha = 0.2) +
+        geom_histogram(data = us_data$increment_deaths, fill = "red", alpha = 0.2) +
+        geom_histogram(data = us_data$increment, fill = "green", alpha = 0.2)
+
 
 ```
 
@@ -332,6 +355,34 @@ tests_visual_data %>%
        fill = "Total Tests") +
   theme_void()
 
+
+```
+
+### NYTimes Data
+```{r}
+
+us_counties %>%
+  filter(state == "New York")
+
+counties <- st_as_sf(map("county", plot = FALSE, fill = TRUE)) %>%
+  mutate(ID = as.character(ID)) %>%
+  separate(ID, into = c("state", "county"), sep = ",") %>%
+  mutate(state = map_chr(state, ~ CapStr(.)),
+         county = map_chr(county, ~ CapStr(.)))
+
+nystate_visual <- us_counties %>%
+  filter(state == "New York", date == "2020-04-18") %>%
+  left_join(counties, by = c("state", "county"))
+
+nystate_visual %>%
+  ggplot(aes(geometry = geom, fill = cases)) +
+  geom_sf() +
+  scale_fill_viridis_c(option = "plasma",
+                       direction = -1) +
+  labs(title = "Covid-19 Cases across New York State",
+       caption = "Source: NYTimes",
+       fill = "Total Tests") +
+  theme_void()
 
 ```
 

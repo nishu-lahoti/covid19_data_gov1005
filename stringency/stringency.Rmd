@@ -18,7 +18,11 @@ library(sf)
 library(maps)
 library(tibble)
 library(countrycode)
+<<<<<<< HEAD
 library(d3rain)
+=======
+library(gganimate)
+>>>>>>> c3f5c051c9816f449691e1095e955a006ed475e4
 ```
 
 ```{r oxford data, include=FALSE}
@@ -257,14 +261,15 @@ stringency_regions <- stringency %>%
 
 usa <- stringency %>% 
   filter(CountryCode == "USA") %>% 
-  ggplot(aes(x = new_date)) +
-    geom_line(aes(y = confirmed, color = "Confirmed")) +
-    geom_line(aes(y = deaths, color = "Deaths")) +
-    geom_line(aes(y = recovered, color = "Recovered")) +
-    transition_reveal(new_date) +
+  filter(new_date > "2020-02-24") %>%
+  ggplot(aes(x = new_date, color = as.factor(S6_Restrictions.on.internal.movement))) +
+    geom_line(aes(y = confirmed), linetype = "solid" ) +
+    geom_line(aes(y = deaths), linetype = "dashed") +
+    geom_line(aes(y = recovered), linetype = "dotted") +
+    # transition_reveal(new_date) +
     scale_color_manual(
       "", 
-      breaks = c("Confirmed", "Deaths", "Recovered"),
+      breaks = c("0", "1", "2"),
       values = c("black", "darkred", "steelblue")
     ) +
     labs(
@@ -275,7 +280,8 @@ usa <- stringency %>%
     scale_x_date(
       date_breaks = "1 week", 
       date_labels = "%b %d"
-    ) 
+    ) +
+  theme_minimal()
 usa
   
 # Country-level
@@ -289,10 +295,35 @@ usa
 # Compare regions
 
 # Compare sub-regions
+
+# how to change background color over time, mapping to stringency
   
+
+```
+
+
+
+
+```{r}
+
+ ## https://covidtracker.bsg.ox.ac.uk/stringency-scatter
+
+# ideas: change the indices on the y-axis (S-1 : S-13); change the x-axis levels to confirmed, recovered, deaths
+# figure out how to have time separate from plot (with a slider)
+# how to highlight a certain country
 
 
 ```
 
 
+
+```{r}
+# https://covidtracker.bsg.ox.ac.uk/stringency-map
+
+# figure out how to get the map (hopefully get stringency as a continuous variable)
+
+
+
+
+```
 
