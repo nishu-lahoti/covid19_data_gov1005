@@ -316,7 +316,7 @@ usa
 ```{r}
 # https://covidtracker.bsg.ox.ac.uk/stringency-map
 
-# figure out 
+# figure out how to get the map (hopefully get stringency as a continuous variable)
 
 
 
