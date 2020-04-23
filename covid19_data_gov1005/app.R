@@ -1,53 +1,93 @@
-#
-# This is a Shiny web application. You can run the application by clicking
-# the 'Run App' button above.
-#
-# Find out more about building applications with Shiny here:
-#
-#    http://shiny.rstudio.com/
-#
-
 library(shiny)
+library(tidyverse)
+library(tidytext)
+library(shinythemes)
+library(plotly)
+
+# Potentially read in data directly from GitHub Repo. This will automatically update Shiny IF we run a CRONR job for the script
+# that creates the RDS files.
+
+covidGlobal <- readRDS("../team_data/covidGlobal.RDS")
+covidUS <- readRDS("../team_data/covidUS.RDS")
+worldometer_data <- readRDS("../team_data/worldometer.RDS")
+tests_per_state <- readRDS("../team_data/tests_per_state.RDS")
+
 
 # Define UI for application that draws a histogram
-ui <- fluidPage(
-
-    # Application title
-    titlePanel("Old Faithful Geyser Data"),
-
-    # Creating tabs
-    
-    tabPanel(
-      
-    ),
-    # Sidebar with a slider input for number of bins 
-    sidebarLayout(
-        sidebarPanel(
-            sliderInput("bins",
-                        "Number of bins:",
-                        min = 1,
-                        max = 50,
-                        value = 30)
-        ),
-
-        # Show a plot of the generated distribution
-        mainPanel(
-           plotOutput("distPlot")
-        )
-    )
-)
-
+ui <- navbarPage("COVID-19",
+                 theme = shinytheme("flatly"),
+                 
+                 tabPanel("About",
+                          column(6,
+                                 h1("Background"),
+                                 p("The goal of this project is..."))),
+                 tabPanel("Spread",
+                          column(6,
+                                 h1("Information on COVID-19 Spread"),
+                                 p("More information on Spread...")),
+                          column(6,
+                                 plotOutput("worldometer_log"))),
+                 tabPanel("Policy",
+                          column(6,
+                                 h1("How Countries Have Responded with Policy"),
+                                 p("More information on Policy..."))),
+                 tabPanel("Economics",
+                          column(6,
+                                 h1("Economic Impact of COVID-19"),
+                                 p("More information on Economics..."))),
+                 tabPanel("Team",
+                          column(6,
+                                 h1("The Team"),
+                                 p("Team Backgrounds...")),
+                          column(6,
+                                 h1("Sources"),
+                                 p("Information on Sources")))
+                 )
+  
 # Define server logic required to draw a histogram
 server <- function(input, output) {
 
-    output$distPlot <- renderPlot({
-        # generate bins based on input$bins from ui.R
-        x    <- faithful[, 2]
-        bins <- seq(min(x), max(x), length.out = input$bins + 1)
-
-        # draw the histogram with the specified number of bins
-        hist(x, breaks = bins, col = 'darkgray', border = 'white')
+    output$worldometer_log <- renderPlot({
+      
+      worldometer_log <- worldometer_data %>%
+        mutate(log_cases = log(total_cases),
+               log_deaths = log(total_deaths),
+               log_recovered = log(total_recovered),
+               log_tests = log(total_tests),
+               log_tests_1m = log(tests_1m_pop))
+      
+      ggplot(worldometer_log, aes(log_cases, log_tests_1m, color = country_other)) +
+        geom_point() +
+        theme(legend.position = "none") +
+        labs(
+          title = "Logarithmic comparison of cases to tests",
+          x = "Cases \n(x10,000)",
+          y = "Tests per 1M \n(x10,000)"
+        )
+      
     })
+    
+    output$covidSpread <- renderPlot({
+      
+      worldometer_log <- worldometer_data %>%
+        mutate(log_cases = log(total_cases),
+               log_deaths = log(total_deaths),
+               log_recovered = log(total_recovered),
+               log_tests = log(total_tests),
+               log_tests_1m = log(tests_1m_pop))
+      
+      ggplot(worldometer_log, aes(log_cases, log_tests_1m, color = country_other)) +
+        geom_point() +
+        theme(legend.position = "none") +
+        labs(
+          title = "Logarithmic comparison of cases to tests",
+          x = "Cases \n(x10,000)",
+          y = "Tests per 1M \n(x10,000)"
+        )
+      
+    })
+    
+    
 }
 
 # Run the application 
