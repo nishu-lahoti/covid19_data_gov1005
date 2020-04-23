@@ -18,7 +18,6 @@ library(sf)
 library(maps)
 library(tibble)
 library(countrycode)
-library(gganimate)
 library(d3rain)
 ```
 
@@ -254,7 +253,7 @@ stringency_regions <- stringency %>%
 
 # S12-13
 
-# Country level (compare 2-3 countries side by side)
+# Compare 
 
 usa <- stringency %>% 
   filter(CountryCode == "USA") %>% 
