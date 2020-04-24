@@ -12,9 +12,7 @@ library(rworldmap)
 library(gganimate)
 
 
-##### Oxford + Policy + JHU Data #####
-
-# https://github.com/OxCGRT/covid-policy-tracker
+##### Policy: Oxford + JHU Data #####
 
 # Import and clean Oxford Covid-Policy-Tracker data. Both sets are downloaded
 # here, but we will likely only need the first (the second is for our own

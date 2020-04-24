@@ -260,7 +260,6 @@ regions <- read.csv(url("https://raw.githubusercontent.com/lukes/ISO-3166-Countr
 
 stringency_regions <- stringency %>% 
   left_join(regions, by = "CountryCode")
-
 ```
 
 ```{r visualizations, echo=FALSE}
@@ -326,22 +325,20 @@ population_data_18 <- read_csv("API_pop.csv", skip = 3) %>%
  select(country_code, x2018) %>% 
   rename(pop_2018 = x2018)
 
+# join with population data and add log transformations (log base 10)
+
 policy <- stringency_regions %>% 
   left_join(population_data_18, by = c("CountryCode" = "country_code")) %>% 
   mutate(confirmed_per_capita = confirmed / pop_2018,
          deaths_per_confirmed = deaths / confirmed,
-         recovered_per_confirmed = recovered / confirmed)
-
-# log transformation (log base 10)
-
-policy_log <- policy %>% 
+         recovered_per_confirmed = recovered / confirmed) %>% 
   mutate(log_confirmed = log10(confirmed), 
          log_deaths = log10(deaths),
          log_recovered = log10(recovered))
 
 # scatterplot
 
-global_scatter <- policy_log %>% 
+global_scatter <- policy %>% 
   filter(new_date == "2020-04-01") %>% 
   ggplot(aes(x = log_confirmed, y = StringencyIndexForDisplay, label = CountryCode)) +
     geom_point() +
@@ -461,7 +458,7 @@ output$gdp_graph <- renderPlot({
 1 - COVID-19 public information campaign
 
 
- ### s6: Restrictions on internal movement (Record restrictions on internal movement)
+### s6: Restrictions on internal movement (Record restrictions on internal movement)
 0 - No measures
 1 - recommend movement restriction
 2 - restrict movement
