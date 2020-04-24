@@ -1,7 +1,5 @@
 ---
-title: "data_sources"
-author: "Nishu Lahoti"
-date: "4/23/2020"
+title: "Data Sources for Covid-19 Project"
 output: html_document
 ---
 
@@ -27,197 +25,10 @@ library(readxl)
 library(date)
 library(chron)
 
-
-
 options(scipen = 999)
 ```
 
-```{r oxford data, include=FALSE}
-
-oxford <- read.csv(url("https://raw.githubusercontent.com/OxCGRT/covid-policy-tracker/master/data/OxCGRT_latest.csv")) %>% 
-  mutate(new_date = as.Date(as.character(Date), format = "%Y%m%d"))
-
-```
-
-```{r JHU data, include=FALSE}
-
-global_confirmed <- read.csv(url("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv")) %>% 
-  clean_names() %>% 
-  pivot_longer(cols = -c(province_state, country_region, lat, long), names_to = "date", values_to = "confirmed") %>%
-  select(country_region, date, confirmed)
-
-global_confirmed <- global_confirmed %>% 
-  mutate(sep_date = sub("x", "", date)) %>%
-  mutate(new_date = as.Date(sep_date, format = "%m_%d_%y")) %>%
-  mutate(helper = c(
-    confirmed[1],
-    confirmed[1:(nrow(global_confirmed) - 1)])
-  ) %>%
-  mutate(increment = confirmed - helper) %>%
-  group_by(country_region)
-
-# Deaths
-
-global_deaths <- read.csv(url("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv")) %>% 
-  clean_names() %>%
-  pivot_longer(cols = -c(province_state, country_region, lat, long), names_to = "date", values_to = "deaths") %>%
-  select(country_region, date, deaths)
-
-global_deaths <- global_deaths %>% 
-  mutate(sep_date = sub("x", "", date)) %>%
-  mutate(new_date = as.Date(sep_date, format = "%m_%d_%y")) %>%
-  mutate(helper = c(
-    deaths[1],
-    deaths[1:(nrow(global_deaths) - 1)])
-  ) %>%
-  mutate(increment = deaths - helper) %>%
-  group_by(country_region)
-
-# Recovered
-
-global_recovered <- read.csv(url("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_recovered_global.csv")) %>% 
-  clean_names() %>%
-  pivot_longer(cols = -c(province_state, country_region, lat, long), names_to = "date", values_to = "recovered") %>%
-  select(country_region, date, recovered)
-
-global_recovered <- global_recovered %>% 
-  mutate(sep_date = sub("x", "", date)) %>%
-  mutate(new_date = as.Date(sep_date, format = "%m_%d_%y")) %>%
-  mutate(helper = c(
-    recovered[1],
-    recovered[1:(nrow(global_recovered) - 1)])
-  ) %>%
-  mutate(increment = recovered - helper) %>%
-  group_by(country_region)
-
-# Join JHU data 
-
-covidGlobal <- global_confirmed %>%
-  inner_join(
-    global_deaths, 
-    by = c("country_region", "new_date"), 
-    suffix = c("_confirmed", "_deaths")
-  ) %>%
-  inner_join(
-    global_recovered, 
-    by = c("country_region", "new_date"), 
-    suffix = c("_confirmed", "_recovered")
-  ) %>%
-  select(
-    country_region, 
-    new_date, 
-    confirmed, 
-    increment_confirmed, 
-    deaths, 
-    increment_deaths, 
-    recovered, 
-    increment
-  ) %>% 
-  rename(
-    Country = country_region
-  )
-
-# Use countrycode package to standardize all country names, for easy joining
-# with Oxford data (which comes with CountryCode column)
-
-covidGlobal <- covidGlobal %>% 
-  mutate(CountryCode = countrycode(Country, origin = 'country.name', destination = 'iso3c')) %>% 
-  filter(Country != "Diamond Princess", Country != "MS Zaandam")
-
-
-```
-
-```{r final data, include=FALSE}
-
-stringency <- oxford %>% 
-  full_join(covidGlobal, by = c("CountryCode", "new_date")) %>% 
-  filter(!is.na(confirmed)) %>% 
-  select(
-    Country, 
-    CountryCode, 
-    new_date, 
-    S1_School.closing,
-    S1_IsGeneral,
-    S2_Workplace.closing,
-    S2_IsGeneral,
-    S3_Cancel.public.events,
-    S3_IsGeneral,
-    S4_Close.public.transport,
-    S4_IsGeneral,
-    S5_Public.information.campaigns,
-    S5_IsGeneral,
-    S6_Restrictions.on.internal.movement,
-    S6_IsGeneral,
-    S7_International.travel.controls,
-    S8_Fiscal.measures,
-    S9_Monetary.measures,
-    S10_Emergency.investment.in.health.care,
-    S11_Investment.in.Vaccines,
-    S12_Testing.framework,
-    S13_Contact.tracing,
-    StringencyIndexForDisplay,
-    confirmed,
-    increment_confirmed,
-    deaths,
-    increment_deaths,
-    recovered,
-    increment
-    )
-
-
-```
-
-```{r regions, echo=FALSE}
-
-regions <- read.csv(url("https://raw.githubusercontent.com/lukes/ISO-3166-Countries-with-Regional-Codes/master/all/all.csv")) %>% 
-  select(name, region, sub.region) %>% 
-  rename(Country = name)
-
-# joining with existing dataset
-
-stringency_regions <- stringency %>% 
-  full_join(regions, by = "Country")
-
-```
-
-```{r visualizations, echo=FALSE}
-
-population_data_18 <- read_csv("../gdp/API_pop.csv", skip = 3) %>% 
-  clean_names() %>% 
- select(country_code, x2018) %>% 
-  rename(pop_2018 = x2018)
-
-policy <- stringency_regions %>% 
-  full_join(population_data_18, by = c("CountryCode" = "country_code")) %>% 
-  mutate(confirmed_per_capita = confirmed / pop_2018,
-         deaths_per_confirmed = deaths / confirmed,
-         recovered_per_confirmed = recovered / confirmed)
-
-# log transformation (log base 10)
-
-policy_log <- policy %>% 
-  mutate(log_confirmed = log10(confirmed), 
-         log_deaths = log10(deaths),
-         log_recovered = log10(recovered))
-
-gdp_data_18 <- read_csv("../gdp/API_gdp.csv", skip = 3) %>%
-  clean_names() %>% 
-  select(country_code, x2018) %>% 
-  rename(gdp_2018 = x2018)
-
-# Combine and create variable for GDP per capita
-
-gdp_pop_2018 <- gdp_data_18 %>% 
-  left_join(population_data_18, by = "country_code") %>% 
-  mutate(gdp_per_capita = round(gdp_2018 / pop_2018, digits = 2))
-
-
-saveRDS(gdp_pop_2018, file = "gdp_per_capita.RDS")
-saveRDS(policy_log, file = "policy.RDS")
-
-```
-
-```{r}
+```{r Spread, echo=FALSE}
 
 # Import NYTimes Data
 
@@ -272,7 +83,8 @@ worldometer <- worldometer_html %>%
 worldometer <- worldometer[[1]] %>% html_table
 worldometer <- worldometer %>% clean_names()
 
-# Clean worldometer data, changing column types to reflect numbers where necessary.
+# Clean worldometer data, changing column types to reflect numbers where
+# necessary.
 
 worldometer <- worldometer %>%
   mutate(total_cases = parse_number(total_cases),
@@ -289,12 +101,12 @@ worldometer <- worldometer %>%
   arrange(desc(total_cases))
 
 saveRDS(worldometer, file = "worldometer.RDS")
-
 ```
 
-```{r}
+```{r Spread with Increments, echo=FALSE}
 
-# Updating the date and creating an increment column for the confirmed cases in the US.
+# Updating the date and creating an increment column for the confirmed cases in
+# the US.
 
 confirmedCovidUS <- us_confirmed %>%
   mutate(sep_date = sub(".", "", date)) %>%
@@ -306,7 +118,8 @@ confirmedCovidUS <- confirmedCovidUS %>%
   mutate(increment = confirmed - helper) %>%
   group_by(combined_key)
 
-# Updating the date and creating an increment column for the confirmed cases in the US.
+# Updating the date and creating an increment column for the confirmed cases in
+# the US.
 
 deathsCovidUS <- us_deaths %>%
   mutate(sep_date = sub(".", "", date)) %>%
@@ -318,7 +131,8 @@ deathsCovidUS <- deathsCovidUS %>%
   mutate(increment = deaths - helper) %>%
   group_by(combined_key)
 
-# Updating the date and creating an increment column for the confirmed cases across the globe
+# Updating the date and creating an increment column for the confirmed cases
+# across the globe
 
 confirmedCovidGlobal <- global_confirmed %>%
   mutate(sep_date = sub(".", "", date)) %>%
@@ -331,7 +145,8 @@ confirmedCovidGlobal <- confirmedCovidGlobal %>%
   mutate(increment = confirmed - helper) %>%
   group_by(country_region)
 
-# Updating the date and creating an increment column for the deaths  across the globe
+# Updating the date and creating an increment column for the deaths  across the
+# globe
 
 deathsCovidGlobal <- global_deaths %>%
   mutate(sep_date = sub(".", "", date)) %>%
@@ -344,7 +159,8 @@ deathsCovidGlobal <- deathsCovidGlobal %>%
   mutate(increment = deaths - helper) %>%
   group_by(country_region)
 
-# Updating the date and creating an increment column for the recovered cases across the globe
+# Updating the date and creating an increment column for the recovered cases
+# across the globe
 
 recoveredCovidGlobal <- global_recovered %>%
   mutate(sep_date = sub(".", "", date)) %>%
@@ -378,6 +194,170 @@ testing_by_state <- us_daily_reports %>%
 saveRDS(covidUS, file = "covidUS.RDS")
 saveRDS(covidGlobal, file = "covidGlobal.RDS")
 saveRDS(testing_by_state, file = "tests_per_state.RDS")
+```
 
+```{r Policy, echo=FALSE}
+
+# Import Oxford Covid-19 Data
+
+oxford <- read.csv(url("https://raw.githubusercontent.com/OxCGRT/covid-policy-tracker/master/data/OxCGRT_latest.csv")) %>% 
+  mutate(new_date = as.Date(as.character(Date), format = "%Y%m%d"))
+
+
+# Import & Clean JHU CSSE Data (unlike Spread, no increments here), starting
+# with Confirmed
+
+global_confirmed <- read.csv(url("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv")) %>% 
+  clean_names() %>% 
+  pivot_longer(cols = -c(province_state, country_region, lat, long), names_to = "date", values_to = "confirmed") %>%
+  select(country_region, date, confirmed)
+
+global_confirmed <- global_confirmed %>% 
+  mutate(sep_date = sub("x", "", date)) %>%
+  mutate(new_date = as.Date(sep_date, format = "%m_%d_%y")) %>%
+  group_by(country_region, new_date) %>%
+  summarize(confirmed = sum(confirmed)) 
+
+# JHU Deaths
+
+global_deaths <- read.csv(url("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv")) %>% 
+  clean_names() %>%
+  pivot_longer(cols = -c(province_state, country_region, lat, long), names_to = "date", values_to = "deaths") %>%
+  select(country_region, date, deaths) 
+
+global_deaths <- global_deaths %>% 
+  mutate(sep_date = sub("x", "", date)) %>%
+  mutate(new_date = as.Date(sep_date, format = "%m_%d_%y")) %>%
+  group_by(country_region, new_date) %>%
+  summarize(deaths = sum(deaths)) 
+
+# JHU Recovered
+
+global_recovered <- read.csv(url("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_recovered_global.csv")) %>% 
+  clean_names() %>%
+  pivot_longer(cols = -c(province_state, country_region, lat, long), names_to = "date", values_to = "recovered") %>%
+  select(country_region, date, recovered)
+
+global_recovered <- global_recovered %>% 
+  mutate(sep_date = sub("x", "", date)) %>%
+  mutate(new_date = as.Date(sep_date, format = "%m_%d_%y")) %>%
+  group_by(country_region, new_date) %>%
+  summarize(recovered = sum(recovered))
+
+# Join JHU data 
+
+covidGlobal <- global_confirmed %>%
+  inner_join(
+    global_deaths, 
+    by = c("country_region", "new_date"), 
+    suffix = c("_confirmed", "_deaths")
+  ) %>%
+  inner_join(
+    global_recovered, 
+    by = c("country_region", "new_date"), 
+    suffix = c("_confirmed", "_recovered")
+  ) %>%
+  select(
+    country_region, 
+    new_date, 
+    confirmed, 
+    deaths, 
+    recovered
+  ) %>% 
+  rename(
+    Country = country_region
+  )
+
+# Use countrycode package to standardize all country names, for easy joining
+# with Oxford data (which comes with CountryCode column). Filtering out 2 cruise
+# ships, which are not of interest in our analysis.
+
+covidGlobal <- covidGlobal %>% 
+  mutate(CountryCode = countrycode(Country, origin = 'country.name', destination = 'iso3c')) %>% 
+  filter(Country != "Diamond Princess", Country != "MS Zaandam")
+
+
+# Join Oxford and JHU Data
+
+stringency <- oxford %>% 
+  full_join(covidGlobal, by = c("CountryCode", "new_date")) %>% 
+  filter(!is.na(confirmed)) %>% 
+  select(
+    Country, 
+    CountryCode, 
+    new_date, 
+    S1_School.closing,
+    S1_IsGeneral,
+    S2_Workplace.closing,
+    S2_IsGeneral,
+    S3_Cancel.public.events,
+    S3_IsGeneral,
+    S4_Close.public.transport,
+    S4_IsGeneral,
+    S5_Public.information.campaigns,
+    S5_IsGeneral,
+    S6_Restrictions.on.internal.movement,
+    S6_IsGeneral,
+    S7_International.travel.controls,
+    S8_Fiscal.measures,
+    S9_Monetary.measures,
+    S10_Emergency.investment.in.health.care,
+    S11_Investment.in.Vaccines,
+    S12_Testing.framework,
+    S13_Contact.tracing,
+    StringencyIndexForDisplay,
+    confirmed,
+    deaths,
+    recovered
+    )
+
+# Importing Region and Subregion Lists
+
+regions <- read.csv(url("https://raw.githubusercontent.com/lukes/ISO-3166-Countries-with-Regional-Codes/master/all/all.csv")) %>% 
+  select(name, region, sub.region) %>% 
+  rename(Country = name)
+
+# Joining with existing dataset
+
+stringency_regions <- stringency %>% 
+  full_join(regions, by = "Country")
+```
+
+```{r Static Data, echo=FALSE}
+
+# Import population and GDP data from World Bank, latest available 2018
+
+population_data_18 <- read_csv("../gdp/API_pop.csv", skip = 3) %>% 
+  clean_names() %>% 
+ select(country_code, x2018) %>% 
+  rename(pop_2018 = x2018)
+
+gdp_data_18 <- read_csv("../gdp/API_gdp.csv", skip = 3) %>%
+  clean_names() %>% 
+  select(country_code, x2018) %>% 
+  rename(gdp_2018 = x2018)
+
+# Combine to create variable for GDP per capita
+
+gdp_pop_2018 <- gdp_data_18 %>% 
+  left_join(population_data_18, by = "country_code") %>% 
+  mutate(gdp_per_capita = round(gdp_2018 / pop_2018, digits = 2))
+
+
+# Create final dataset for POLICY, adding per capita and per case variables and
+# log transformation (log base 10)
+
+policy <- stringency_regions %>% 
+  full_join(population_data_18, by = c("CountryCode" = "country_code")) %>% 
+  mutate(confirmed_per_capita = confirmed / pop_2018,
+         deaths_per_confirmed = deaths / confirmed,
+         recovered_per_confirmed = recovered / confirmed) %>% 
+  mutate(log_confirmed = log10(confirmed), 
+         log_deaths = log10(deaths),
+         log_recovered = log10(recovered))
+
+# Saving files for team use
+saveRDS(gdp_pop_2018, file = "gdp_per_capita.RDS")
+saveRDS(policy, file = "policy.RDS")
 ```
 
