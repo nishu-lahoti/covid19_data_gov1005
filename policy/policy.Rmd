@@ -305,6 +305,9 @@ usa
 # Add animation
 ```
 
+SelectInput() <- for country
+DateRangeInput() <- for x axis 
+SelectInput() <- for the policy measure
 
 ```{r}
 
@@ -374,3 +377,122 @@ global_scatter
 
 ```
 
+radioButtons ("caseInput", "Case Type",
+              choices = c("Confirmed", "Deaths", "Recovered"),
+              selected = "Confirmed")
+              
+selectInput ("indexInput", "Policy Measure",
+              choices = c("School Closing", "Workplace Closing", "Public Events Cancellations",
+              "Public Transport Closings", "Public Info Campaigns", "Restrictions on Internal Movement", "International Travel Controls", 
+              "Fiscal Measures", "Monetary measures", "Emergency Investment in Healthcare", "Investment in Vaccines", "Testing Policy", "Contact Tracing"))
+              
+              
+sliderInput("DatesMerge",
+                          "Dates:",
+                          min = as.Date("2020-01-22","%Y-%m-%d"),
+                          max = Sys.Date(),
+                          value=as.Date("2016-01-22"),
+                          timeFormat="%Y-%m-%d")
+                          
+                          
+output$globalpolicy <- renderPlot({
+        if
+        if
+})
+                          
+                          
+                          
+
+output$gdp_graph <- renderPlot({
+    if(input$gdp == "GDP") {
+      y_value <- data$gdp
+      y_lab <- "GDP"
+      gdp_title <- "Number of Refugees and GDP"
+    } 
+    else if(input$gdp == "GDP Per Capita") {
+      y_value <- data$gdp_percap
+      y_lab <- "GDP Per Capita"
+      gdp_title <- "Number of Refugees and GDP Per Capita"
+    } else {
+      y_value <- data$gdp_percap_growth
+      y_lab <- "GDP Per Capita Growth Rate"
+      gdp_title <- "Number of Refugees and GDP Per Capita Growth Rate"
+    }
+    
+    # Use ggplot to create the framework for the graph. I used geom point to
+    # make a scatter plot, geom smooth to add a line of best fit, and scale x
+    # and y continuous to avoid the axies being in scientific notation because
+    # it is not user friendly.
+    
+    data %>%
+      ggplot(aes(refugee_number, y_value)) +
+      geom_point() +
+      scale_x_continuous(labels = scales::comma) +
+      scale_y_continuous(labels = scales::comma) +
+      geom_smooth(method = "lm") +
+      labs(title = gdp_tit)
+
+)
+
+
+
+### S1: School closing (Record closings of schools and universities)
+0 - no measures
+1 - recommend closing
+2 - require closing
+
+### S2: Workplace closing (Record closings of workplaces)
+0 - No measures
+1 - recommend closing
+2 - require closing
+
+### S3: Cancel public events (Record cancelling public events)
+0 - No measures
+1 - Recommend cancelling
+2 - Require cancelling
+
+### S4: Close public transport (Record closing of public transport)
+0 - No measures
+1 - Recommend closing
+2 - Require closing
+
+### S5: Public info campaigns (Record presence of public info campaigns)
+0 -No COVID-19 public information campaign
+1 - COVID-19 public information campaign
+
+
+ ### s6: Restrictions on internal movement (Record restrictions on internal movement)
+0 - No measures
+1 - recommend movement restriction
+2 - restrict movement
+
+### s7: International travel controls (Record restrictions on international travel)
+0 - No measures
+1 - Screening
+2 - Quarantine on high-risk regions
+3 - Ban on high-risk regions
+
+### s8: Fiscal measures (What economic stimulus policies are adopted?)
+Value of fiscal stimuli, including spending or tax cuts (in USD)
+
+### s9: Monetary measures (What monetary policy interventions?)
+Value of interest rate (in %)
+
+### s10: Emergency investment in healthcare (Short-term spending on, e.g, hospitals, masks,etc)
+Value of new short-term spending on health (in USD)
+
+### s11: Investment in vaccines (Announced public spending on vaccine development)
+Value of investment (in USD)
+
+### S12: Testing policy (Who can get tested)
+0 - No testing policy
+1 - only testing those who both (a) have symptoms, and (b) meet specific criteria (eg key workers, admitted to hospital, came into contact with a known case, returned from overseas)
+2 - testing of anyone showing COVID19 symptoms 
+3 - open public testing (eg “drive through” testing available to asymptomatic people)
+
+###S13: Contact tracing (Are governments doing contact tracing)
+
+
+0 - no contact tracing
+1 - limited contact tracing – not done for all cases
+2 - comprehensive contact tracing – done for all cases
