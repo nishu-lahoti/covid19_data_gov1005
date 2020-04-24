@@ -15,16 +15,17 @@ library(countrycode)
 covidGlobal <- readRDS("../covid19_data_gov1005/covidGlobal.RDS")
 covidUS <- readRDS("../covid19_data_gov1005/covidUS.RDS")
 worldometer_data <- readRDS("../covid19_data_gov1005/worldometer.RDS")
+tests_per_state <- readRDS("../covid19_data_gov1005/tests_per_state.RDS")
 
 # For policy:
 policy <- readRDS("../covid19_data_gov1005/policy.RDS")
 
 # For economics:
-tests_per_state <- readRDS("../covid19_data_gov1005/tests_per_state.RDS")
+stock_data <- readRDS("../covid19_data_gov1005/stock_data.RDS")
 gdp_percapita_cases <- readRDS("../covid19_data_gov1005/gdp_per_capita.RDS")
 
 
-########### Stock Data Starts Here ##########
+######## Stock Data Start Here #########
 
 # Function to take stock indices from yahoo and scrape data every time its run
 # (updated daily)
@@ -102,8 +103,9 @@ stock_data$IBEX_Spain <- gsub(',', '', stock_data$IBEX_Spain) %>% as.numeric(sto
 
 covid_global_stock <- covidGlobal %>% 
   full_join(stock_data, by = c("new_date" = "date")) %>% 
-  rename(country = "country_region") %>% 
-  select(country, new_date, confirmed, deaths, recovered, KOSPI, NASDAQ, MSCI, SSE_China, DAX, FTSE_Italy, IBEX_Spain)
+  select(Country, new_date, confirmed, deaths, recovered, KOSPI, NASDAQ, MSCI, SSE_China, DAX, FTSE_Italy, IBEX_Spain)
+
+
 
 
 
@@ -113,10 +115,6 @@ covid_global_stock <- covidGlobal %>%
 # Define UI
 ui <- navbarPage("The COVID-19 Data Project",
                  theme = shinytheme("flatly"),
-                 
-                 # Narrative about overall project. One - three paragraphs
-                 
-                 # Add top two visualizations.
                  
                  tabPanel("About",
                           column(8,
@@ -169,8 +167,8 @@ ui <- navbarPage("The COVID-19 Data Project",
                           p("More information on Policy..."),
                           sidebarLayout(
                             sidebarPanel(
-                              helpText("Select a policy response"),
-                              selectInput("indexInput", "Policy Response",
+                              helpText("Look at country-specific policy"),
+                              selectInput("indexInput", "Select a policy response",
                                           choices = c("School closing", "Workplace closing", "Cancel public events", 
                                                       "Public transport closings", "Public info campaigns", 
                                                       "Restrictions on internal movement", "International travel controls", 
@@ -182,14 +180,14 @@ ui <- navbarPage("The COVID-19 Data Project",
                           
                           sidebarLayout(
                             sidebarPanel(
-                              helpText("Drag slider to selected day"),
+                              helpText("Compare global policy"),
                               sliderInput("dateInput",
-                                          "Dates:",
+                                          "Select a date:",
                                           min = as.Date("2020-01-22","%Y-%m-%d"),
                                           max = Sys.Date(),
                                           value = as.Date("2016-01-22"),
                                           timeFormat = "%Y-%m-%d"),
-                              radioButtons("caseInput", "Case Type",
+                              radioButtons("caseInput", "Choose a case type",
                                            choices = c("Confirmed", "Deaths", "Recovered"),
                                            selected = "Confirmed")
                               
@@ -198,23 +196,21 @@ ui <- navbarPage("The COVID-19 Data Project",
                  
                  
                  # Add narrative about policy. One - three paragraphs.
-                 # Add top two visualizations.
                  
                  tabPanel("Economic Impact",
                           h1("Economic Impact of COVID-19"),
                           p("More information on Economics..."),
                           sidebarLayout(
                             sidebarPanel(
-                              helpText("Do something cool with Ec data!"),
+                              helpText("Look at COVID-19's impact on stock prices for select countries"),
                               selectInput("countryInput", "Select a Country: ",
                                           choices = c("China", 
                                                       "Germany", 
                                                       "Italy", 
                                                       "South Korea", 
                                                       "Spain", 
-                                                      "United States")), 
-                              helpText("Choose a Case Type"),
-                              radioButtons("caseInput", "Case Type",
+                                                      "United States")),
+                              radioButtons("caseInput", "Choose a case type",
                                            choices = c("Confirmed", "Deaths", "Recovered"),
                                            selected = "Confirmed")
                             ),
@@ -222,8 +218,8 @@ ui <- navbarPage("The COVID-19 Data Project",
                           
                           sidebarLayout(
                             sidebarPanel(
-                              helpText("Choose a Case Type"),
-                              radioButtons("caseInput", "Case Type",
+                              helpText("Compare COVID-19's impact among countries of different GDP levels"),
+                              radioButtons("caseInput", "Choose a case type",
                                            choices = c("Confirmed", "Deaths", "Recovered"),
                                            selected = "Confirmed")
                               
@@ -239,7 +235,7 @@ ui <- navbarPage("The COVID-19 Data Project",
                                                                "here.")),
                                  p("Katelyn Li is a junior at Harvard concentrating 
                                    in Neuroscience with a secondary in Government. 
-                                   Her github can be found", a(href =  " ",
+                                   Her github can be found", a(href =  "https://github.com/katelynxli",
                                                                "here.")),
                                  p("Nishu Lahoti ..."),
                                  p("Jun-Yong Kim is a first-year at Harvard prospectively 
@@ -473,6 +469,8 @@ server <- function(input, output) {
     
   })
   
+  # Create scatterplot for global response
+  
   output$globalPolicy <- renderPlot({
     
     if(input$caseInput == "Confirmed") {
@@ -496,14 +494,15 @@ server <- function(input, output) {
     
     policy %>% 
       filter(new_date == input$dateInput) %>% 
-      ggplot(aes(x = x_value, y = StringencyIndexForDisplay, label = CountryCode)) +
+      ggplot(aes(x = x_value, y = StringencyIndexForDisplay, label = CountryCode, color = sub.region)) +
       geom_point() +
       geom_text() +
       labs(
         title = "Relationship between Number of Cases and Government Response",
         subtitle = "Overall Stringency Index",
         x = x_axis,
-        y = "Stringency Index"
+        y = "Stringency Index",
+        color = "Region"
       ) +
       theme_classic()
     
@@ -517,42 +516,42 @@ server <- function(input, output) {
     
     if(input$countryInput == "China") {
       y_value <- covid_global_stock %>% 
-        filter(country == "CHN") %>% 
+        filter(Country == "CHN") %>% 
         pull(SSE_China)
       y_axis <- "Index: SSE"
       subtitle <- "In China"
     }
     else if(input$countryInput == "Germany") {
       y_value <- covid_global_stock %>% 
-        filter(country == "GER") %>% 
+        filter(Country == "GER") %>% 
         pull(DAX)
       y_axis <- "Index: DAX"
       subtitle <- "In Germany"
     }
     else if(input$countryInput == "Italy") {
       y_value <- covid_global_stock %>% 
-        filter(country == "ITA") %>% 
+        filter(Country == "ITA") %>% 
         pull(FTSE_Italy)
       y_axis <- "Index: FTSE"
       subtitle <- "In Italy"
     }
     else if(input$countryInput == "South Korea") {
       y_value <- covid_global_stock %>% 
-        filter(country == "KOR") %>% 
+        filter(Country == "KOR") %>% 
         pull(KOSPI)
       y_axis <- "Index: KOSPI"
       subtitle <- "In South Korea"
     }
     else if(input$countryInput == "Spain") {
       y_value <- covid_global_stock %>% 
-        filter(country == "SPA") %>% 
+        filter(Country == "SPA") %>% 
         pull(IBEX_Spain)
       y_axis <- "Index: IBEX"
       subtitle <- "In Spain"
     }
     else {
       y_value <- covid_global_stock %>% 
-        filter(country == "USA") %>% 
+        filter(Country == "USA") %>% 
         pull(NASDAQ)
       y_axis <- "Index: NASDAQ"
       subtitle <- "In the United States"
@@ -579,7 +578,7 @@ server <- function(input, output) {
     }
     # Create plot for one country's response
     
-    covid_global_stock %>%  
+    stock_data %>%  
       filter(y_value != "NA", x_value != "0") %>%
       ggplot(aes(x = log(x_value))) +
       geom_line(aes(y = y_value), linetype = "solid") +
