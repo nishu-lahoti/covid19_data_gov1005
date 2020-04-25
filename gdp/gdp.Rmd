@@ -280,5 +280,4 @@ usa <- covid_global_stock %>%
 
 usa
 
-
 ```
