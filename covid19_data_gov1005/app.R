@@ -652,76 +652,76 @@ server <- function(input, output) {
   })
   
   
-  
+
   # Economic Impact
-  
+
 #   output$stock_impact <- renderPlot({
-#     
+#
 #     if(input$countryInput == "China") {
-#       y_value <- covid_global_stock %>% 
-#         filter(Country == "CHN") %>% 
+#       y_value <- covid_global_stock %>%
+#         filter(Country == "CHN") %>%
 #         pull(SSE_China)
 #       y_axis <- "Index: SSE"
 #       subtitle <- "In China"
 #     }
 #    else if(input$countryInput == "Germany") {
-#       y_value <- covid_global_stock %>% 
-#         filter(Country == "GER") %>% 
+#       y_value <- covid_global_stock %>%
+#         filter(Country == "GER") %>%
 #         pull(DAX)
 #       y_axis <- "Index: DAX"
 #       subtitle <- "In Germany"
 #     }
 #     else if(input$countryInput == "Italy") {
-#       y_value <- covid_global_stock %>% 
-#         filter(Country == "ITA") %>% 
+#       y_value <- covid_global_stock %>%
+#         filter(Country == "ITA") %>%
 #         pull(FTSE_Italy)
 #       y_axis <- "Index: FTSE"
 #       subtitle <- "In Italy"
 #     }
 #     else if(input$countryInput == "South Korea") {
-#       y_value <- covid_global_stock %>% 
-#         filter(Country == "KOR") %>% 
+#       y_value <- covid_global_stock %>%
+#         filter(Country == "KOR") %>%
 #         pull(KOSPI)
 #       y_axis <- "Index: KOSPI"
 #       subtitle <- "In South Korea"
 #     }
 #     else if(input$countryInput == "Spain") {
-#       y_value <- covid_global_stock %>% 
-#         filter(Country == "SPA") %>% 
+#       y_value <- covid_global_stock %>%
+#         filter(Country == "SPA") %>%
 #         pull(IBEX_Spain)
 #       y_axis <- "Index: IBEX"
 #       subtitle <- "In Spain"
 #     }
 #     else {
-#       y_value <- covid_global_stock %>% 
-#         filter(Country == "USA") %>% 
+#       y_value <- covid_global_stock %>%
+#         filter(Country == "USA") %>%
 #         pull(NASDAQ)
 #       y_axis <- "Index: NASDAQ"
 #       subtitle <- "In the United States"
-#     } 
-#     
-#     
+#     }
+#
+#
 #     if(input$caseInput == "Confirmed") {
-#       x_value <- covid_global_stock %>% 
+#       x_value <- covid_global_stock %>%
 #         pull(confirmed)
 #       x_axis <- "Number of Confirmed Cases (log transformed)"
 #       title <- "Impact of Confirmed Cases on Stock Indices"
 #     }
 #     else if(input$caseInput == "Recovered") {
-#       x_value <- covid_global_stock %>% 
+#       x_value <- covid_global_stock %>%
 #         pull(recovered)
 #       x_axis <- "Number of Recovered Cases (log transformed)"
 #       title <- "Impact of Recovered Cases on Stock Indices"
 #     }
 #     else{
-#       x_value <- covid_global_stock %>% 
+#       x_value <- covid_global_stock %>%
 #         pull(deaths)
 #       x_axis <- "Number of Deaths (log transformed)"
 #       title <- "Impact of Number of Deaths on Stock Indices"
 #     }
 #     # Create plot for one country's response
-#     
-#     stock_data %>%  
+#
+#     stock_data %>%
 #       filter(y_value != "NA", x_value != "0") %>%
 #       ggplot(aes(x = log(x_value))) +
 #       geom_line(aes(y = y_value), linetype = "solid") +
@@ -730,20 +730,20 @@ server <- function(input, output) {
 #         subtitle = subtitle,
 #         x = x_axis,
 #         y = y_axis
-#       ) + 
-#       transition_reveal(new_date) + 
-#       theme_classic() 
-#     
+#       ) +
+#       transition_reveal(new_date) +
+#       theme_classic()
+#
 #   })
-#   
+#
 #   output$gdp_cases <- renderPlot({
-#     
+#
 #     worldometer_data$country_other <- countrycode(worldometer_data$country_other, origin = "country.name", destination = "iso3c", warn = FALSE)
-#     tidy_gdp_pop <- gdp_percapita_cases %>% 
-#       left_join(worldometer_data, by = c("country_code" = "country_other")) %>% 
-#       select(country_code, pop_2018, gdp_2018, gdp_per_capita, total_cases, total_deaths, total_recovered) %>% 
-#       na.omit() 
-#              
+#     tidy_gdp_pop <- gdp_percapita_cases %>%
+#       left_join(worldometer_data, by = c("country_code" = "country_other")) %>%
+#       select(country_code, pop_2018, gdp_2018, gdp_per_capita, total_cases, total_deaths, total_recovered) %>%
+#       na.omit()
+#
 #     if(input$caseInput == "Confirmed") {
 #       y_value <- tidy_gdp_pop$log_cases
 #       y_axis <- "Total Confirmed Cases (log transformed)"
@@ -756,9 +756,9 @@ server <- function(input, output) {
 #       y_value <- tidy_gdp_pop$log_recovered
 #       y_axis <- "Total Deaths (log transformed)"
 #     }
-#     
-#     
-#     tidy_gdp_pop %>% 
+#
+#
+#     tidy_gdp_pop %>%
 #       ggplot(aes(x = log(gdp_per_capita), y = y_value, label = country_code)) +
 #       geom_point() +
 #       geom_text() +
@@ -769,11 +769,11 @@ server <- function(input, output) {
 #         y = y_axis
 #       ) +
 #       theme_classic()
-#   
+#
 # })
-#   
+#
 #   }
 
-# Run the application 
+# Run the application
 shinyApp(ui = ui, server = server)
 
