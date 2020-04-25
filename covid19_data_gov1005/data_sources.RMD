@@ -442,7 +442,12 @@ covid_global_stock <- covidGlobal %>%
   full_join(stock_data, by = c("new_date" = "date")) %>% 
   select(Country, new_date, confirmed, deaths, recovered, KOSPI, NASDAQ, MSCI, SSE_China, DAX, FTSE_Italy, IBEX_Spain)
 
-saveRDS(covid_global_stock, file = "stock_data.RDS")
+# Pivot to tidy up
+
+covid_global_stock_tidied <- covid_global_stock %>% 
+  pivot_longer(cols = -c("Country", "new_date", "confirmed", "deaths", "recovered"), names_to = "stock", values_to = "price")
+
+saveRDS(covid_global_stock_tidied, file = "stock_data.RDS")
 ```
 
 
