@@ -910,8 +910,8 @@ output$stock_impact <- renderPlot({
     }
     # Create plot for one country's response
 
-    # stock_data %>%
-    #   filter(y_value != "NA", x_value != "0") %>%
+    stock_data %>%
+      filter(y_value != "NA", x_value != "0") %>%
       ggplot(aes(x = log(x_value))) +
       geom_line(aes(y = y_value), linetype = "solid") +
       labs(
