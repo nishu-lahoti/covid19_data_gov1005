@@ -189,7 +189,7 @@ covidGlobal <- confirmedCovidGlobal %>%
 testing_by_state <- us_daily_reports %>%
   filter(!is.na(people_tested))
 
-# Saving files for team use
+# Saving files
 
 saveRDS(covidUS, file = "covidUS.RDS")
 saveRDS(covidGlobal, file = "covidGlobal.RDS")
@@ -356,9 +356,17 @@ policy <- stringency_regions %>%
          log_deaths = log10(deaths),
          log_recovered = log10(recovered))
 
-# Saving files for team use
+# Join policy dataset (for case counts) and gdp_per_capita dataset (from
+# previous code chunk, Static Data)
 
-saveRDS(gdp_pop_2018, file = "gdp_per_capita.RDS")
+global_gdp_cases <- gdp_pop_2018 %>%
+  rename(CountryCode = country_code) %>% 
+  full_join(policy, by = "CountryCode") %>%
+  select(Country, CountryCode, new_date, sub.region, pop_2018.x, gdp_2018, gdp_per_capita, log_confirmed, log_deaths, log_recovered)
+
+# Saving file
+
+saveRDS(global_gdp_cases, file = "gdp.RDS")
 saveRDS(policy, file = "policy.RDS")
 ```
 
@@ -438,16 +446,28 @@ stock_data$DAX <- gsub(',', '', stock_data$DAX) %>% as.numeric(stock_data$DAX)
 stock_data$FTSE_Italy <- gsub(',', '', stock_data$FTSE_Italy) %>% as.numeric(stock_data$FTSE_Italy)
 stock_data$IBEX_Spain <- gsub(',', '', stock_data$IBEX_Spain) %>% as.numeric(stock_data$IBEX_Spain)
 
-covid_global_stock <- covidGlobal %>% 
-  full_join(stock_data, by = c("new_date" = "date")) %>% 
-  select(Country, new_date, confirmed, deaths, recovered, KOSPI, NASDAQ, MSCI, SSE_China, DAX, FTSE_Italy, IBEX_Spain)
+# Tidy stock data and add country indicator
 
-# Pivot to tidy up
+stock_data_tidy <- stock_data %>% 
+  pivot_longer(cols = -date, names_to = "stock", values_to = "price") %>% 
+  mutate(CountryCode = ifelse(stock == "KOSPI", "KOR", 
+                          ifelse(stock == "NASDAQ", "USA", 
+                                 ifelse(stock == "MSCI", "World", 
+                                        ifelse(stock == "SSE_China", "CHN",
+                                               ifelse(stock == "DAX", "DEU",
+                                                      ifelse(stock == "FTSE_Italy", "ITA", "ESP")))))))
 
-covid_global_stock_tidied <- covid_global_stock %>% 
-  pivot_longer(cols = -c("Country", "new_date", "confirmed", "deaths", "recovered"), names_to = "stock", values_to = "price")
 
-saveRDS(covid_global_stock_tidied, file = "stock_data.RDS")
+# Join global_gdp_cases to stock data for COMPLETE covid + economic dataset
+
+economic_data <- global_gdp_cases %>% 
+  full_join(stock_data_tidy, by = c("new_date" = "date", "CountryCode")) %>% 
+  rename(pop_2018 = pop_2018.x) %>% 
+  select(Country, CountryCode, new_date, sub.region, pop_2018, gdp_2018, gdp_per_capita, log_confirmed, log_deaths, log_recovered, stock, price)
+
+# Saving file 
+
+saveRDS(economic_data, file = "economic_data.RDS")
 ```
 
 

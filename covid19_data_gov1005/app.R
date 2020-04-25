@@ -22,8 +22,8 @@ tests_per_state <- readRDS(url("https://github.com/nishu-lahoti/covid19_data_gov
 policy <- readRDS(url("https://github.com/nishu-lahoti/covid19_data_gov1005/blob/master/covid19_data_gov1005/policy.RDS?raw=true"))
 
 # For economics:
-stock_data <- readRDS(url("https://github.com/nishu-lahoti/covid19_data_gov1005/blob/master/covid19_data_gov1005/stock_data.RDS?raw=true"))
-gdp_percapita_cases <- readRDS(url("https://github.com/nishu-lahoti/covid19_data_gov1005/blob/53a643de83c9c4d5bf0d438b0ddc2a6e8816a59b/covid19_data_gov1005/gdp_per_capita.RDS?raw=true"))
+economic_data <- readRDS(url("https://github.com/nishu-lahoti/covid19_data_gov1005/blob/master/covid19_data_gov1005/economic_data.RDS?raw=true"))
+
 
 
 ########## Shiny App Starts Here ##########
@@ -414,7 +414,7 @@ ui <- navbarPage("The COVID-19 Data Project",
                                           "Select a date range:",
                                           min = as.Date("2020-01-22","%Y-%m-%d"),
                                           max = Sys.Date(),
-                                          value = c(as.Date("2016-01-22"), Sys.Date()),
+                                          value = c(as.Date("2020-01-22"), Sys.Date()),
                                           timeFormat = "%Y-%m-%d")
                             ),
                             mainPanel(plotOutput("countryPolicy"))),
@@ -428,16 +428,15 @@ ui <- navbarPage("The COVID-19 Data Project",
                           sidebarLayout(
                             sidebarPanel(
                               helpText("Compare global policy"),
+                              radioButtons("caseInput", "Choose a case type",
+                                           choices = c("Confirmed", "Deaths", "Recovered"),
+                                           selected = "Confirmed"),
                               sliderInput("dateInput",
                                           "Select a date:",
                                           min = as.Date("2020-01-22","%Y-%m-%d"),
                                           max = Sys.Date(),
-                                          value = as.Date("2016-01-22"),
-                                          timeFormat = "%Y-%m-%d"),
-                              radioButtons("caseInput", "Choose a case type",
-                                           choices = c("Confirmed", "Deaths", "Recovered"),
-                                           selected = "Confirmed")
-                              
+                                          value = as.Date("2020-01-22"),
+                                          timeFormat = "%Y-%m-%d")
                             ),
                             mainPanel(plotOutput("globalPolicy")))),
                  
@@ -464,7 +463,7 @@ ui <- navbarPage("The COVID-19 Data Project",
                                           "Select a date:",
                                           min = as.Date("2020-01-22","%Y-%m-%d"),
                                           max = Sys.Date(),
-                                          value = as.Date("2016-01-22"),
+                                          value = as.Date("2020-01-22"),
                                           timeFormat = "%Y-%m-%d")
                             ),
                             mainPanel(plotOutput("stock_impact"))),
@@ -473,16 +472,15 @@ ui <- navbarPage("The COVID-19 Data Project",
                           sidebarLayout(
                             sidebarPanel(
                               helpText("Compare COVID-19's impact among countries of different GDP levels"),
+                              radioButtons("caseInput", "Choose a case type",
+                                           choices = c("Confirmed", "Deaths", "Recovered"),
+                                           selected = "Confirmed"),
                               sliderInput("dateInput",
                                           "Select a date:",
                                           min = as.Date("2020-01-22","%Y-%m-%d"),
                                           max = Sys.Date(),
-                                          value = as.Date("2016-01-22"),
-                                          timeFormat = "%Y-%m-%d"),
-                              radioButtons("caseInput", "Choose a case type",
-                                           choices = c("Confirmed", "Deaths", "Recovered"),
-                                           selected = "Confirmed")
-                  
+                                          value = as.Date("2020-01-22"),
+                                          timeFormat = "%Y-%m-%d")
                             ),
                             mainPanel(plotOutput("gdp_cases")))),
                  
@@ -882,99 +880,101 @@ options(scipen = 999)
     
   })
   
+  
 # Economic Impact
 
   output$stock_impact <- renderPlot({
    
      if(input$countryInput == "China") {
-       y_value <- stock_data %>%
-         filter(Country == "China") %>%
+       y_value <- economic_data %>%
          filter(new_date == input$dateInput) %>% 
-         select(stock == "SSE_China") %>% 
+         filter(stock == "SSE_China") %>%
          pull(price)
        y_axis <- "Index: SSE"
        subtitle <- "In China"
      }
      else if(input$countryInput == "Germany") {
-       y_value <- stock_data %>%
-         filter(Country == "Germany") %>%
+       y_value <- economic_data %>%
          filter(new_date == input$dateInput) %>% 
-         select(stock == "DAX") %>% 
+         filter(stock == "DAX") %>%
          pull(price)
        y_axis <- "Index: DAX"
        subtitle <- "In Germany"
      }
      else if(input$countryInput == "Italy") {
-       y_value <- stock_data %>%
-         filter(Country == "Italy") %>%
-         filter(new_date == input$dateInput) %>%
-         select(stock == "FTSE_Italy") %>% 
+       y_value <- economic_data %>%
+         filter(new_date == input$dateInput) %>% 
+         filter(stock == "FTSE_Italy") %>%
          pull(price)
        y_axis <- "Index: FTSE"
        subtitle <- "In Italy"
      }
      else if(input$countryInput == "South Korea") {
-       y_value <- stock_data %>%
-         filter(Country == "Korea, South") %>%
-         filter(new_date == input$dateInput) %>%
-         select(stock == "KOSPI") %>% 
+       y_value <- economic_data %>%
+         filter(new_date == input$dateInput) %>% 
+         filter(stock == "KOSPI") %>%
          pull(price)
        y_axis <- "Index: KOSPI"
        subtitle <- "In South Korea"
      }
      else if(input$countryInput == "Spain") {
-       y_value <- stock_data %>%
-         filter(Country == "Spain") %>%
-         filter(new_date == input$dateInput) %>%
-         select(stock == "IBEX_Spain") %>% 
+       y_value <- economic_data %>%
+         filter(new_date == input$dateInput) %>% 
+         filter(stock == "IBEX_Spain") %>%
          pull(price)
        y_axis <- "Index: IBEX"
        subtitle <- "In Spain"
      }
      else {
-       y_value <- stock_data %>%
-         filter(Country == "USA") %>%
-         filter(new_date == input$dateInput) %>%
-         filter(stock == "NASDAQ") %>% 
+       y_value <- economic_data %>%
+         filter(new_date == input$dateInput) %>% 
+         filter(stock == "NASDAQ") %>%
          pull(price)
        y_axis <- "Index: NASDAQ"
        subtitle <- "In the United States"
      }
- 
+    
+    # alter countryInput to fit Country variable options in economic_data
+    
+    if(input$countryInput == "South Korea") {
+      input$countryInput <- "Korea, South"
+    }
+    if(input$countryInput == "United States") {
+      input$countryInput <- "US"
+    }
    
      if(input$caseInput == "Confirmed") {
-       x_value <- stock_data %>%
+       x_value <- economic_data %>%
          filter(Country == input$countryInput) %>%
          filter(new_date == input$dateInput) %>%
-         filter(stock == "NASDAQ") %>% 
-         pull(confirmed)
+         pull(log_confirmed)
        x_axis <- "Number of Confirmed Cases (log transformed)"
        title <- "Impact of Confirmed Cases on Stock Indices"
      }
      else if(input$caseInput == "Recovered") {
-       x_value <- stock_data %>%
+       x_value <- economic_data %>%
          filter(Country == input$countryInput) %>%
          filter(new_date == input$dateInput) %>%
-         filter(stock == "NASDAQ") %>% 
-         pull(recovered)
+         pull(log_recovered)
        x_axis <- "Number of Recovered Cases (log transformed)"
        title <- "Impact of Recovered Cases on Stock Indices"
      }
      else{
-       x_value <- stock_data %>%
+       x_value <- economic_data %>%
          filter(Country == input$countryInput) %>%
          filter(new_date == input$dateInput) %>%
-         pull(deaths)
+         pull(log_deaths)
        x_axis <- "Number of Deaths (log transformed)"
        title <- "Impact of Number of Deaths on Stock Indices"
      }
     
    # Create plot for one country's response
  
-     stock_data %>%
+     economic_data %>%
        # filter(y_value != "NA", x_value != "0") %>%
+       filter(Country == input$countryInput)
        filter(new_date == input$dateInput) %>%
-       ggplot(aes(x = log(x_value), y = y_value)) +
+       ggplot(aes(x = x_value, y = y_value)) +
        geom_line(linetype = "solid") +
        labs(
          title = title,
@@ -988,28 +988,21 @@ options(scipen = 999)
    })
 
    output$gdp_cases <- renderPlot({
-     
-     # Join policy dataset (for case counts) and gdp_percapita_cases
-     
-     global_gdp_cases <- gdp_percapita_cases %>%
-       full_join(policy, by = c("country_code" = "CountryCode")) %>%
-       select(Country, country_code, new_date, sub.region, pop_2018.x, gdp_2018, gdp_per_capita, log_confirmed, log_deaths, log_recovered) %>%
-       na.omit()
  
      if(input$caseInput == "Confirmed") {
-       y_value <- global_gdp_cases %>% 
+       y_value <- economic_data %>% 
          filter(new_date == input$dateInput) %>% 
          pull(log_confirmed)
        y_axis <- "Total Confirmed Cases (log transformed)"
      }
      else if(input$caseInput == "Recovered") {
-       y_value <- global_gdp_cases %>% 
+       y_value <- economic_data %>% 
          filter(new_date == input$dateInput) %>% 
          pull(log_recovered)
        y_axis <- "Total Recoveries (log transformed)"
      }
      else{
-       y_value <- global_gdp_cases %>% 
+       y_value <- economic_data %>% 
          filter(new_date == input$dateInput) %>% 
          pull(log_deaths)
        y_axis <- "Total Deaths (log transformed)"
@@ -1017,9 +1010,9 @@ options(scipen = 999)
  
     # Plot cases vs. (static) GDP per capita levels
  
-     global_gdp_cases %>%
+     economic_data %>%
        filter(new_date == input$dateInput) %>% 
-       ggplot(aes(x = log(gdp_per_capita), y = y_value, label = country_code, color = sub.region)) +
+       ggplot(aes(x = log(gdp_per_capita), y = y_value, label = CountryCode, color = sub.region)) +
        geom_point() +
        geom_text() +
        labs(
