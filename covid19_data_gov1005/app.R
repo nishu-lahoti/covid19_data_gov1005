@@ -459,7 +459,13 @@ ui <- navbarPage("The COVID-19 Data Project",
                                                       "United States")),
                               radioButtons("caseInput", "Choose a case type",
                                            choices = c("Confirmed", "Deaths", "Recovered"),
-                                           selected = "Confirmed")
+                                           selected = "Confirmed"),
+                              sliderInput("dateInput",
+                                          "Select a date:",
+                                          min = as.Date("2020-01-22","%Y-%m-%d"),
+                                          max = Sys.Date(),
+                                          value = as.Date("2016-01-22"),
+                                          timeFormat = "%Y-%m-%d")
                             ),
                             mainPanel(plotOutput("stock_impact"))),
                           
@@ -883,42 +889,54 @@ options(scipen = 999)
      if(input$countryInput == "China") {
        y_value <- stock_data %>%
          filter(Country == "China") %>%
-         pull(SSE_China)
+         filter(new_date == input$dateInput) %>% 
+         select(stock == "SSE_China") %>% 
+         pull(price)
        y_axis <- "Index: SSE"
        subtitle <- "In China"
      }
      else if(input$countryInput == "Germany") {
        y_value <- stock_data %>%
          filter(Country == "Germany") %>%
-         pull(DAX)
+         filter(new_date == input$dateInput) %>% 
+         select(stock == "DAX") %>% 
+         pull(price)
        y_axis <- "Index: DAX"
        subtitle <- "In Germany"
      }
      else if(input$countryInput == "Italy") {
        y_value <- stock_data %>%
          filter(Country == "Italy") %>%
-         pull(FTSE_Italy)
+         filter(new_date == input$dateInput) %>%
+         select(stock == "FTSE_Italy") %>% 
+         pull(price)
        y_axis <- "Index: FTSE"
        subtitle <- "In Italy"
      }
      else if(input$countryInput == "South Korea") {
        y_value <- stock_data %>%
          filter(Country == "Korea, South") %>%
-         pull(KOSPI)
+         filter(new_date == input$dateInput) %>%
+         select(stock == "KOSPI") %>% 
+         pull(price)
        y_axis <- "Index: KOSPI"
        subtitle <- "In South Korea"
      }
      else if(input$countryInput == "Spain") {
        y_value <- stock_data %>%
          filter(Country == "Spain") %>%
-         pull(IBEX_Spain)
+         filter(new_date == input$dateInput) %>%
+         select(stock == "IBEX_Spain") %>% 
+         pull(price)
        y_axis <- "Index: IBEX"
        subtitle <- "In Spain"
      }
      else {
        y_value <- stock_data %>%
          filter(Country == "USA") %>%
-         pull(NASDAQ)
+         filter(new_date == input$dateInput) %>%
+         filter(stock == "NASDAQ") %>% 
+         pull(price)
        y_axis <- "Index: NASDAQ"
        subtitle <- "In the United States"
      }
@@ -927,6 +945,8 @@ options(scipen = 999)
      if(input$caseInput == "Confirmed") {
        x_value <- stock_data %>%
          filter(Country == input$countryInput) %>%
+         filter(new_date == input$dateInput) %>%
+         filter(stock == "NASDAQ") %>% 
          pull(confirmed)
        x_axis <- "Number of Confirmed Cases (log transformed)"
        title <- "Impact of Confirmed Cases on Stock Indices"
@@ -934,6 +954,8 @@ options(scipen = 999)
      else if(input$caseInput == "Recovered") {
        x_value <- stock_data %>%
          filter(Country == input$countryInput) %>%
+         filter(new_date == input$dateInput) %>%
+         filter(stock == "NASDAQ") %>% 
          pull(recovered)
        x_axis <- "Number of Recovered Cases (log transformed)"
        title <- "Impact of Recovered Cases on Stock Indices"
@@ -941,6 +963,7 @@ options(scipen = 999)
      else{
        x_value <- stock_data %>%
          filter(Country == input$countryInput) %>%
+         filter(new_date == input$dateInput) %>%
          pull(deaths)
        x_axis <- "Number of Deaths (log transformed)"
        title <- "Impact of Number of Deaths on Stock Indices"
@@ -950,8 +973,9 @@ options(scipen = 999)
  
      stock_data %>%
        # filter(y_value != "NA", x_value != "0") %>%
-       ggplot(aes(x = log(x_value))) +
-       geom_line(aes(y = y_value), linetype = "solid") +
+       filter(new_date == input$dateInput) %>%
+       ggplot(aes(x = log(x_value), y = y_value)) +
+       geom_line(linetype = "solid") +
        labs(
          title = title,
          subtitle = subtitle,
