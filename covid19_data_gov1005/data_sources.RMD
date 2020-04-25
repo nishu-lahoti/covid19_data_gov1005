@@ -86,21 +86,21 @@ worldometer <- worldometer %>% clean_names()
 # Clean worldometer data, changing column types to reflect numbers where
 # necessary.
 
-# worldometer <- worldometer %>%
-#   mutate(total_cases = parse_number(total_cases),
-#          new_cases = parse_number(new_cases),
-#          total_deaths = parse_number(total_deaths),
-#          new_deaths = parse_number(new_deaths),
-#          total_recovered = parse_number(total_recovered),
-#          active_cases = parse_number(active_cases),
-#          serious_critical = parse_number(serious_critical),
-#          total_tests = parse_number(total_tests),
-#          tests_1m_pop = parse_number(tests_1m_pop)) %>%
-#   filter(! country_other %in% c("World", "Total:", "Europe", "North America", "Asia", "South America", 
-#                                 "Africa", "Oceania", "")) %>%
-#   arrange(desc(total_cases))
-# 
-# saveRDS(worldometer, file = "worldometer.RDS")
+worldometer <- worldometer %>%
+  mutate(total_cases = parse_number(total_cases),
+         new_cases = parse_number(new_cases),
+         total_deaths = parse_number(total_deaths),
+         new_deaths = parse_number(new_deaths),
+         total_recovered = parse_number(total_recovered),
+         active_cases = parse_number(active_cases),
+         serious_critical = parse_number(serious_critical),
+         total_tests = parse_number(total_tests),
+         tests_1m_pop = parse_number(tests_1m_pop)) %>%
+  filter(! country_other %in% c("World", "Total:", "Europe", "North America", "Asia", "South America",
+                                "Africa", "Oceania", "")) %>%
+  arrange(desc(total_cases))
+
+saveRDS(worldometer, file = "worldometer.RDS")
 ```
 
 ```{r Spread with Increments, echo=FALSE}
