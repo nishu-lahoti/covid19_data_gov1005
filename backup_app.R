@@ -81,153 +81,153 @@ ui <- navbarPage("The COVID-19 Data Project",
                             are to dispel that belief, showing just how quickly Coronavirus has spread in countries across the world,
                             it's devastation, and the eventual pathway to recovery."),
                           # sidebarLayout(
-                            # sidebarPanel(
-                              h3("Select a country to see how the arc of COVID-19 cases and deaths"),
-                              selectInput("country_region", NULL,
-                                          choices = c("Afghanistan",				
-                                                      "Angola",			
-                                                      "Albania",
-                                                      "Algeria",	
-                                                      "Andorra",				
-                                                      "Argentina",		
-                                                      "Australia",		
-                                                      "Austria",				
-                                                      "Azerbaijan",			
-                                                      "Burundi",
-                                                      "Belgium",				
-                                                      "Burkina Faso",
-                                                      "Burma",		
-                                                      "Bangladesh",			
-                                                      "Bulgaria",			
-                                                      "Bahrain",				
-                                                      "Bosnia and Herzegovina",				
-                                                      "Belize",			
-                                                      "Bolivia",				
-                                                      "Brazil",				
-                                                      "Barbados",
-                                                      "Brunei",			
-                                                      "Botswana",				
-                                                      "Canada",			
-                                                      "Chile",				
-                                                      "China",				
-                                                      "Cameroon",				
-                                                      "Congo (Kinshasa)",				
-                                                      "Colombia",				
-                                                      "Costa Rica",
-                                                      "Cuba",				
-                                                      "Cyprus",				
-                                                      "Czechia",				
-                                                      "Germany",				
-                                                      "Djibouti",				
-                                                      "Dominica",				
-                                                      "Denmark",				
-                                                      "Dominican Republic",				
-                                                      "Ecuador",
-                                                      "Egypt",				
-                                                      "Spain",				
-                                                      "Estonia",				
-                                                      "Ethiopia",				
-                                                      "Finland",				
-                                                      "France",				
-                                                      "Gabon",				
-                                                      "Ghana",				
-                                                      "Gambia",
-                                                      "Greece",				
-                                                      "Guatemala",				
-                                                      "Guyana",				
-                                                      "Honduras",				
-                                                      "Croatia",				
-                                                      "Hungary",				
-                                                      "Indonesia",				
-                                                      "India",				
-                                                      "Ireland",				
-                                                      "Iran",
-                                                      "Iraq",				
-                                                      "Iceland",			
-                                                      "Israel",				
-                                                      "Italy",				
-                                                      "Jamaica",				
-                                                      "Jordan",				
-                                                      "Japan",				
-                                                      "Kazakhstan",				
-                                                      "Kenya",				
-                                                      "Kyrgyzstan",
-                                                      "Korea, South",				
-                                                      "Kuwait",				
-                                                      "Laos",				
-                                                      "Lebanon",				
-                                                      "Libya",				
-                                                      "Sri Lanka",				
-                                                      "Luxembourg",			
-                                                      "Morocco",				
-                                                      "Moldova",				
-                                                      "Madagascar",
-                                                      "Mexico",				
-                                                      "Mali",				
-                                                      "Mongolia",				
-                                                      "Mozambique",			
-                                                      "Mauritania",			
-                                                      "Mauritius",				
-                                                      "Malawi",				
-                                                      "Malaysia",				
-                                                      "Namibia",
-                                                      "Niger",				
-                                                      "Nigeria",				
-                                                      "Nicaragua",				
-                                                      "Netherlands",				
-                                                      "Norway",				
-                                                      "New Zealand",				
-                                                      "Oman",				
-                                                      "Pakistan",			
-                                                      "Panama",			
-                                                      "Peru",
-                                                      "Philippines",				
-                                                      "Papua New Guinea",			
-                                                      "Poland",				
-                                                      "Portugal",				
-                                                      "Paraguay",				
-                                                      "West Bank and Gaza",			
-                                                      "Qatar",				
-                                                      "Romania",				
-                                                      "Russia",				
-                                                      "Rwanda",
-                                                      "Saudi Arabia",			
-                                                      "Sudan",				
-                                                      "Singapore",				
-                                                      "Sierra Leone",				
-                                                      "El Salvador",				
-                                                      "San Marino",				
-                                                      "Serbia",				
-                                                      "South Sudan",				
-                                                      "Slovakia",				
-                                                      "Slovenia",
-                                                      "Sweden",
-                                                      "Switzerland",	
-                                                      "Eswatini",				
-                                                      "Seychelles",				
-                                                      "Syria",				
-                                                      "Chad",				
-                                                      "Thailand",				
-                                                      "Trinidad and Tobago",				
-                                                      "Tunisia",				
-                                                      "Turkey",				
-                                                      "Tanzania",				
-                                                      "Uganda",				
-                                                      "Ukraine",	
-                                                      "United Kingdom",
-                                                      "United Arab Emirates",
-                                                      "Uruguay",			
-                                                      "US",			
-                                                      "Uzbekistan",				
-                                                      "Venezuela",				
-                                                      "Vietnam",				
-                                                      "South Africa",				
-                                                      "Zambia",				
-                                                      "Zimbabwe",
-                                                      "Taiwan*"	)),
-                            textOutput("selected_var"),
-                            plotOutput("covidSpread"),
-                            plotOutput("covidDeaths"),
+                          # sidebarPanel(
+                          h3("Select a country to see how the arc of COVID-19 cases and deaths"),
+                          selectInput("country_region", NULL,
+                                      choices = c("Afghanistan",				
+                                                  "Angola",			
+                                                  "Albania",
+                                                  "Algeria",	
+                                                  "Andorra",				
+                                                  "Argentina",		
+                                                  "Australia",		
+                                                  "Austria",				
+                                                  "Azerbaijan",			
+                                                  "Burundi",
+                                                  "Belgium",				
+                                                  "Burkina Faso",
+                                                  "Burma",		
+                                                  "Bangladesh",			
+                                                  "Bulgaria",			
+                                                  "Bahrain",				
+                                                  "Bosnia and Herzegovina",				
+                                                  "Belize",			
+                                                  "Bolivia",				
+                                                  "Brazil",				
+                                                  "Barbados",
+                                                  "Brunei",			
+                                                  "Botswana",				
+                                                  "Canada",			
+                                                  "Chile",				
+                                                  "China",				
+                                                  "Cameroon",				
+                                                  "Congo (Kinshasa)",				
+                                                  "Colombia",				
+                                                  "Costa Rica",
+                                                  "Cuba",				
+                                                  "Cyprus",				
+                                                  "Czechia",				
+                                                  "Germany",				
+                                                  "Djibouti",				
+                                                  "Dominica",				
+                                                  "Denmark",				
+                                                  "Dominican Republic",				
+                                                  "Ecuador",
+                                                  "Egypt",				
+                                                  "Spain",				
+                                                  "Estonia",				
+                                                  "Ethiopia",				
+                                                  "Finland",				
+                                                  "France",				
+                                                  "Gabon",				
+                                                  "Ghana",				
+                                                  "Gambia",
+                                                  "Greece",				
+                                                  "Guatemala",				
+                                                  "Guyana",				
+                                                  "Honduras",				
+                                                  "Croatia",				
+                                                  "Hungary",				
+                                                  "Indonesia",				
+                                                  "India",				
+                                                  "Ireland",				
+                                                  "Iran",
+                                                  "Iraq",				
+                                                  "Iceland",			
+                                                  "Israel",				
+                                                  "Italy",				
+                                                  "Jamaica",				
+                                                  "Jordan",				
+                                                  "Japan",				
+                                                  "Kazakhstan",				
+                                                  "Kenya",				
+                                                  "Kyrgyzstan",
+                                                  "Korea, South",				
+                                                  "Kuwait",				
+                                                  "Laos",				
+                                                  "Lebanon",				
+                                                  "Libya",				
+                                                  "Sri Lanka",				
+                                                  "Luxembourg",			
+                                                  "Morocco",				
+                                                  "Moldova",				
+                                                  "Madagascar",
+                                                  "Mexico",				
+                                                  "Mali",				
+                                                  "Mongolia",				
+                                                  "Mozambique",			
+                                                  "Mauritania",			
+                                                  "Mauritius",				
+                                                  "Malawi",				
+                                                  "Malaysia",				
+                                                  "Namibia",
+                                                  "Niger",				
+                                                  "Nigeria",				
+                                                  "Nicaragua",				
+                                                  "Netherlands",				
+                                                  "Norway",				
+                                                  "New Zealand",				
+                                                  "Oman",				
+                                                  "Pakistan",			
+                                                  "Panama",			
+                                                  "Peru",
+                                                  "Philippines",				
+                                                  "Papua New Guinea",			
+                                                  "Poland",				
+                                                  "Portugal",				
+                                                  "Paraguay",				
+                                                  "West Bank and Gaza",			
+                                                  "Qatar",				
+                                                  "Romania",				
+                                                  "Russia",				
+                                                  "Rwanda",
+                                                  "Saudi Arabia",			
+                                                  "Sudan",				
+                                                  "Singapore",				
+                                                  "Sierra Leone",				
+                                                  "El Salvador",				
+                                                  "San Marino",				
+                                                  "Serbia",				
+                                                  "South Sudan",				
+                                                  "Slovakia",				
+                                                  "Slovenia",
+                                                  "Sweden",
+                                                  "Switzerland",	
+                                                  "Eswatini",				
+                                                  "Seychelles",				
+                                                  "Syria",				
+                                                  "Chad",				
+                                                  "Thailand",				
+                                                  "Trinidad and Tobago",				
+                                                  "Tunisia",				
+                                                  "Turkey",				
+                                                  "Tanzania",				
+                                                  "Uganda",				
+                                                  "Ukraine",	
+                                                  "United Kingdom",
+                                                  "United Arab Emirates",
+                                                  "Uruguay",			
+                                                  "US",			
+                                                  "Uzbekistan",				
+                                                  "Venezuela",				
+                                                  "Vietnam",				
+                                                  "South Africa",				
+                                                  "Zambia",				
+                                                  "Zimbabwe",
+                                                  "Taiwan*"	)),
+                          textOutput("selected_var"),
+                          plotOutput("covidSpread"),
+                          plotOutput("covidDeaths"),
                           br(),
                           p("We aimed to understand if there was bias in the reporting of new COVID-19 cases.
                             Specifically, how did a country's capacity to test influence it's total case reporting?
@@ -464,9 +464,9 @@ ui <- navbarPage("The COVID-19 Data Project",
                                  p("is a Masters student between Harvard's
                                    Graduate School of Design and Engineering. His github
                                    can be found", a(href = "https://github.com/nishu-lahoti", "here.")),
-                                
-                                h4("Jun-Yong Kim"),
-                                p("is a first-year at Harvard prospectively 
+                                 
+                                 h4("Jun-Yong Kim"),
+                                 p("is a first-year at Harvard prospectively 
                                    concentrating in Statistics and Sociology. His github can
                                    be found", a(href = "https://github.com/juniyong247", "here."))),
                           column(6,
@@ -558,84 +558,84 @@ server <- function(input, output) {
     
   })
   
-options(scipen = 999)
+  options(scipen = 999)
   
-# Normal
-worldometer_tests <- worldometer %>%
-  filter(total_cases >= 15000, 
-          !is.na(total_tests))
+  # Normal
+  worldometer_tests <- worldometer %>%
+    filter(total_cases >= 15000, 
+           !is.na(total_tests))
   
-# Logarithmic
+  # Logarithmic
   
-worldometer_log <- worldometer %>%
-  mutate(log_cases = log(total_cases),
-          log_deaths = log(total_deaths),
-          log_recovered = log(total_recovered),
-          log_tests = log(total_tests),
-          log_tests_1m = log(tests_1m_pop))
+  worldometer_log <- worldometer %>%
+    mutate(log_cases = log(total_cases),
+           log_deaths = log(total_deaths),
+           log_recovered = log(total_recovered),
+           log_tests = log(total_tests),
+           log_tests_1m = log(tests_1m_pop))
   
   output$covidHighTests <- renderPlot({
-  # Visualizing total cases and total deaths against total tests. A good next step may be to filter by countries of interest and to get a good enough
-  # sample of countries that have tested. Qualify a country based on total number of cases (>1000). Maybe there is a weak positive correlation.
-  
-  
-  ggplot(worldometer_tests, aes(total_cases, total_tests, color = country_other)) + 
-    geom_point() +
-    geom_jitter() +
-    theme_classic() +
-    theme(legend.position = "top") +
-    labs(
-      title = "Comparing COVID-19 Cases versus Total Tests",
-      subtitle = "Comparing total conducted tests \nfor countries with over 15,000 reported cases.",
-      x = "Total Cases",
-      y = "Tests per 1M",
-      color = "Country"
-    )
-  
+    # Visualizing total cases and total deaths against total tests. A good next step may be to filter by countries of interest and to get a good enough
+    # sample of countries that have tested. Qualify a country based on total number of cases (>1000). Maybe there is a weak positive correlation.
+    
+    
+    ggplot(worldometer_tests, aes(total_cases, total_tests, color = country_other)) + 
+      geom_point() +
+      geom_jitter() +
+      theme_classic() +
+      theme(legend.position = "top") +
+      labs(
+        title = "Comparing COVID-19 Cases versus Total Tests",
+        subtitle = "Comparing total conducted tests \nfor countries with over 15,000 reported cases.",
+        x = "Total Cases",
+        y = "Tests per 1M",
+        color = "Country"
+      )
+    
   })
-
-output$covidMTests <- renderPlot({
-
-  ggplot(worldometer_tests, aes(total_cases, tests_1m_pop, color = country_other)) + 
-    geom_point() +
-    geom_jitter() +
-    theme_classic() +
-    theme(legend.position = "top") +
-    labs(
-      title = "COVID-19 Country Testing Capacity",
-      subtitle = "Visualizing a country's case rate against testing rate\nfor countries with over 15,000 reported cases.",
-      x = "Total Cases",
-      y = "Tests per 1M",
-      color = "Country"
-    )
   
-})
+  output$covidMTests <- renderPlot({
+    
+    ggplot(worldometer_tests, aes(total_cases, tests_1m_pop, color = country_other)) + 
+      geom_point() +
+      geom_jitter() +
+      theme_classic() +
+      theme(legend.position = "top") +
+      labs(
+        title = "COVID-19 Country Testing Capacity",
+        subtitle = "Visualizing a country's case rate against testing rate\nfor countries with over 15,000 reported cases.",
+        x = "Total Cases",
+        y = "Tests per 1M",
+        color = "Country"
+      )
+    
+  })
   
-
-output$covidLogTests <- renderPlot({
-  # Logarithmic plot of total tests
   
-  ggplot(worldometer_log, aes(log_cases, log_tests, color = country_other)) +
-    geom_point() +
-    theme(legend.position = "none") +
-    labs(
-      title = "Logarithmic comparison of cases to tests",
-      x = "Cases \n(x10,000)",
-      y = "Tests \n(x10,000)"
-    )
-})
+  output$covidLogTests <- renderPlot({
+    # Logarithmic plot of total tests
+    
+    ggplot(worldometer_log, aes(log_cases, log_tests, color = country_other)) +
+      geom_point() +
+      theme(legend.position = "none") +
+      labs(
+        title = "Logarithmic comparison of cases to tests",
+        x = "Cases \n(x10,000)",
+        y = "Tests \n(x10,000)"
+      )
+  })
   
-output$covidLogMTests <- renderPlot({
-  # Logarithmic plot of tests per 1m
-  
-  ggplot(worldometer_log, aes(log_cases, log_tests_1m, color = country_other)) +
-    geom_point() +
-    theme(legend.position = "none") +
-    labs(
-      title = "Logarithmic comparison of cases to tests",
-      x = "Cases \n(x10,000)",
-      y = "Tests per 1M \n(x10,000)"
-    )
+  output$covidLogMTests <- renderPlot({
+    # Logarithmic plot of tests per 1m
+    
+    ggplot(worldometer_log, aes(log_cases, log_tests_1m, color = country_other)) +
+      geom_point() +
+      theme(legend.position = "none") +
+      labs(
+        title = "Logarithmic comparison of cases to tests",
+        x = "Cases \n(x10,000)",
+        y = "Tests per 1M \n(x10,000)"
+      )
   })
   
   # Policy
@@ -843,9 +843,9 @@ output$covidLogMTests <- renderPlot({
   })
   
   # Economic Impact
-
-output$stock_impact <- renderPlot({
   
+  output$stock_impact <- renderPlot({
+    
     if(input$countryInput == "China") {
       y_value <- stock_data %>%
         filter(Country == "China") %>%
@@ -853,7 +853,7 @@ output$stock_impact <- renderPlot({
       y_axis <- "Index: SSE"
       subtitle <- "In China"
     }
-   else if(input$countryInput == "Germany") {
+    else if(input$countryInput == "Germany") {
       y_value <- stock_data %>%
         filter(Country == "Germany") %>%
         pull(DAX)
@@ -888,8 +888,8 @@ output$stock_impact <- renderPlot({
       y_axis <- "Index: NASDAQ"
       subtitle <- "In the United States"
     }
-
-  
+    
+    
     if(input$caseInput == "Confirmed") {
       x_value <- stock_data %>%
         filter(Country == input$countryInput) %>%
@@ -912,7 +912,7 @@ output$stock_impact <- renderPlot({
       title <- "Impact of Number of Deaths on Stock Indices"
     }
     # Create plot for one country's response
-
+    
     stock_data %>%
       filter(y_value != "NA", x_value != "0") %>%
       ggplot(aes(x = log(x_value))) +
@@ -925,17 +925,17 @@ output$stock_impact <- renderPlot({
       ) +
       transition_reveal(new_date) +
       theme_classic()
-
+    
   })
-
+  
   output$gdp_cases <- renderPlot({
-
+    
     worldometer_data$country_other <- countrycode(worldometer_data$country_other, origin = "country.name", destination = "iso3c", warn = FALSE)
     tidy_gdp_pop <- gdp_percapita_cases %>%
       left_join(worldometer_data, by = c("country_code" = "country_other")) %>%
       select(country_code, pop_2018, gdp_2018, gdp_per_capita, total_cases, total_deaths, total_recovered) %>%
       na.omit()
-
+    
     if(input$caseInput == "Confirmed") {
       y_value <- tidy_gdp_pop$log_cases
       y_axis <- "Total Confirmed Cases (log transformed)"
@@ -948,8 +948,8 @@ output$stock_impact <- renderPlot({
       y_value <- tidy_gdp_pop$log_recovered
       y_axis <- "Total Deaths (log transformed)"
     }
-
-
+    
+    
     tidy_gdp_pop %>%
       ggplot(aes(x = log(gdp_per_capita), y = y_value, label = country_code)) +
       geom_point() +
@@ -961,9 +961,9 @@ output$stock_impact <- renderPlot({
         y = y_axis
       ) +
       theme_classic()
-
-})
-
+    
+  })
+  
 }
 
 # Run the application 
