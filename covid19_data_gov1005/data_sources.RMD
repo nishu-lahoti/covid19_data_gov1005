@@ -357,6 +357,7 @@ policy <- stringency_regions %>%
          log_recovered = log10(recovered))
 
 # Saving files for team use
+
 saveRDS(gdp_pop_2018, file = "gdp_per_capita.RDS")
 saveRDS(policy, file = "policy.RDS")
 ```

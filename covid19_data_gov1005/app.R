@@ -8,17 +8,15 @@ library(janitor)
 library(countrycode)
 library(gganimate)
 
-# Potentially read in data directly from GitHub Repo. This will automatically
-# update Shiny IF we run a CRONR job for the script that creates the RDS files.
-
-# readRDS(url("...raw github link"))
+# Reading in data directly from GitHub Repo. This will automatically update
+# Shiny IF we run a CRONR job for the script that creates the RDS files.
 
 # For spread:
 
 covidGlobal <- readRDS(url("https://github.com/nishu-lahoti/covid19_data_gov1005/blob/master/covid19_data_gov1005/covidGlobal.RDS?raw=true"))
 covidUS <- readRDS(url("https://github.com/nishu-lahoti/covid19_data_gov1005/blob/master/covid19_data_gov1005/covidUS.RDS?raw=true"))
 worldometer <- readRDS(url("https://github.com/nishu-lahoti/covid19_data_gov1005/blob/master/covid19_data_gov1005/worldometer.RDS?raw=true"))
-tests_per_state <- readRDS("../covid19_data_gov1005/tests_per_state.RDS")
+tests_per_state <- readRDS(url("https://github.com/nishu-lahoti/covid19_data_gov1005/blob/53a643de83c9c4d5bf0d438b0ddc2a6e8816a59b/covid19_data_gov1005/tests_per_state.RDS?raw=true"))
 
 # For policy:
 policy <- readRDS(url("https://github.com/nishu-lahoti/covid19_data_gov1005/blob/master/covid19_data_gov1005/policy.RDS?raw=true"))
