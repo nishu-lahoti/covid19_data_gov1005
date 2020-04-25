@@ -581,13 +581,13 @@ server <- function(input, output) {
 options(scipen = 999)
   
 # Normal
-worldometer_tests <- worldometer %>%
+worldometer_tests <- worldometer_data %>%
   filter(total_cases >= 15000, 
           !is.na(total_tests))
   
 # Logarithmic
   
-worldometer_log <- worldometer %>%
+worldometer_log <- worldometer_data %>%
   mutate(log_cases = log(total_cases),
           log_deaths = log(total_deaths),
           log_recovered = log(total_recovered),
