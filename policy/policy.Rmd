@@ -374,6 +374,71 @@ global_scatter
 
 ```
 
+```{r}
+
+policy %>%
+  filter(new_date == "2020-03-10") %>%
+  select(Country.x)
+
+```
+# South Korea, Congo, 
+```{r}
+
+"Uruguay",			
+"US",			
+"Uzbekistan",				
+"Venezuela",				
+"Vietnam",				
+"South Africa",				
+"Zambia",				
+"Zimbabwe",
+"Taiwan*",				
+"Antigua and Barbuda",				
+Armenia				
+Bahamas				
+Belarus				
+Benin				
+Bhutan				
+Cabo Verde				
+Cambodia				
+Central African Republic
+Congo (Brazzaville)				
+Cote d'Ivoire				
+Equatorial Guinea				
+Eritrea				
+Fiji				
+Georgia				
+Grenada				
+Guinea				
+Guinea-Bissau				
+Haiti
+Holy See				
+Kosovo				
+Latvia				
+Liberia				
+Liechtenstein				
+Lithuania				
+Maldives				
+Malta				
+Monaco				
+Montenegro
+Nepal				
+North Macedonia				
+Saint Kitts and Nevis				
+Saint Lucia				
+Saint Vincent and the Grenadines				
+Sao Tome and Principe				
+Senegal				
+Somalia				
+Suriname				
+Timor-Leste
+Togo				
+Western Sahara				
+Yemen
+```
+
+
+
 radioButtons ("caseInput", "Case Type",
               choices = c("Confirmed", "Deaths", "Recovered"),
               selected = "Confirmed")
