@@ -11,19 +11,21 @@ library(gganimate)
 # Potentially read in data directly from GitHub Repo. This will automatically
 # update Shiny IF we run a CRONR job for the script that creates the RDS files.
 
+# readRDS(url("...raw github link"))
+
 # For spread:
 
-covidGlobal <- readRDS("../covid19_data_gov1005/covidGlobal.RDS")
-covidUS <- readRDS("../covid19_data_gov1005/covidUS.RDS")
-worldometer_data <- readRDS("../covid19_data_gov1005/worldometer.RDS")
+covidGlobal <- readRDS(url("https://github.com/nishu-lahoti/covid19_data_gov1005/blob/master/covid19_data_gov1005/covidGlobal.RDS?raw=true"))
+covidUS <- readRDS(url("https://github.com/nishu-lahoti/covid19_data_gov1005/blob/master/covid19_data_gov1005/covidUS.RDS?raw=true"))
+worldometer <- readRDS(url("https://github.com/nishu-lahoti/covid19_data_gov1005/blob/master/covid19_data_gov1005/worldometer.RDS?raw=true"))
 tests_per_state <- readRDS("../covid19_data_gov1005/tests_per_state.RDS")
 
 # For policy:
-policy <- readRDS("../covid19_data_gov1005/policy.RDS")
+policy <- readRDS(url("https://github.com/nishu-lahoti/covid19_data_gov1005/blob/master/covid19_data_gov1005/policy.RDS?raw=true"))
 
 # For economics:
 stock_data <- readRDS("../covid19_data_gov1005/stock_data.RDS")
-gdp_percapita_cases <- readRDS("../covid19_data_gov1005/gdp_per_capita.RDS")
+gdp_percapita_cases <- readRDS(url("https://github.com/nishu-lahoti/covid19_data_gov1005/blob/53a643de83c9c4d5bf0d438b0ddc2a6e8816a59b/covid19_data_gov1005/gdp_per_capita.RDS?raw=true"))
 
 
 ########## Shiny App Starts Here ##########
@@ -864,151 +866,152 @@ output$covidLogMTests <- renderPlot({
   
   # Economic Impact
 
-# output$stock_impact <- renderPlot({
-#   
-#     if(input$countryInput == "China") {
-#       y_value <- stock_data %>%
-#         filter(Country == "China") %>%
-#         pull(SSE_China)
-#       y_axis <- "Index: SSE"
-#       subtitle <- "In China"
-#     }
-#    else if(input$countryInput == "Germany") {
-#       y_value <- stock_data %>%
-#         filter(Country == "Germany") %>%
-#         pull(DAX)
-#       y_axis <- "Index: DAX"
-#       subtitle <- "In Germany"
-#     }
-#     else if(input$countryInput == "Italy") {
-#       y_value <- stock_data %>%
-#         filter(Country == "Italy") %>%
-#         pull(FTSE_Italy)
-#       y_axis <- "Index: FTSE"
-#       subtitle <- "In Italy"
-#     }
-#     else if(input$countryInput == "South Korea") {
-#       y_value <- stock_data %>%
-#         filter(Country == "South Korea") %>%
-#         pull(KOSPI)
-#       y_axis <- "Index: KOSPI"
-#       subtitle <- "In South Korea"
-#     }
-#     else if(input$countryInput == "Spain") {
-#       y_value <- stock_data %>%
-#         filter(Country == "Spain") %>%
-#         pull(IBEX_Spain)
-#       y_axis <- "Index: IBEX"
-#       subtitle <- "In Spain"
-#     }
-#     else {
-#       y_value <- stock_data %>%
-#         filter(Country == "USA") %>%
-#         pull(NASDAQ)
-#       y_axis <- "Index: NASDAQ"
-#       subtitle <- "In the United States"
-#     }
-# 
-#   
-#     if(input$caseInput == "Confirmed") {
-#       x_value <- stock_data %>%
-#         filter(Country == input$countryInput) %>%
-#         pull(confirmed)
-#       x_axis <- "Number of Confirmed Cases (log transformed)"
-#       title <- "Impact of Confirmed Cases on Stock Indices"
-#     }
-#     else if(input$caseInput == "Recovered") {
-#       x_value <- stock_data %>%
-#         filter(Country == input$countryInput) %>%
-#         pull(recovered)
-#       x_axis <- "Number of Recovered Cases (log transformed)"
-#       title <- "Impact of Recovered Cases on Stock Indices"
-#     }
-#     else{
-#       x_value <- stock_data %>%
-#         filter(Country == input$countryInput) %>%
-#         pull(deaths)
-#       x_axis <- "Number of Deaths (log transformed)"
-#       title <- "Impact of Number of Deaths on Stock Indices"
-#     }
-#     # Create plot for one country's response
-# 
-#     stock_data %>%
-#       filter(y_value != "NA", x_value != "0") %>%
-#       ggplot(aes(x = log(x_value))) +
-#       geom_line(aes(y = y_value), linetype = "solid") +
-#       labs(
-#         title = title,
-#         subtitle = subtitle,
-#         x = x_axis,
-#         y = y_axis
-#       ) +
-#       transition_reveal(new_date) +
-#       theme_classic()
-# 
-#   })
+  output$stock_impact <- renderPlot({
+   
+     if(input$countryInput == "China") {
+       y_value <- stock_data %>%
+         filter(Country == "China") %>%
+         pull(SSE_China)
+       y_axis <- "Index: SSE"
+       subtitle <- "In China"
+     }
+     else if(input$countryInput == "Germany") {
+       y_value <- stock_data %>%
+         filter(Country == "Germany") %>%
+         pull(DAX)
+       y_axis <- "Index: DAX"
+       subtitle <- "In Germany"
+     }
+     else if(input$countryInput == "Italy") {
+       y_value <- stock_data %>%
+         filter(Country == "Italy") %>%
+         pull(FTSE_Italy)
+       y_axis <- "Index: FTSE"
+       subtitle <- "In Italy"
+     }
+     else if(input$countryInput == "South Korea") {
+       y_value <- stock_data %>%
+         filter(Country == "South Korea") %>%
+         pull(KOSPI)
+       y_axis <- "Index: KOSPI"
+       subtitle <- "In South Korea"
+     }
+     else if(input$countryInput == "Spain") {
+       y_value <- stock_data %>%
+         filter(Country == "Spain") %>%
+         pull(IBEX_Spain)
+       y_axis <- "Index: IBEX"
+       subtitle <- "In Spain"
+     }
+     else {
+       y_value <- stock_data %>%
+         filter(Country == "USA") %>%
+         pull(NASDAQ)
+       y_axis <- "Index: NASDAQ"
+       subtitle <- "In the United States"
+     }
+ 
+   
+     if(input$caseInput == "Confirmed") {
+       x_value <- stock_data %>%
+         filter(Country == input$countryInput) %>%
+         pull(confirmed)
+       x_axis <- "Number of Confirmed Cases (log transformed)"
+       title <- "Impact of Confirmed Cases on Stock Indices"
+     }
+     else if(input$caseInput == "Recovered") {
+       x_value <- stock_data %>%
+         filter(Country == input$countryInput) %>%
+         pull(recovered)
+       x_axis <- "Number of Recovered Cases (log transformed)"
+       title <- "Impact of Recovered Cases on Stock Indices"
+     }
+     else{
+       x_value <- stock_data %>%
+         filter(Country == input$countryInput) %>%
+         pull(deaths)
+       x_axis <- "Number of Deaths (log transformed)"
+       title <- "Impact of Number of Deaths on Stock Indices"
+     }
+    
+   # Create plot for one country's response
+ 
+     stock_data %>%
+       filter(y_value != "NA", x_value != "0") %>%
+       ggplot(aes(x = log(x_value))) +
+       geom_line(aes(y = y_value), linetype = "solid") +
+       labs(
+         title = title,
+         subtitle = subtitle,
+         x = x_axis,
+         y = y_axis
+       ) +
+       transition_reveal(new_date) +
+       theme_classic()
+ 
+   })
 
-#   output$gdp_cases <- renderPlot({
-# 
-#     # input$dateInput
-#     
-#     # Import population and GDP data from World Bank, latest available 2018
-#     
-#     population_data_18 <- read_csv("../gdp/API_pop.csv", skip = 3) %>% 
-#       clean_names() %>% 
-#       select(country_code, x2018) %>% 
-#       rename(pop_2018 = x2018)
-#     
-#     gdp_data_18 <- read_csv("../gdp/API_gdp.csv", skip = 3) %>%
-#       clean_names() %>% 
-#       select(country_code, x2018) %>% 
-#       rename(gdp_2018 = x2018)
-#     
-#     # Combine to create variable for GDP per capita
-#     
-#     gdp_pop_2018 <- gdp_data_18 %>% 
-#       left_join(population_data_18, by = "country_code") %>% 
-#       mutate(gdp_per_capita = round(gdp_2018 / pop_2018, digits = 2))
-#     
-#     # worldometer_data$country_other <- countrycode(worldometer_data$country_other, origin = "country.name", destination = "iso3c", warn = FALSE)
-#     
-#     policy <- policy %>% 
-#       rename(country_code = CountryCode)
-#     
-#     global_gdp <- gdp_pop_2018 %>%
-#       full_join(policy, by = c("country_code")) %>%
-#       select(Country, country_code, pop_2018, gdp_2018, gdp_per_capita, log_confirmed, log_deaths, log_recovered) %>%
-#       filter(new_date == 2020-4-23) %>% 
-#       na.omit()
-# 
-#     if(input$caseInput == "Confirmed") {
-#       y_value <- global_gdp$log_confirmed
-#       y_axis <- "Total Confirmed Cases (log transformed)"
-#     }
-#     else if(input$caseInput == "Recovered") {
-#       y_value <- global_gdp$log_deaths
-#       y_axis <- "Total Recovered Cases (log transformed)"
-#     }
-#     else{
-#       y_value <- global_gdp$log_recovered
-#       y_axis <- "Total Deaths (log transformed)"
-#     }
-# 
-# 
-#     global_gdp %>%
-#       ggplot(aes(x = log(gdp_per_capita), y = y_value, label = CountryCode)) +
-#       geom_point() +
-#       geom_text() +
-#       labs(
-#         title = "Relationship between GDP Per Capita and the Number of Cases",
-#         subtitle = "By Type of Case",
-#         x = "GDP Per Capita (log transformed)",
-#         y = y_axis
-#       ) +
-#       theme_classic()
-# 
-# })
-# 
+   output$gdp_cases <- renderPlot({
+ 
+     # input$dateInput
+     
+     # Import population and GDP data from World Bank, latest available 2018
+     
+     population_data_18 <- read_csv("../gdp/API_pop.csv", skip = 3) %>% 
+       clean_names() %>% 
+       select(country_code, x2018) %>% 
+       rename(pop_2018 = x2018)
+     
+     gdp_data_18 <- read_csv("../gdp/API_gdp.csv", skip = 3) %>%
+       clean_names() %>% 
+       select(country_code, x2018) %>% 
+       rename(gdp_2018 = x2018)
+     
+    #  Combine to create variable for GDP per capita
+     
+     gdp_pop_2018 <- gdp_data_18 %>% 
+       left_join(population_data_18, by = "country_code") %>% 
+       mutate(gdp_per_capita = round(gdp_2018 / pop_2018, digits = 2))
+     
+      worldometer_data$country_other <- countrycode(worldometer_data$country_other, origin = "country.name", destination = "iso3c", warn = FALSE)
+     
+     policy <- policy %>% 
+       rename(country_code = CountryCode)
+     
+     global_gdp <- gdp_pop_2018 %>%
+       full_join(worldometer, by = c("country_code")) %>%
+       select(Country, country_code, pop_2018, gdp_2018, gdp_per_capita, log_confirmed, log_deaths, log_recovered) %>%
+       filter(new_date == 2020-4-23) %>% 
+       na.omit()
+ 
+     if(input$caseInput == "Confirmed") {
+       y_value <- global_gdp$log_confirmed
+       y_axis <- "Total Confirmed Cases (log transformed)"
+     }
+     else if(input$caseInput == "Recovered") {
+       y_value <- global_gdp$log_deaths
+       y_axis <- "Total Recovered Cases (log transformed)"
+     }
+     else{
+       y_value <- global_gdp$log_recovered
+       y_axis <- "Total Deaths (log transformed)"
+     }
+ 
+ 
+     global_gdp %>%
+       ggplot(aes(x = log(gdp_per_capita), y = y_value, label = CountryCode)) +
+       geom_point() +
+       geom_text() +
+       labs(
+         title = "Relationship between GDP Per Capita and the Number of Cases",
+         subtitle = "By Type of Case",
+         x = "GDP Per Capita (log transformed)",
+         y = y_axis
+       ) +
+       theme_classic()
+ 
+ })
+ 
 }
 #   
 
