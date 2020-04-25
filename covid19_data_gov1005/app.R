@@ -64,7 +64,11 @@ ui <- navbarPage("The COVID-19 Data Project",
                             In “Policy”, we explore the stringency of common policy responses governments have taken 
                             and compare these responses across countries and regions."),
                                  br(),
-                                 h4(em("Economic Impact:")))
+                                 h4(em("Economic Impact:")),
+                                 p("Markets around the world have suffered in the face of COVID-19, with stay-at-home orders and quarantine 
+                                 measures affecting non-essential businesses and productivity across the board. With the 
+                                 focus on combatting the illness coming first and foremost, we hope to see the impact that 
+                                 the number of cases, deaths, and recovered individuals have on indices."))
                  ),
                  
                  
@@ -243,7 +247,17 @@ ui <- navbarPage("The COVID-19 Data Project",
                  
                  tabPanel("Policy",
                           h1("How Countries Have Responded with Policy"),
-                          p("More information on Policy..."),
+                          p("The first visualization examines how, in a given country, the number of confirmed cases, 
+                            the number of deaths, and the number of recovered cases changes over time. 
+                            The graph is divided into time segments based on the stringency level of the policy 
+                            measure enacted during that time period. Stringency is measured on a scale of 0 to 2, 
+                            with 0 corresponding to mild actions, 1 corresponding to moderate actions, and 2 
+                            corresponding to severe actions taken. The policy measures include: 1) school closings, 
+                            2) workplace closings, 3) public event cancellations, 4) public transportations closures, 
+                            5) public info campaigns, 6) restrictions on internal movement, 7) international travel 
+                            controls, 8) testing policy, and 9) contact tracing. By comparing the change in number 
+                            of cases with the stringency of the policy measure enacted, we can examine the efficacy 
+                            of each given policy within each country analyzed."),
                           sidebarLayout(
                             sidebarPanel(
                               helpText("Look at country-specific policy"),
@@ -398,6 +412,12 @@ ui <- navbarPage("The COVID-19 Data Project",
                                                       "Taiwan*"	))
                             ),
                             mainPanel(plotOutput("countryPolicy"))),
+                          br(),
+                          p("The second visualization plots the stringency level of each of the policy 
+                          measures versus the number of confirmed cases over time, for all of the countries 
+                          analyzed. We can compare the extent to which the number of confirmed cases, and the
+                          level of stringency of policy measures, differs between countries around the globe 
+                          for each given date."),
                           
                           sidebarLayout(
                             sidebarPanel(
@@ -842,6 +862,7 @@ output$covidLogMTests <- renderPlot({
     
   })
   
+  # Economic Impact
 
 # output$stock_impact <- renderPlot({
 #   
@@ -927,151 +948,55 @@ output$covidLogMTests <- renderPlot({
 # 
 #   })
 
-  output$gdp_cases <- renderPlot({
-
-    worldometer_data$country_other <- countrycode(worldometer_data$country_other, origin = "country.name", destination = "iso3c", warn = FALSE)
-    tidy_gdp_pop <- gdp_percapita_cases %>%
-      left_join(worldometer_data, by = c("country_code" = "country_other")) %>%
-      select(country_code, pop_2018, gdp_2018, gdp_per_capita, total_cases, total_deaths, total_recovered) %>%
-      na.omit()
-
-    if(input$caseInput == "Confirmed") {
-      y_value <- tidy_gdp_pop$log_cases
-      y_axis <- "Total Confirmed Cases (log transformed)"
-    }
-    else if(input$caseInput == "Recovered") {
-      y_value <- tidy_gdp_pop$log_deaths
-      y_axis <- "Total Recovered Cases (log transformed)"
-    }
-    else{
-      y_value <- tidy_gdp_pop$log_recovered
-      y_axis <- "Total Deaths (log transformed)"
-    }
-
-
-    tidy_gdp_pop %>%
-      ggplot(aes(x = log(gdp_per_capita), y = y_value, label = country_code)) +
-      geom_point() +
-      geom_text() +
-      labs(
-        title = "Relationship between GDP Per Capita and the Number of Cases",
-        subtitle = "By Type of Case",
-        x = "GDP Per Capita (log transformed)",
-        y = y_axis
-      ) +
-      theme_classic()
-
-})
-
-}
-  
-  # Economic Impact
-
-#   output$stock_impact <- renderPlot({
-#
-#     if(input$countryInput == "China") {
-#       y_value <- covid_global_stock %>%
-#         filter(Country == "CHN") %>%
-#         pull(SSE_China)
-#       y_axis <- "Index: SSE"
-#       subtitle <- "In China"
-#     }
-#    else if(input$countryInput == "Germany") {
-#       y_value <- covid_global_stock %>%
-#         filter(Country == "GER") %>%
-#         pull(DAX)
-#       y_axis <- "Index: DAX"
-#       subtitle <- "In Germany"
-#     }
-#     else if(input$countryInput == "Italy") {
-#       y_value <- covid_global_stock %>%
-#         filter(Country == "ITA") %>%
-#         pull(FTSE_Italy)
-#       y_axis <- "Index: FTSE"
-#       subtitle <- "In Italy"
-#     }
-#     else if(input$countryInput == "South Korea") {
-#       y_value <- covid_global_stock %>%
-#         filter(Country == "KOR") %>%
-#         pull(KOSPI)
-#       y_axis <- "Index: KOSPI"
-#       subtitle <- "In South Korea"
-#     }
-#     else if(input$countryInput == "Spain") {
-#       y_value <- covid_global_stock %>%
-#         filter(Country == "SPA") %>%
-#         pull(IBEX_Spain)
-#       y_axis <- "Index: IBEX"
-#       subtitle <- "In Spain"
-#     }
-#     else {
-#       y_value <- covid_global_stock %>%
-#         filter(Country == "USA") %>%
-#         pull(NASDAQ)
-#       y_axis <- "Index: NASDAQ"
-#       subtitle <- "In the United States"
-#     }
-#
-#
-#     if(input$caseInput == "Confirmed") {
-#       x_value <- covid_global_stock %>%
-#         pull(confirmed)
-#       x_axis <- "Number of Confirmed Cases (log transformed)"
-#       title <- "Impact of Confirmed Cases on Stock Indices"
-#     }
-#     else if(input$caseInput == "Recovered") {
-#       x_value <- covid_global_stock %>%
-#         pull(recovered)
-#       x_axis <- "Number of Recovered Cases (log transformed)"
-#       title <- "Impact of Recovered Cases on Stock Indices"
-#     }
-#     else{
-#       x_value <- covid_global_stock %>%
-#         pull(deaths)
-#       x_axis <- "Number of Deaths (log transformed)"
-#       title <- "Impact of Number of Deaths on Stock Indices"
-#     }
-#     # Create plot for one country's response
-#
-#     stock_data %>%
-#       filter(y_value != "NA", x_value != "0") %>%
-#       ggplot(aes(x = log(x_value))) +
-#       geom_line(aes(y = y_value), linetype = "solid") +
-#       labs(
-#         title = title,
-#         subtitle = subtitle,
-#         x = x_axis,
-#         y = y_axis
-#       ) +
-#       transition_reveal(new_date) +
-#       theme_classic()
-#
-#   })
-#
 #   output$gdp_cases <- renderPlot({
-#
-#     worldometer_data$country_other <- countrycode(worldometer_data$country_other, origin = "country.name", destination = "iso3c", warn = FALSE)
-#     tidy_gdp_pop <- gdp_percapita_cases %>%
-#       left_join(worldometer_data, by = c("country_code" = "country_other")) %>%
-#       select(country_code, pop_2018, gdp_2018, gdp_per_capita, total_cases, total_deaths, total_recovered) %>%
+# 
+#     # input$dateInput
+#     
+#     # Import population and GDP data from World Bank, latest available 2018
+#     
+#     population_data_18 <- read_csv("../gdp/API_pop.csv", skip = 3) %>% 
+#       clean_names() %>% 
+#       select(country_code, x2018) %>% 
+#       rename(pop_2018 = x2018)
+#     
+#     gdp_data_18 <- read_csv("../gdp/API_gdp.csv", skip = 3) %>%
+#       clean_names() %>% 
+#       select(country_code, x2018) %>% 
+#       rename(gdp_2018 = x2018)
+#     
+#     # Combine to create variable for GDP per capita
+#     
+#     gdp_pop_2018 <- gdp_data_18 %>% 
+#       left_join(population_data_18, by = "country_code") %>% 
+#       mutate(gdp_per_capita = round(gdp_2018 / pop_2018, digits = 2))
+#     
+#     # worldometer_data$country_other <- countrycode(worldometer_data$country_other, origin = "country.name", destination = "iso3c", warn = FALSE)
+#     
+#     policy <- policy %>% 
+#       rename(country_code = CountryCode)
+#     
+#     global_gdp <- gdp_pop_2018 %>%
+#       full_join(policy, by = c("country_code")) %>%
+#       select(Country, country_code, pop_2018, gdp_2018, gdp_per_capita, log_confirmed, log_deaths, log_recovered) %>%
+#       filter(new_date == 2020-4-23) %>% 
 #       na.omit()
-#
+# 
 #     if(input$caseInput == "Confirmed") {
-#       y_value <- tidy_gdp_pop$log_cases
+#       y_value <- global_gdp$log_confirmed
 #       y_axis <- "Total Confirmed Cases (log transformed)"
 #     }
 #     else if(input$caseInput == "Recovered") {
-#       y_value <- tidy_gdp_pop$log_deaths
+#       y_value <- global_gdp$log_deaths
 #       y_axis <- "Total Recovered Cases (log transformed)"
 #     }
 #     else{
-#       y_value <- tidy_gdp_pop$log_recovered
+#       y_value <- global_gdp$log_recovered
 #       y_axis <- "Total Deaths (log transformed)"
 #     }
-#
-#
-#     tidy_gdp_pop %>%
-#       ggplot(aes(x = log(gdp_per_capita), y = y_value, label = country_code)) +
+# 
+# 
+#     global_gdp %>%
+#       ggplot(aes(x = log(gdp_per_capita), y = y_value, label = CountryCode)) +
 #       geom_point() +
 #       geom_text() +
 #       labs(
@@ -1081,10 +1006,11 @@ output$covidLogMTests <- renderPlot({
 #         y = y_axis
 #       ) +
 #       theme_classic()
-#
+# 
 # })
-#
-#   }
+# 
+}
+#   
 
 # Run the application
 shinyApp(ui = ui, server = server)
