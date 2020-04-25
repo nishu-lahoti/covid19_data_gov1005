@@ -135,6 +135,11 @@ ui <- navbarPage("The COVID-19 Data Project",
                            This site is organized into three parts:"),
                                  br(),
                                  h4(em("Spread:")),
+                                 p("COVID-19 has spread more rapidly than most politicians and people, in general, expected.
+                                 In some countries, the total number of confirmed cases and deaths exponentially increased
+                                 over the early months of 2020. In other countries, the total number of confirmed cases is uncertain
+                                 due to a lack of testing. In “Spread”, we explore how COVID-19 spread in countries across the world and
+                                 the correlation with each country's ability to test."),
                                  br(),
                                  h4(em("Policy:")),
                                  p("Governments around the world have implemented a variety of measures to respond to 
