@@ -6,6 +6,7 @@ library(plotly)
 library(rvest)
 library(janitor)
 library(countrycode)
+library(gganimate)
 
 # Potentially read in data directly from GitHub Repo. This will automatically
 # update Shiny IF we run a CRONR job for the script that creates the RDS files.
@@ -125,19 +126,28 @@ ui <- navbarPage("The COVID-19 Data Project",
                            growing at a historically unprecedented pace. As politicians, researchers, 
                            lawyers, and other experts scramble for answers, uncertainty about when the
                            world can reopen and begin on a road-to-recovery has only continued to grow."),
+                                 br(),
                                  p("The purpose of this project is to analyze the spread and impact of the 
                            coronavirus pandemic and to understand the efficacy of various policies 
                            enacted around the globe in mitigating the crisis. We seek to shed light 
                            on many different aspects of the pandemic using data visualization and 
                            statistical analysis, as well as provide commentary on the data we have. 
                            This site is organized into three parts:"),
+                                 br(),
                                  h4(em("Spread:")),
+                                 p("COVID-19 has spread more rapidly than most politicians and people, in general, expected.
+                                 In some countries, the total number of confirmed cases and deaths exponentially increased
+                                 over the early months of 2020. In other countries, the total number of confirmed cases is uncertain
+                                 due to a lack of testing. In “Spread”, we explore how COVID-19 spread in countries across the world and
+                                 the correlation with each country's ability to test."),
+                                 br(),
                                  h4(em("Policy:")),
                                  p("Governments around the world have implemented a variety of measures to respond to 
                             the threat and spread of COVID-19, ranging from mild to severe. Such measures include schools and workplaces closing, 
                             international travel controls, and emergency investment in healthcare and vaccines. 
                             In “Policy”, we explore the stringency of common policy responses governments have taken 
                             and compare these responses across countries and regions."),
+                                 br(),
                                  h4(em("Economic Impact:")))
                  ),
                  
@@ -146,17 +156,171 @@ ui <- navbarPage("The COVID-19 Data Project",
                  
                  
                  tabPanel("Spread",
-                          h1("Background"),
-                          p("The goal of this project is..."),
-                          sidebarLayout(
-                            sidebarPanel(
-                              helpText("Do something interesting with spread data!"),
-                              h3("Search something"),
+                          h1("Visualizing the rate of spread across countries"),
+                          p("The rapidity with which COVID-19 spread within countries surprised political leaders
+                            and society, as a whole. In the early months of 2020, most global citizens believed
+                            the Coronavirus to be a problem distant to their daily life, sequestered to a manufacturing
+                            city in the heart of China. As the virus began spreading outside of Wuhan, society-at-large continued
+                            to believe it could be contained and would not impact daily life. The aim of the visualizations below
+                            are to dispel that belief, showing just how quickly Coronavirus has spread in countries across the world,
+                            it's devastation, and the eventual pathway to recovery."),
+                          # sidebarLayout(
+                            # sidebarPanel(
+                              h3("Select a country to see how the arc of COVID-19 cases and deaths"),
                               selectInput("country_region", NULL,
-                                          choices = list("US" = "US",
-                                                         "Spain" = "Spain",
-                                                         "Italy" = "Italy"))),
-                            plotOutput("covidSpread"))),
+                                          choices = c("Afghanistan",				
+                                                      "Angola",			
+                                                      "Albania",
+                                                      "Algeria",	
+                                                      "Andorra",				
+                                                      "Argentina",		
+                                                      "Australia",		
+                                                      "Austria",				
+                                                      "Azerbaijan",			
+                                                      "Burundi",
+                                                      "Belgium",				
+                                                      "Burkina Faso",
+                                                      "Burma",		
+                                                      "Bangladesh",			
+                                                      "Bulgaria",			
+                                                      "Bahrain",				
+                                                      "Bosnia and Herzegovina",				
+                                                      "Belize",			
+                                                      "Bolivia",				
+                                                      "Brazil",				
+                                                      "Barbados",
+                                                      "Brunei",			
+                                                      "Botswana",				
+                                                      "Canada",			
+                                                      "Chile",				
+                                                      "China",				
+                                                      "Cameroon",				
+                                                      "Congo (Kinshasa)",				
+                                                      "Colombia",				
+                                                      "Costa Rica",
+                                                      "Cuba",				
+                                                      "Cyprus",				
+                                                      "Czechia",				
+                                                      "Germany",				
+                                                      "Djibouti",				
+                                                      "Dominica",				
+                                                      "Denmark",				
+                                                      "Dominican Republic",				
+                                                      "Ecuador",
+                                                      "Egypt",				
+                                                      "Spain",				
+                                                      "Estonia",				
+                                                      "Ethiopia",				
+                                                      "Finland",				
+                                                      "France",				
+                                                      "Gabon",				
+                                                      "Ghana",				
+                                                      "Gambia",
+                                                      "Greece",				
+                                                      "Guatemala",				
+                                                      "Guyana",				
+                                                      "Honduras",				
+                                                      "Croatia",				
+                                                      "Hungary",				
+                                                      "Indonesia",				
+                                                      "India",				
+                                                      "Ireland",				
+                                                      "Iran",
+                                                      "Iraq",				
+                                                      "Iceland",			
+                                                      "Israel",				
+                                                      "Italy",				
+                                                      "Jamaica",				
+                                                      "Jordan",				
+                                                      "Japan",				
+                                                      "Kazakhstan",				
+                                                      "Kenya",				
+                                                      "Kyrgyzstan",
+                                                      "Korea, South",				
+                                                      "Kuwait",				
+                                                      "Laos",				
+                                                      "Lebanon",				
+                                                      "Libya",				
+                                                      "Sri Lanka",				
+                                                      "Luxembourg",			
+                                                      "Morocco",				
+                                                      "Moldova",				
+                                                      "Madagascar",
+                                                      "Mexico",				
+                                                      "Mali",				
+                                                      "Mongolia",				
+                                                      "Mozambique",			
+                                                      "Mauritania",			
+                                                      "Mauritius",				
+                                                      "Malawi",				
+                                                      "Malaysia",				
+                                                      "Namibia",
+                                                      "Niger",				
+                                                      "Nigeria",				
+                                                      "Nicaragua",				
+                                                      "Netherlands",				
+                                                      "Norway",				
+                                                      "New Zealand",				
+                                                      "Oman",				
+                                                      "Pakistan",			
+                                                      "Panama",			
+                                                      "Peru",
+                                                      "Philippines",				
+                                                      "Papua New Guinea",			
+                                                      "Poland",				
+                                                      "Portugal",				
+                                                      "Paraguay",				
+                                                      "West Bank and Gaza",			
+                                                      "Qatar",				
+                                                      "Romania",				
+                                                      "Russia",				
+                                                      "Rwanda",
+                                                      "Saudi Arabia",			
+                                                      "Sudan",				
+                                                      "Singapore",				
+                                                      "Sierra Leone",				
+                                                      "El Salvador",				
+                                                      "San Marino",				
+                                                      "Serbia",				
+                                                      "South Sudan",				
+                                                      "Slovakia",				
+                                                      "Slovenia",
+                                                      "Sweden",
+                                                      "Switzerland",	
+                                                      "Eswatini",				
+                                                      "Seychelles",				
+                                                      "Syria",				
+                                                      "Chad",				
+                                                      "Thailand",				
+                                                      "Trinidad and Tobago",				
+                                                      "Tunisia",				
+                                                      "Turkey",				
+                                                      "Tanzania",				
+                                                      "Uganda",				
+                                                      "Ukraine",	
+                                                      "United Kingdom",
+                                                      "United Arab Emirates",
+                                                      "Uruguay",			
+                                                      "US",			
+                                                      "Uzbekistan",				
+                                                      "Venezuela",				
+                                                      "Vietnam",				
+                                                      "South Africa",				
+                                                      "Zambia",				
+                                                      "Zimbabwe",
+                                                      "Taiwan*"	)),
+                            textOutput("selected_var"),
+                            plotOutput("covidSpread"),
+                            plotOutput("covidDeaths"),
+                          br(),
+                          p("We aimed to understand if there was bias in the reporting of new COVID-19 cases.
+                            Specifically, how did a country's capacity to test influence it's total case reporting?
+                            We suspected that countries with a greater ability to test would report a greater number of cases,
+                            and vice versa."),
+                          plotOutput("covidHighTests"),
+                          plotOutput("covidMTests"),
+                          plotOutput("covidLogTests"),
+                          plotOutput("covidLogMTests")),
                  
                  # Add narrative about policy. One - three paragraphs.
                  # Add top two visualizations.
@@ -244,7 +408,7 @@ ui <- navbarPage("The COVID-19 Data Project",
                                                       "Kenya",				
                                                       "Kyrgyzstan",
                                                       "Korea, South",				
-                                                      "Kuwait"				
+                                                      "Kuwait",				
                                                       "Laos",				
                                                       "Lebanon",				
                                                       "Libya",				
@@ -370,40 +534,47 @@ ui <- navbarPage("The COVID-19 Data Project",
                  tabPanel("Team",
                           column(6,
                                  h1("The Team"),
-                                 p("Rebecca Xi is a sophomore at Harvard concentrating 
+                                 h4("Rebecca Xi"),
+                                 p("is a sophomore at Harvard concentrating 
                                    in Applied Math & Economics with a secondary in Government. 
                                    Her github can be found", a(href =  "https://github.com/beccaxi",
                                                                "here.")),
-                                 p("Katelyn Li is a junior at Harvard concentrating 
+                                 h4("Katelyn Li"),
+                                 p("is a junior at Harvard concentrating 
                                    in Neuroscience with a secondary in Government. 
                                    Her github can be found", a(href =  "https://github.com/katelynxli",
                                                                "here.")),
-                                 p("Nishu Lahoti ..."),
-                                 p("Jun-Yong Kim is a first-year at Harvard prospectively 
+                                 h4("Nishu Lahoti"),
+                                 p("is a Masters student between Harvard's
+                                   Graduate School of Design and Engineering. His github
+                                   can be found", a(href = "https://github.com/nishu-lahoti", "here.")),
+                                
+                                h4("Jun-Yong Kim"),
+                                p("is a first-year at Harvard prospectively 
                                    concentrating in Statistics and Sociology. His github can
                                    be found", a(href = "https://github.com/juniyong247", "here."))),
                           column(6,
                                  h1("Data Sources"),
-                                 h3(a(href = "https://github.com/CSSEGISandData/COVID-19",
+                                 h4(a(href = "https://github.com/CSSEGISandData/COVID-19",
                                       "2019 Novel Coronavirus COVID-19 (2019-nCoV) Data Repository by Johns Hopkins CSSE")),
                                  p("This is the data repository for the 2019 Novel Coronavirus Visual Dashboard operated
                                  by the Johns Hopkins University Center for Systems Science and Engineering (JHU CSSE)."),
-                                 h3(a(href = "https://github.com/nytimes/covid-19-data",
+                                 h4(a(href = "https://github.com/nytimes/covid-19-data",
                                       "NYTimes Coronavirus (Covid-19) Data in the United States")),
                                  p("The New York Times is releasing a series of data files with cumulative counts of 
                                    coronavirus cases in the United States, at the state and county level, over time."),
-                                 h3(a(href = "https://www.worldometers.info/coronavirus/",
+                                 h4(a(href = "https://www.worldometers.info/coronavirus/",
                                       "Worldometer COVID-19 Data")),
                                  p("Worldometer manually analyzes, validates, and aggregates data from thousands of sources 
                                  in real time and provides global COVID-19 live statistics for a wide audience of caring people around the world."),
-                                 h3(a(href = "https://finance.yahoo.com",
+                                 h4(a(href = "https://finance.yahoo.com",
                                       "Yahoo Finance Daily Stock Indices Database")),
                                  p("Yahoo Finance tracks the daily prices of different stock indices from all around the world."), 
-                                 h3(a(href = "https://github.com/OxCGRT/covid-policy-tracker",
+                                 h4(a(href = "https://github.com/OxCGRT/covid-policy-tracker",
                                       "Oxford Covid-19 Government Response Tracker")),
                                  p("The OxCGRT collects systematic information on which governments have taken which measures, and when, 
                                  scoring the stringency of such measures and aggregating these scores into a common Stringency Index."),
-                                 h3(a(href = "https://raw.githubusercontent.com/lukes/ISO-3166-Countries-with-Regional-Codes/master/all/all.csv",
+                                 h4(a(href = "https://raw.githubusercontent.com/lukes/ISO-3166-Countries-with-Regional-Codes/master/all/all.csv",
                                       "ISO-3166 Country and Dependent Territories Lists with UN Regional Codes")),
                                  p("These lists are the result of merging data from two sources, the Wikipedia ISO 3166-1 article for alpha and numeric
                                    country codes, and the UN Statistics site for countries' regional, and sub-regional codes.")
@@ -416,6 +587,10 @@ ui <- navbarPage("The COVID-19 Data Project",
 server <- function(input, output) {
   
   # Spread
+  
+  output$selected_var <- renderText({
+    paste(input$country_region)
+  })
   
   output$worldometer_log <- renderPlot({
     
@@ -442,10 +617,110 @@ server <- function(input, output) {
     covidGlobal %>%
       filter(country_region == input$country_region,
              increment_confirmed >= 0) %>%
-      ggplot(aes(x = new_date, y = increment_confirmed)) + geom_col()
+      ggplot(aes(x = new_date, y = increment_confirmed)) + 
+      geom_col() +
+      labs(
+        title = "Incremental Cases of COVID-19\nmeasured over time",
+        x = "Date",
+        y = "New Daily Cases"
+      )
     
   })
   
+  output$covidDeaths <- renderPlot({
+    
+    covidGlobal %>%
+      filter(country_region == input$country_region,
+             increment_confirmed >= 0) %>%
+      ggplot(aes(x = new_date, y = increment_deaths)) + 
+      geom_col() +
+      labs(
+        title = "Incremental Deaths of COVID-19\nmeasured over time",
+        x = "Date",
+        y = "New Daily Deaths"
+      )
+    
+  })
+  
+options(scipen = 999)
+  
+# Normal
+worldometer_tests <- worldometer %>%
+  filter(total_cases >= 15000, 
+          !is.na(total_tests))
+  
+# Logarithmic
+  
+worldometer_log <- worldometer %>%
+  mutate(log_cases = log(total_cases),
+          log_deaths = log(total_deaths),
+          log_recovered = log(total_recovered),
+          log_tests = log(total_tests),
+          log_tests_1m = log(tests_1m_pop))
+  
+  output$covidHighTests <- renderPlot({
+  # Visualizing total cases and total deaths against total tests. A good next step may be to filter by countries of interest and to get a good enough
+  # sample of countries that have tested. Qualify a country based on total number of cases (>1000). Maybe there is a weak positive correlation.
+  
+  
+  ggplot(worldometer_tests, aes(total_cases, total_tests, color = country_other)) + 
+    geom_point() +
+    geom_jitter() +
+    theme_classic() +
+    theme(legend.position = "top") +
+    labs(
+      title = "Comparing COVID-19 Cases versus Total Tests",
+      subtitle = "Comparing total conducted tests \nfor countries with over 15,000 reported cases.",
+      x = "Total Cases",
+      y = "Tests per 1M",
+      color = "Country"
+    )
+  
+  })
+
+output$covidMTests <- renderPlot({
+
+  ggplot(worldometer_tests, aes(total_cases, tests_1m_pop, color = country_other)) + 
+    geom_point() +
+    geom_jitter() +
+    theme_classic() +
+    theme(legend.position = "top") +
+    labs(
+      title = "COVID-19 Country Testing Capacity",
+      subtitle = "Visualizing a country's case rate against testing rate\nfor countries with over 15,000 reported cases.",
+      x = "Total Cases",
+      y = "Tests per 1M",
+      color = "Country"
+    )
+  
+})
+  
+
+output$covidLogTests <- renderPlot({
+  # Logarithmic plot of total tests
+  
+  ggplot(worldometer_log, aes(log_cases, log_tests, color = country_other)) +
+    geom_point() +
+    theme(legend.position = "none") +
+    labs(
+      title = "Logarithmic comparison of cases to tests",
+      x = "Cases \n(x10,000)",
+      y = "Tests \n(x10,000)"
+    )
+})
+  
+output$covidLogMTests <- renderPlot({
+  # Logarithmic plot of tests per 1m
+  
+  ggplot(worldometer_log, aes(log_cases, log_tests_1m, color = country_other)) +
+    geom_point() +
+    theme(legend.position = "none") +
+    labs(
+      title = "Logarithmic comparison of cases to tests",
+      x = "Cases \n(x10,000)",
+      y = "Tests per 1M \n(x10,000)"
+    )
+  })
   
   # Policy
   
@@ -651,8 +926,13 @@ server <- function(input, output) {
     
   })
   
+<<<<<<< HEAD
   
 
+=======
+}
+  
+>>>>>>> 661addf50a080fdf745772458eebe40347a321fb
   # Economic Impact
 
 #   output$stock_impact <- renderPlot({
