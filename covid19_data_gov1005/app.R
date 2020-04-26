@@ -888,8 +888,7 @@ options(scipen = 999)
    
      if(input$countryInput == "China") {
        y_value <- stock_cases %>%
-         #filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>% 
-         filter(new_date == 2020-04-01) %>% 
+         filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>% 
          filter(stock == "SSE_China") %>%
          pull(price)
        y_axis <- "Index: SSE"
@@ -897,8 +896,7 @@ options(scipen = 999)
      }
      else if(input$countryInput == "Germany") {
        y_value <- stock_cases %>%
-         #filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>%
-         filter(new_date == 2020-04-01) %>% 
+         filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>%
          filter(stock == "DAX") %>%
          pull(price)
        y_axis <- "Index: DAX"
@@ -906,8 +904,7 @@ options(scipen = 999)
      }
      else if(input$countryInput == "Italy") {
        y_value <- stock_cases %>%
-         #filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>%
-         filter(new_date == 2020-04-01) %>% 
+         filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>%
          filter(stock == "FTSE_Italy") %>%
          pull(price)
        y_axis <- "Index: FTSE"
@@ -915,8 +912,7 @@ options(scipen = 999)
      }
      else if(input$countryInput == "South Korea") {
        y_value <- stock_cases %>%
-         #filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>%
-         filter(new_date == 2020-04-01) %>% 
+         filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>%
          filter(stock == "KOSPI") %>%
          pull(price)
        y_axis <- "Index: KOSPI"
@@ -924,8 +920,7 @@ options(scipen = 999)
      }
      else if(input$countryInput == "Spain") {
        y_value <- stock_cases %>%
-         #filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>%
-         filter(new_date == 2020-04-01) %>% 
+         filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>%
          filter(stock == "IBEX_Spain") %>%
          pull(price)
        y_axis <- "Index: IBEX"
@@ -933,8 +928,7 @@ options(scipen = 999)
      }
      else {
        y_value <- stock_cases %>%
-         #filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>%
-         filter(new_date == 2020-04-01) %>% 
+         filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>%
          filter(stock == "NASDAQ") %>%
          pull(price)
        y_axis <- "Index: NASDAQ"
@@ -983,8 +977,7 @@ options(scipen = 999)
      stock_cases %>%
        #filter(y_value != "NA", log_confirmed != "0") %>%
        filter(Country == input$countryInput) %>% 
-       #filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>%
-       filter(new_date == 2020-04-01) %>% 
+       filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>%
        ggplot(aes(x = log_confirmed, y = y_value)) +
        geom_line(linetype = "solid") +
        labs(
