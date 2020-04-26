@@ -86,21 +86,21 @@ worldometer <- worldometer %>% clean_names()
 # Clean worldometer data, changing column types to reflect numbers where
 # necessary.
 
-# worldometer <- worldometer %>%
-#   mutate(total_cases = parse_number(total_cases),
-#          new_cases = parse_number(new_cases),
-#          total_deaths = parse_number(total_deaths),
-#          new_deaths = parse_number(new_deaths),
-#          total_recovered = parse_number(total_recovered),
-#          active_cases = parse_number(active_cases),
-#          serious_critical = parse_number(serious_critical),
-#          total_tests = parse_number(total_tests),
-#          tests_1m_pop = parse_number(tests_1m_pop)) %>%
-#   filter(! country_other %in% c("World", "Total:", "Europe", "North America", "Asia", "South America", 
-#                                 "Africa", "Oceania", "")) %>%
-#   arrange(desc(total_cases))
-# 
-# saveRDS(worldometer, file = "worldometer.RDS")
+worldometer <- worldometer %>%
+  mutate(total_cases = parse_number(total_cases),
+         new_cases = parse_number(new_cases),
+         total_deaths = parse_number(total_deaths),
+         new_deaths = parse_number(new_deaths),
+         total_recovered = parse_number(total_recovered),
+         active_cases = parse_number(active_cases),
+         serious_critical = parse_number(serious_critical),
+         total_tests = parse_number(total_tests),
+         tests_1m_pop = parse_number(tests_1m_pop)) %>%
+  filter(! country_other %in% c("World", "Total:", "Europe", "North America", "Asia", "South America",
+                                "Africa", "Oceania", "")) %>%
+  arrange(desc(total_cases))
+
+saveRDS(worldometer, file = "worldometer.RDS")
 ```
 
 ```{r Spread with Increments, echo=FALSE}
@@ -189,7 +189,7 @@ covidGlobal <- confirmedCovidGlobal %>%
 testing_by_state <- us_daily_reports %>%
   filter(!is.na(people_tested))
 
-# Saving files for team use
+# Saving files
 
 saveRDS(covidUS, file = "covidUS.RDS")
 saveRDS(covidGlobal, file = "covidGlobal.RDS")
@@ -356,8 +356,17 @@ policy <- stringency_regions %>%
          log_deaths = log10(deaths),
          log_recovered = log10(recovered))
 
-# Saving files for team use
-saveRDS(gdp_pop_2018, file = "gdp_per_capita.RDS")
+# Join policy dataset (for case counts) and gdp_per_capita dataset (from
+# previous code chunk, Static Data)
+
+global_gdp_cases <- gdp_pop_2018 %>%
+  rename(CountryCode = country_code) %>% 
+  full_join(policy, by = "CountryCode") %>%
+  select(Country, CountryCode, new_date, sub.region, pop_2018.x, gdp_2018, gdp_per_capita, log_confirmed, log_deaths, log_recovered)
+
+# Saving file
+
+saveRDS(global_gdp_cases, file = "gdp.RDS")
 saveRDS(policy, file = "policy.RDS")
 ```
 
@@ -437,11 +446,30 @@ stock_data$DAX <- gsub(',', '', stock_data$DAX) %>% as.numeric(stock_data$DAX)
 stock_data$FTSE_Italy <- gsub(',', '', stock_data$FTSE_Italy) %>% as.numeric(stock_data$FTSE_Italy)
 stock_data$IBEX_Spain <- gsub(',', '', stock_data$IBEX_Spain) %>% as.numeric(stock_data$IBEX_Spain)
 
-covid_global_stock <- covidGlobal %>% 
-  full_join(stock_data, by = c("new_date" = "date")) %>% 
-  select(Country, new_date, confirmed, deaths, recovered, KOSPI, NASDAQ, MSCI, SSE_China, DAX, FTSE_Italy, IBEX_Spain)
+# Tidy stock data and add country indicator
 
-saveRDS(covid_global_stock, file = "stock_data.RDS")
+stock_data_tidy <- stock_data %>% 
+  pivot_longer(cols = -date, names_to = "stock", values_to = "price") %>% 
+  mutate(CountryCode = ifelse(stock == "KOSPI", "KOR", 
+                          ifelse(stock == "NASDAQ", "USA", 
+                                 ifelse(stock == "MSCI", "World", 
+                                        ifelse(stock == "SSE_China", "CHN",
+                                               ifelse(stock == "DAX", "DEU",
+                                                      ifelse(stock == "FTSE_Italy", "ITA", "ESP"))))))) %>% 
+  filter(date >= 2020-01-22)
+         
+
+# Join global_gdp_cases to stock data for COMPLETE covid + economic dataset,
+# filtering out all observations prior to Jan 22
+
+stock_cases <- policy %>% 
+  full_join(stock_data_tidy, by = c("new_date" = "date", "CountryCode")) %>%
+  select(Country, CountryCode, new_date, sub.region, log_confirmed, log_deaths, log_recovered, stock, price) %>% 
+  filter(!is.na(Country))
+
+# Saving file 
+
+saveRDS(stock_cases, file = "stock_cases.RDS")
 ```
 
 
