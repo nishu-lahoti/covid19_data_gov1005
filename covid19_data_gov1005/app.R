@@ -450,22 +450,23 @@ ui <- navbarPage("The COVID-19 Data Project",
                           sidebarLayout(
                             sidebarPanel(
                               helpText("Look at COVID-19's impact on stock prices for select countries"),
-                              selectInput("countryInput", "Select a Country: ",
+                              selectInput("countryInputs", "Select a Country: ",
                                           choices = c("China", 
                                                       "Germany", 
                                                       "Italy", 
-                                                      "South Korea", 
+                                                      "Korea, South", 
                                                       "Spain", 
-                                                      "United States")),
-                              radioButtons("caseInput", "Choose a case type",
+                                                      "US")),
+                              radioButtons("caseInputs", "Choose a case type",
                                            choices = c("Confirmed", "Deaths", "Recovered"),
-                                           selected = "Confirmed"),
-                              sliderInput("dateRange",
-                                          "Select a date range:",
-                                          min = as.Date("2020-01-22","%Y-%m-%d"),
-                                          max = Sys.Date(),
-                                          value = c(as.Date("2020-01-22"), Sys.Date()),
-                                          timeFormat = "%Y-%m-%d")
+                                           selected = "Confirmed")
+                              #,
+                              # sliderInput("dateRange",
+                              #             "Select a date range:",
+                              #             min = as.Date("2020-01-22","%Y-%m-%d"),
+                              #             max = Sys.Date(),
+                              #             value = c(as.Date("2020-01-22"), Sys.Date()),
+                              #             timeFormat = "%Y-%m-%d")
                             ),
                             mainPanel(plotOutput("stock_impact"))),
                           
@@ -886,111 +887,115 @@ options(scipen = 999)
 
   output$stock_impact <- renderPlot({
    
-     if(input$countryInput == "China") {
-       y_value <- stock_cases %>%
-         #filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>% 
-         filter(new_date == 2020-04-01) %>% 
-         filter(stock == "SSE_China") %>%
-         pull(price)
-       y_axis <- "Index: SSE"
-       subtitle <- "In China"
-     }
-     else if(input$countryInput == "Germany") {
-       y_value <- stock_cases %>%
-         #filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>%
-         filter(new_date == 2020-04-01) %>% 
-         filter(stock == "DAX") %>%
-         pull(price)
+      if(input$countryInputs == "China") {
+       # y_value <- stock_cases %>%
+       #   #filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>%
+       #  # filter(new_date == 2020-04-01) %>%
+       #   filter(stock == "SSE_China" ) %>%
+       #   pull(price)
+        y_axis <- "Index: SSE"
+        subtitlex <- "In China"
+      }
+     else if(input$countryInputs == "Germany") {
+       # y_value <- stock_cases %>%
+       #   #filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>%
+       #  # filter(new_date == 2020-04-01) %>%
+       #   filter(stock == "DAX" ) %>%
+       #   pull(price)
        y_axis <- "Index: DAX"
-       subtitle <- "In Germany"
+       subtitlex <- "In Germany"
      }
-     else if(input$countryInput == "Italy") {
-       y_value <- stock_cases %>%
-         #filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>%
-         filter(new_date == 2020-04-01) %>% 
-         filter(stock == "FTSE_Italy") %>%
-         pull(price)
+     else if(input$countryInputs == "Italy") {
+       # y_value <- stock_cases %>%
+       #   #filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>%
+       # #  filter(new_date == 2020-04-01) %>%
+       #   filter(stock == "FTSE_Italy" ) %>%
+       #   pull(price)
        y_axis <- "Index: FTSE"
-       subtitle <- "In Italy"
+       subtitlex <- "In Italy"
      }
-     else if(input$countryInput == "South Korea") {
-       y_value <- stock_cases %>%
-         #filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>%
-         filter(new_date == 2020-04-01) %>% 
-         filter(stock == "KOSPI") %>%
-         pull(price)
+     else if(input$countryInputs == "Korea, South") {
+       # y_value <- stock_cases %>%
+       #   #filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>%
+       #  # filter(new_date == 2020-04-01) %>%
+       #   filter(stock == "KOSPI" ) %>%
+       #   pull(price)
        y_axis <- "Index: KOSPI"
-       subtitle <- "In South Korea"
+       subtitlex <- "In South Korea"
      }
-     else if(input$countryInput == "Spain") {
-       y_value <- stock_cases %>%
-         #filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>%
-         filter(new_date == 2020-04-01) %>% 
-         filter(stock == "IBEX_Spain") %>%
-         pull(price)
+     else if(input$countryInputs == "Spain") {
+       # y_value <- stock_cases %>%
+       #   #filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>%
+       #  # filter(new_date == 2020-04-01) %>%
+       #   filter(stock == "IBEX_Spain" ) %>%
+       #   pull(price)
        y_axis <- "Index: IBEX"
-       subtitle <- "In Spain"
+       subtitlex <- "In Spain"
      }
      else {
-       y_value <- stock_cases %>%
-         #filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>%
-         filter(new_date == 2020-04-01) %>% 
-         filter(stock == "NASDAQ") %>%
-         pull(price)
+       # y_value <- stock_cases %>%
+       #   #filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>%
+       #  # filter(new_date == 2020-04-01) %>%
+       #   filter(stock == "NASDAQ") %>%
+       #   pull(price)
        y_axis <- "Index: NASDAQ"
-       subtitle <- "In the United States"
+       subtitlex <- "In the United States"
      }
-    
+
     # alter countryInput to fit Country variable options in economic_data
-    
-    if(input$countryInput == "South Korea") {
-      input$countryInput <- "Korea, South"
-    }
-    if(input$countryInput == "United States") {
-      input$countryInput <- "US"
-    }
+    #
+    # if(input$countryInput == "South Korea") {
+    #   input$countryInput <- "Korea, South"
+    # }
+    # if(input$countryInput == "United States") {
+    #   input$countryInput <- "US"
+    # }
    
-     # if(input$caseInput == "Confirmed") {
-     #   x_value <- stock_cases %>%
-     #     filter(Country == input$countryInput) %>%
-     #     #filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>%
-     #     filter(new_date == 2020-04-01) %>% 
-     #     pull(log_confirmed)
-     #   x_axis <- "Number of Confirmed Cases (log transformed)"
-     #   title <- "Impact of Confirmed Cases on Stock Indices"
-     # }
-     # else if(input$caseInput == "Recovered") {
-     #   x_value <- stock_cases %>%
-     #     filter(Country == input$countryInput) %>%
-     #     #filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>%
-     #     filter(new_date == 2020-04-01) %>% 
-     #     pull(log_recovered)
-     #   x_axis <- "Number of Recovered Cases (log transformed)"
-     #   title <- "Impact of Recovered Cases on Stock Indices"
-     # }
-     # else{
-     #   x_value <- stock_cases %>%
-     #     filter(Country == input$countryInput) %>%
-     #     #filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>%
-     #     filter(new_date == 2020-04-01) %>% 
-     #     pull(log_deaths)
-     #   x_axis <- "Number of Deaths (log transformed)"
-     #   title <- "Impact of Number of Deaths on Stock Indices"
-     # }
+     if(input$caseInputs == "Confirmed") {
+       x_value <- "log_confirmed"
+       # x_value <- stock_cases %>%
+       #   # filter(Country == input$countryInput) %>%
+       #   # #filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>%
+       #   # filter(new_date == 2020-04-01) %>%
+       #   pull(log_confirmed)
+       x_axis <- "Number of Confirmed Cases (log transformed)"
+       titlex <- "Impact of Confirmed Cases on Stock Indices"
+     }
+     else if(input$caseInputs == "Recovered") {
+       x_value <- "log_recovered"
+       # x_value <- stock_cases %>%
+       #   # filter(Country == input$countryInput) %>%
+       #   # #filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>%
+       #   # filter(new_date == 2020-04-01) %>%
+       #   pull(log_recovered)
+       x_axis <- "Number of Recovered Cases (log transformed)"
+       titlex <- "Impact of Recovered Cases on Stock Indices"
+     }
+     else{
+       x_value <- "log_deaths"
+       # x_value <- stock_cases %>%
+       #   # filter(Country == input$countryInput) %>%
+       #   # #filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>%
+       #   # filter(new_date == 2020-04-01) %>%
+       #   pull(log_deaths)
+       x_axis <- "Number of Deaths (log transformed)"
+       titlex <- "Impact of Number of Deaths on Stock Indices"
+     }
     
    # Create plot for one country's response
  
      stock_cases %>%
        #filter(y_value != "NA", log_confirmed != "0") %>%
-       filter(Country == input$countryInput) %>% 
+       filter(Country == input$countryInputs, is.finite(price)) %>% 
        #filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>%
-       filter(new_date == 2020-04-01) %>% 
-       ggplot(aes(x = log_confirmed, y = y_value)) +
-       geom_line(linetype = "solid") +
+       #filter(new_date == 2020-04-01) %>% 
+       #filter(log_confirmed != "-Inf", price != "NA") %>% 
+       ggplot(aes_string(x = x_value)) +
+       geom_line(aes(y = price), linetype = "solid") +
        labs(
-         title = title,
-         subtitle = subtitle,
-         x = "Number of Confirmed Cases (log transformed)",
+         title = titlex,
+         subtitle = subtitlex,
+         x = x_axis,
          y = y_axis
        ) +
        theme_classic()
@@ -1000,21 +1005,24 @@ options(scipen = 999)
    output$gdp_cases <- renderPlot({
      
      if(input$caseInput == "Confirmed") {
-       x_value <- gdp_cases %>% 
-         filter(new_date == input$dateInput) %>% 
-         pull(log_confirmed)
+       x_value <- "log_confirmed"
+       # x_value <- gdp_cases %>% 
+       #   filter(new_date == input$dateInput) %>% 
+       #   pull(log_confirmed)
        x_axis <- "Confirmed cases (log transformed)"
      }
      else if(input$caseInput == "Recovered") {
-       x_value <- gdp_cases %>% 
-         filter(new_date == input$dateInput) %>% 
-         pull(log_recovered)
+       x_value <- "log_recovered"
+       # x_value <- gdp_cases %>% 
+       #   filter(new_date == input$dateInput) %>% 
+       #   pull(log_recovered)
        x_axis <- "Recoveries (log transformed)"
      }
      else{
-       x_value <- gdp_cases %>% 
-         filter(new_date == input$dateInput) %>% 
-         pull(log_deaths)
+       x_value <- "log_deaths"
+       # x_value <- gdp_cases %>% 
+       #   filter(new_date == input$dateInput) %>% 
+       #   pull(log_deaths)
        x_axis <- "Deaths (log transformed)"
      }
  
@@ -1022,9 +1030,9 @@ options(scipen = 999)
  
      gdp_cases %>%
        filter(new_date == input$dateInput) %>% 
-       ggplot(aes(x = x_value, y = log(gdp_per_capita), label = CountryCode, color = sub.region)) +
-       geom_point() +
-       geom_text() +
+       ggplot(aes_string(x = x_value, label = "CountryCode", color = "sub.region")) +
+       geom_point(aes(y = log(gdp_per_capita))) +
+       geom_text(aes(y = log(gdp_per_capita))) +
        labs(
          title = "Relationship between GDP Per Capita and the Number of Cases",
          subtitle = "By Type of Case",
