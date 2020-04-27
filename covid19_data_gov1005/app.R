@@ -8,22 +8,23 @@ library(janitor)
 library(countrycode)
 library(gganimate)
 
-# Potentially read in data directly from GitHub Repo. This will automatically
-# update Shiny IF we run a CRONR job for the script that creates the RDS files.
+# Reading in data directly from GitHub Repo. This will automatically update
+# Shiny IF we run a CRONR job for the script that creates the RDS files.
 
 # For spread:
 
-covidGlobal <- readRDS("../covid19_data_gov1005/covidGlobal.RDS")
-covidUS <- readRDS("../covid19_data_gov1005/covidUS.RDS")
-worldometer_data <- readRDS("../covid19_data_gov1005/worldometer.RDS")
-tests_per_state <- readRDS("../covid19_data_gov1005/tests_per_state.RDS")
+covidGlobal <- readRDS(url("https://github.com/nishu-lahoti/covid19_data_gov1005/blob/master/covid19_data_gov1005/covidGlobal.RDS?raw=true"))
+covidUS <- readRDS(url("https://github.com/nishu-lahoti/covid19_data_gov1005/blob/master/covid19_data_gov1005/covidUS.RDS?raw=true"))
+worldometer_data <- readRDS(url("https://github.com/nishu-lahoti/covid19_data_gov1005/blob/master/covid19_data_gov1005/worldometer.RDS?raw=true"))
+tests_per_state <- readRDS(url("https://github.com/nishu-lahoti/covid19_data_gov1005/blob/53a643de83c9c4d5bf0d438b0ddc2a6e8816a59b/covid19_data_gov1005/tests_per_state.RDS?raw=true"))
 
 # For policy:
-policy <- readRDS("../covid19_data_gov1005/policy.RDS")
+policy <- readRDS(url("https://github.com/nishu-lahoti/covid19_data_gov1005/blob/master/covid19_data_gov1005/policy.RDS?raw=true"))
 
 # For economics:
-stock_data <- readRDS("../covid19_data_gov1005/stock_data.RDS")
-gdp_percapita_cases <- readRDS("../covid19_data_gov1005/gdp_per_capita.RDS")
+stock_cases <- readRDS(url("https://github.com/nishu-lahoti/covid19_data_gov1005/blob/master/covid19_data_gov1005/stock_cases.RDS?raw=true"))
+gdp_cases <- readRDS(url("https://github.com/nishu-lahoti/covid19_data_gov1005/blob/master/covid19_data_gov1005/gdp.RDS?raw=true"))
+
 
 
 ########## Shiny App Starts Here ##########
@@ -84,10 +85,10 @@ ui <- navbarPage("The COVID-19 Data Project",
                             to believe it could be contained and would not impact daily life. The aim of the visualizations below
                             are to dispel that belief, showing just how quickly Coronavirus has spread in countries across the world,
                             it's devastation, and the eventual pathway to recovery."),
-                          # sidebarLayout(
-                            # sidebarPanel(
-                              h3("Select a country to see how the arc of COVID-19 cases and deaths"),
-                              selectInput("country_region", NULL,
+                              tabsetPanel(
+                                tabPanel("Rate of Spread",
+                                  h3("Select a country to see how the arc of COVID-19 cases and deaths"),
+                                  selectInput("country_region", NULL,
                                           choices = c("Afghanistan",				
                                                       "Angola",			
                                                       "Albania",
@@ -231,8 +232,8 @@ ui <- navbarPage("The COVID-19 Data Project",
                                                       "Taiwan*"	)),
                             textOutput("selected_var"),
                             plotOutput("covidSpread"),
-                            plotOutput("covidDeaths"),
-                          br(),
+                            plotOutput("covidDeaths")),
+                          tabPanel("Testing",
                           p("We aimed to understand if there was bias in the reporting of new COVID-19 cases.
                             Specifically, how did a country's capacity to test influence it's total case reporting?
                             We suspected that countries with a greater ability to test would report a greater number of cases,
@@ -240,7 +241,8 @@ ui <- navbarPage("The COVID-19 Data Project",
                           plotOutput("covidHighTests"),
                           plotOutput("covidMTests"),
                           plotOutput("covidLogTests"),
-                          plotOutput("covidLogMTests")),
+                          plotOutput("covidLogMTests")))
+                        ),
                  
                  # Add narrative about policy. One - three paragraphs.
                  # Add top two visualizations.
@@ -258,6 +260,7 @@ ui <- navbarPage("The COVID-19 Data Project",
                             controls, 8) testing policy, and 9) contact tracing. By comparing the change in number 
                             of cases with the stringency of the policy measure enacted, we can examine the efficacy 
                             of each given policy within each country analyzed."),
+                          br(),
                           sidebarLayout(
                             sidebarPanel(
                               helpText("Look at country-specific policy"),
@@ -409,7 +412,15 @@ ui <- navbarPage("The COVID-19 Data Project",
                                                       "South Africa",				
                                                       "Zambia",				
                                                       "Zimbabwe",
-                                                      "Taiwan*"	))
+                                                      "Taiwan*"	)),
+                              sliderInput("dateRange",
+                                          "Select a date range:",
+                                          min = as.Date("2020-01-22","%Y-%m-%d"),
+                                          max = Sys.Date(),
+                                          value = c(as.Date("2020-01-22"), Sys.Date()),
+                                          timeFormat = "%Y-%m-%d"),
+                              p("Solid line represents Confirmed Cases, \n Dashed line represents Deaths,\n Dotted line represents Recovered.")
+                      
                             ),
                             mainPanel(plotOutput("countryPolicy"))),
                           br(),
@@ -422,16 +433,15 @@ ui <- navbarPage("The COVID-19 Data Project",
                           sidebarLayout(
                             sidebarPanel(
                               helpText("Compare global policy"),
+                              radioButtons("caseInput", "Choose a case type",
+                                           choices = c("Confirmed", "Deaths", "Recovered"),
+                                           selected = "Confirmed"),
                               sliderInput("dateInput",
                                           "Select a date:",
                                           min = as.Date("2020-01-22","%Y-%m-%d"),
                                           max = Sys.Date(),
-                                          value = as.Date("2016-01-22"),
-                                          timeFormat = "%Y-%m-%d"),
-                              radioButtons("caseInput", "Choose a case type",
-                                           choices = c("Confirmed", "Deaths", "Recovered"),
-                                           selected = "Confirmed")
-                              
+                                          value = as.Date("2020-01-22"),
+                                          timeFormat = "%Y-%m-%d")
                             ),
                             mainPanel(plotOutput("globalPolicy")))),
                  
@@ -444,26 +454,39 @@ ui <- navbarPage("The COVID-19 Data Project",
                           sidebarLayout(
                             sidebarPanel(
                               helpText("Look at COVID-19's impact on stock prices for select countries"),
-                              selectInput("countryInput", "Select a Country: ",
+                              selectInput("countryInputs", "Select a Country: ",
                                           choices = c("China", 
                                                       "Germany", 
                                                       "Italy", 
-                                                      "South Korea", 
+                                                      "Korea, South", 
                                                       "Spain", 
-                                                      "United States")),
-                              radioButtons("caseInput", "Choose a case type",
+                                                      "US")),
+                              radioButtons("caseInputs", "Choose a case type",
                                            choices = c("Confirmed", "Deaths", "Recovered"),
                                            selected = "Confirmed")
+                              #,
+                              # sliderInput("dateRange",
+                              #             "Select a date range:",
+                              #             min = as.Date("2020-01-22","%Y-%m-%d"),
+                              #             max = Sys.Date(),
+                              #             value = c(as.Date("2020-01-22"), Sys.Date()),
+                              #             timeFormat = "%Y-%m-%d")
                             ),
                             mainPanel(plotOutput("stock_impact"))),
                           
+                          br(),
                           sidebarLayout(
                             sidebarPanel(
                               helpText("Compare COVID-19's impact among countries of different GDP levels"),
                               radioButtons("caseInput", "Choose a case type",
                                            choices = c("Confirmed", "Deaths", "Recovered"),
-                                           selected = "Confirmed")
-                              
+                                           selected = "Confirmed"),
+                              sliderInput("dateInput",
+                                          "Select a date:",
+                                          min = as.Date("2020-01-22","%Y-%m-%d"),
+                                          max = Sys.Date(),
+                                          value = as.Date("2020-01-22"),
+                                          timeFormat = "%Y-%m-%d")
                             ),
                             mainPanel(plotOutput("gdp_cases")))),
                  
@@ -522,21 +545,17 @@ ui <- navbarPage("The COVID-19 Data Project",
 # Define server logic
 server <- function(input, output) {
   
-  # Spread
+# Spread
   
   output$selected_var <- renderText({
     paste(input$country_region)
   })
-  
+
   output$worldometer_log <- renderPlot({
-    
+
     worldometer_log <- worldometer_data %>%
-      mutate(log_cases = log(total_cases),
-             log_deaths = log(total_deaths),
-             log_recovered = log(total_recovered),
-             log_tests = log(total_tests),
-             log_tests_1m = log(tests_1m_pop))
-    
+
+
     ggplot(worldometer_log, aes(log_cases, log_tests_1m, color = country_other)) +
       geom_point() +
       theme(legend.position = "none") +
@@ -545,127 +564,129 @@ server <- function(input, output) {
         x = "Cases \n(x10,000)",
         y = "Tests per 1M \n(x10,000)"
       )
-    
+
   })
-  
+
   output$covidSpread <- renderPlot({
-    
+
     covidGlobal %>%
       filter(country_region == input$country_region,
              increment_confirmed >= 0) %>%
-      ggplot(aes(x = new_date, y = increment_confirmed)) + 
+      ggplot(aes(x = new_date, y = increment_confirmed)) +
       geom_col() +
       labs(
         title = "Incremental Cases of COVID-19\nmeasured over time",
         x = "Date",
         y = "New Daily Cases"
       )
-    
+
   })
-  
+
   output$covidDeaths <- renderPlot({
-    
+
     covidGlobal %>%
       filter(country_region == input$country_region,
              increment_confirmed >= 0) %>%
-      ggplot(aes(x = new_date, y = increment_deaths)) + 
+      ggplot(aes(x = new_date, y = increment_deaths)) +
       geom_col() +
       labs(
         title = "Incremental Deaths of COVID-19\nmeasured over time",
         x = "Date",
         y = "New Daily Deaths"
       )
-    
+
   })
-  
+
 options(scipen = 999)
-  
-# Normal
-worldometer_tests <- worldometer_data %>%
-  filter(total_cases >= 15000, 
-          !is.na(total_tests))
-  
-# Logarithmic
-  
-worldometer_log <- worldometer_data %>%
-  mutate(log_cases = log(total_cases),
-          log_deaths = log(total_deaths),
-          log_recovered = log(total_recovered),
-          log_tests = log(total_tests),
-          log_tests_1m = log(tests_1m_pop))
-  
-  output$covidHighTests <- renderPlot({
-  # Visualizing total cases and total deaths against total tests. A good next step may be to filter by countries of interest and to get a good enough
-  # sample of countries that have tested. Qualify a country based on total number of cases (>1000). Maybe there is a weak positive correlation.
-  
-  
-  ggplot(worldometer_tests, aes(total_cases, total_tests, color = country_other)) + 
-    geom_point() +
-    geom_jitter() +
-    theme_classic() +
-    theme(legend.position = "top") +
-    labs(
-      title = "Comparing COVID-19 Cases versus Total Tests",
-      subtitle = "Comparing total conducted tests \nfor countries with over 15,000 reported cases.",
-      x = "Total Cases",
-      y = "Tests per 1M",
-      color = "Country"
-    )
-  
+
+  # Normal
+  worldometer_tests <- worldometer_data %>%
+    filter(total_cases >= 15000,
+            !is.na(total_tests))
+
+  # Logarithmic
+
+  worldometer_log_data <- worldometer_data %>%
+    mutate(log_cases = log(total_cases),
+            log_deaths = log(total_deaths),
+            log_recovered = log(total_recovered),
+            log_tests = log(total_tests),
+            log_tests_1m = log(tests_1m_pop))
+
+    output$covidHighTests <- renderPlot({
+    # Visualizing total cases and total deaths against total tests. A good next step may be to filter by countries of interest and to get a good enough
+    # sample of countries that have tested. Qualify a country based on total number of cases (>1000). Maybe there is a weak positive correlation.
+
+
+    ggplot(worldometer_tests, aes(total_cases, total_tests, color = country_other)) +
+      geom_point() +
+      geom_jitter() +
+      theme_classic() +
+      theme(legend.position = "top") +
+      labs(
+        title = "Comparing COVID-19 Cases versus Total Tests",
+        subtitle = "Comparing total conducted tests \nfor countries with over 15,000 reported cases.",
+        x = "Total Cases",
+        y = "Tests per 1M",
+        color = "Country"
+      )
+
   })
 
-output$covidMTests <- renderPlot({
+  output$covidMTests <- renderPlot({
 
-  ggplot(worldometer_tests, aes(total_cases, tests_1m_pop, color = country_other)) + 
-    geom_point() +
-    geom_jitter() +
-    theme_classic() +
-    theme(legend.position = "top") +
-    labs(
-      title = "COVID-19 Country Testing Capacity",
-      subtitle = "Visualizing a country's case rate against testing rate\nfor countries with over 15,000 reported cases.",
-      x = "Total Cases",
-      y = "Tests per 1M",
-      color = "Country"
-    )
-  
-})
-  
+    ggplot(worldometer_tests, aes(total_cases, tests_1m_pop, color = country_other)) +
+      geom_point() +
+      geom_jitter() +
+      theme_classic() +
+      theme(legend.position = "top") +
+      labs(
+        title = "COVID-19 Country Testing Capacity",
+        subtitle = "Visualizing a country's case rate against testing rate\nfor countries with over 15,000 reported cases.",
+        x = "Total Cases",
+        y = "Tests per 1M",
+        color = "Country"
+      )
 
-output$covidLogTests <- renderPlot({
-  # Logarithmic plot of total tests
-  
-  ggplot(worldometer_log, aes(log_cases, log_tests, color = country_other)) +
-    geom_point() +
-    theme(legend.position = "none") +
-    labs(
-      title = "Logarithmic comparison of cases to tests",
-      x = "Cases \n(x10,000)",
-      y = "Tests \n(x10,000)"
-    )
-})
-  
-output$covidLogMTests <- renderPlot({
-  # Logarithmic plot of tests per 1m
-  
-  ggplot(worldometer_log, aes(log_cases, log_tests_1m, color = country_other)) +
-    geom_point() +
-    theme(legend.position = "none") +
-    labs(
-      title = "Logarithmic comparison of cases to tests",
-      x = "Cases \n(x10,000)",
-      y = "Tests per 1M \n(x10,000)"
-    )
   })
-  
-  # Policy
+
+
+  output$covidLogTests <- renderPlot({
+    # Logarithmic plot of total tests
+
+    ggplot(worldometer_log_data, aes(log_cases, log_tests, color = country_other)) +
+      geom_point() +
+      theme(legend.position = "none") +
+      labs(
+        title = "Logarithmic comparison of cases to tests",
+        x = "Cases \n(x10,000)",
+        y = "Tests \n(x10,000)"
+      )
+
+  })
+
+  output$covidLogMTests <- renderPlot({
+    # Logarithmic plot of tests per 1m
+
+    ggplot(worldometer_log_data, aes(log_cases, log_tests_1m, color = country_other)) +
+      geom_point() +
+      theme(legend.position = "none") +
+      labs(
+        title = "Logarithmic comparison of cases to tests",
+        x = "Cases \n(x10,000)",
+        y = "Tests per 1M \n(x10,000)"
+      )
+
+  })
+
+# Policy
   
   output$countryPolicy <- renderPlot({
     
     if(input$indexInput == "School closing") {
       color <- policy %>% 
         filter(Country == input$countryInput) %>% 
-        filter(new_date >= "2020-02-01") %>% 
+        filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>% 
         pull(S1_School.closing)
       subtitle <- "Policy response: Closings of schools and universities"
       breaks <- c("0", "1", "2")
@@ -675,7 +696,7 @@ output$covidLogMTests <- renderPlot({
     else if(input$indexInput == "Workplace closing") {
       color <- policy %>% 
         filter(Country == input$countryInput) %>% 
-        filter(new_date >= "2020-02-01") %>% 
+        filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>% 
         pull(S2_Workplace.closing)
       subtitle <- "Policy response: Closings of workplaces"
       breaks <- c("0", "1", "2")
@@ -685,7 +706,7 @@ output$covidLogMTests <- renderPlot({
     else if(input$indexInput == "Cancel public events") {
       color <- policy %>% 
         filter(Country == input$countryInput) %>% 
-        filter(new_date >= "2020-02-01") %>% 
+        filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>% 
         pull(S3_Cancel.public.events)
       subtitle <- "Policy response: Cancelling public events"
       breaks <- c("0", "1", "2")
@@ -695,7 +716,7 @@ output$covidLogMTests <- renderPlot({
     else if(input$indexInput == "Public transport closings") {
       color <- policy %>% 
         filter(Country == input$countryInput) %>% 
-        filter(new_date >= "2020-02-01") %>% 
+        filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>% 
         pull(S4_Close.public.transport)
       subtitle <- "Policy response: Closing of public transport"
       breaks <- c("0", "1", "2")
@@ -705,7 +726,7 @@ output$covidLogMTests <- renderPlot({
     else if(input$indexInput == "Public info campaigns") {
       color <- policy %>% 
         filter(Country == input$countryInput) %>% 
-        filter(new_date >= "2020-02-01") %>% 
+        filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>% 
         pull(S5_Public.information.campaigns)
       subtitle <- "Policy response: Presence of public info campaigns"
       breaks <- c("0", "1")
@@ -715,7 +736,7 @@ output$covidLogMTests <- renderPlot({
     else if(input$indexInput == "Restrictions on internal movement") {
       color <- policy %>% 
         filter(Country == input$countryInput) %>% 
-        filter(new_date >= "2020-02-01") %>% 
+        filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>% 
         pull(S6_Restrictions.on.internal.movement)
       subtitle <- "Policy response: Restrictions on internal movement"
       breaks <- c("0", "1", "2")
@@ -725,7 +746,7 @@ output$covidLogMTests <- renderPlot({
     else if(input$indexInput == "International travel controls") {
       color <- policy %>% 
         filter(Country == input$countryInput) %>% 
-        filter(new_date >= "2020-02-01") %>% 
+        filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>% 
         pull(S7_International.travel.controls)
       subtitle <- "Policy response: Restrictions on international travel"
       breaks <- c("0", "1", "2", "3")
@@ -735,35 +756,35 @@ output$covidLogMTests <- renderPlot({
     else if(input$indexInput == "Fiscal measures") {
       color <- policy %>% 
         filter(Country == input$countryInput) %>% 
-        filter(new_date >= "2020-02-01") %>% 
+        filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>% 
         pull(S8_Fiscal.measures)
       subtitle <- "Policy response: Value of fiscal stimuli (in USD)"
     }
     else if(input$indexInput == "Monetary measures") {
       color <- policy %>% 
         filter(Country == input$countryInput) %>% 
-        filter(new_date >= "2020-02-01") %>% 
+        filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>% 
         pull(S9_Monetary.measures)
       subtitle <- "Policy response: Monetary measures (Value of interest rate, in %)"
     }
     else if(input$indexInput == "Emergency investment in healthcare") {
       color <- policy %>% 
         filter(Country == input$countryInput) %>% 
-        filter(new_date >= "2020-02-01") %>% 
+        filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>% 
         pull(S10_Emergency.investment.in.health.care)
       subtitle <- "Policy response: Emergency investment in healthcare (in USD)"
     }
     else if(input$indexInput == "Investment in vaccines") {
       color <- policy %>% 
         filter(Country == input$countryInput) %>% 
-        filter(new_date >= "2020-02-01") %>% 
+        filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>% 
         pull(S11_Investment.in.Vaccines)
       subtitle <- "Policy response: Investment in vaccines (in USD)"
     }
     else if(input$indexInput == "Testing policy") {
       color <- policy %>% 
         filter(Country == input$countryInput) %>% 
-        filter(new_date >= "2020-02-01") %>% 
+        filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>% 
         pull(S12_Testing.framework)
       subtitle <- "Policy response: Testing policy"
       breaks <- c("0", "1", "2", "3")
@@ -776,7 +797,7 @@ output$covidLogMTests <- renderPlot({
     else if(input$indexInput == "Contact tracing") {
       color <- policy %>% 
         filter(Country == input$countryInput) %>% 
-        filter(new_date >= "2020-02-01") %>% 
+        filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>% 
         pull(S13_Contact.tracing)
       subtitle <- "Policy response: Contact tracing"
       breaks <- c("0", "1")
@@ -787,20 +808,20 @@ output$covidLogMTests <- renderPlot({
     else {
       color <- policy %>% 
         filter(Country == input$countryInput) %>% 
-        filter(new_date >= "2020-02-01") %>% 
+        filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>% 
         pull(StringencyIndexForDisplay)
       subtitle <- "Stringency Index"
     } 
     
     
     # Create plot for one country's response
-    
+
     
     policy %>%  
       filter(Country == input$countryInput) %>% 
-      filter(new_date >= "2020-02-01") %>%
+      filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>%
       ggplot(aes(x = new_date, color = as.factor(color))) +
-      geom_line(aes(y = log_confirmed), linetype = "solid" ) +
+      geom_line(aes(y = log_confirmed), linetype = "solid") +
       geom_line(aes(y = log_deaths), linetype = "dashed") +
       geom_line(aes(y = log_recovered), linetype = "dotted") +
       scale_color_manual(
@@ -809,7 +830,7 @@ output$covidLogMTests <- renderPlot({
         values = values
       ) +
       labs(
-        title = "Spread and Stringency Response, February Onward",
+        title = "Spread and Stringency Response",
         subtitle = subtitle,
         x = "Time",
         y = "Count (log transformed)",
@@ -862,155 +883,226 @@ output$covidLogMTests <- renderPlot({
     
   })
   
-  # Economic Impact
+  
+# Economic Impact
 
-# output$stock_impact <- renderPlot({
-#   
-#     if(input$countryInput == "China") {
-#       y_value <- stock_data %>%
-#         filter(Country == "China") %>%
-#         pull(SSE_China)
-#       y_axis <- "Index: SSE"
-#       subtitle <- "In China"
-#     }
-#    else if(input$countryInput == "Germany") {
-#       y_value <- stock_data %>%
-#         filter(Country == "Germany") %>%
-#         pull(DAX)
-#       y_axis <- "Index: DAX"
-#       subtitle <- "In Germany"
-#     }
-#     else if(input$countryInput == "Italy") {
-#       y_value <- stock_data %>%
-#         filter(Country == "Italy") %>%
-#         pull(FTSE_Italy)
-#       y_axis <- "Index: FTSE"
-#       subtitle <- "In Italy"
-#     }
-#     else if(input$countryInput == "South Korea") {
-#       y_value <- stock_data %>%
-#         filter(Country == "South Korea") %>%
-#         pull(KOSPI)
-#       y_axis <- "Index: KOSPI"
-#       subtitle <- "In South Korea"
-#     }
-#     else if(input$countryInput == "Spain") {
-#       y_value <- stock_data %>%
-#         filter(Country == "Spain") %>%
-#         pull(IBEX_Spain)
-#       y_axis <- "Index: IBEX"
-#       subtitle <- "In Spain"
-#     }
-#     else {
-#       y_value <- stock_data %>%
-#         filter(Country == "USA") %>%
-#         pull(NASDAQ)
-#       y_axis <- "Index: NASDAQ"
-#       subtitle <- "In the United States"
-#     }
-# 
-#   
-#     if(input$caseInput == "Confirmed") {
-#       x_value <- stock_data %>%
-#         filter(Country == input$countryInput) %>%
-#         pull(confirmed)
-#       x_axis <- "Number of Confirmed Cases (log transformed)"
-#       title <- "Impact of Confirmed Cases on Stock Indices"
-#     }
-#     else if(input$caseInput == "Recovered") {
-#       x_value <- stock_data %>%
-#         filter(Country == input$countryInput) %>%
-#         pull(recovered)
-#       x_axis <- "Number of Recovered Cases (log transformed)"
-#       title <- "Impact of Recovered Cases on Stock Indices"
-#     }
-#     else{
-#       x_value <- stock_data %>%
-#         filter(Country == input$countryInput) %>%
-#         pull(deaths)
-#       x_axis <- "Number of Deaths (log transformed)"
-#       title <- "Impact of Number of Deaths on Stock Indices"
-#     }
-#     # Create plot for one country's response
-# 
-#     stock_data %>%
-#       filter(y_value != "NA", x_value != "0") %>%
-#       ggplot(aes(x = log(x_value))) +
-#       geom_line(aes(y = y_value), linetype = "solid") +
-#       labs(
-#         title = title,
-#         subtitle = subtitle,
-#         x = x_axis,
-#         y = y_axis
-#       ) +
-#       transition_reveal(new_date) +
-#       theme_classic()
-# 
-#   })
+  output$stock_impact <- renderPlot({
+   
+master
+      if(input$countryInputs == "China") {
+       # y_value <- stock_cases %>%
+       #   #filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>%
+       #  # filter(new_date == 2020-04-01) %>%
+       #   filter(stock == "SSE_China" ) %>%
+       #   pull(price)
+        y_axis <- "Index: SSE"
+        subtitlex <- "In China"
+      }
+     else if(input$countryInputs == "Germany") {
+       # y_value <- stock_cases %>%
+       #   #filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>%
+       #  # filter(new_date == 2020-04-01) %>%
+       #   filter(stock == "DAX" ) %>%
+       #   pull(price)
+     }
+    
+     if(input$countryInput == "China") {
+       y_value <- stock_cases %>%
+         filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>% 
+         filter(stock == "SSE_China") %>%
+         pull(price)
+       y_axis <- "Index: SSE"
+       subtitle <- "In China"
+     }
+     else if(input$countryInput == "Germany") {
+       y_value <- stock_cases %>%
+         filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>%
+         filter(stock == "DAX") %>%
+         pull(price)
+       y_axis <- "Index: DAX"
+       subtitlex <- "In Germany"
+     }
 
-#   output$gdp_cases <- renderPlot({
-# 
-#     # input$dateInput
-#     
-#     # Import population and GDP data from World Bank, latest available 2018
-#     
-#     population_data_18 <- read_csv("../gdp/API_pop.csv", skip = 3) %>% 
-#       clean_names() %>% 
-#       select(country_code, x2018) %>% 
-#       rename(pop_2018 = x2018)
-#     
-#     gdp_data_18 <- read_csv("../gdp/API_gdp.csv", skip = 3) %>%
-#       clean_names() %>% 
-#       select(country_code, x2018) %>% 
-#       rename(gdp_2018 = x2018)
-#     
-#     # Combine to create variable for GDP per capita
-#     
-#     gdp_pop_2018 <- gdp_data_18 %>% 
-#       left_join(population_data_18, by = "country_code") %>% 
-#       mutate(gdp_per_capita = round(gdp_2018 / pop_2018, digits = 2))
-#     
-#     # worldometer_data$country_other <- countrycode(worldometer_data$country_other, origin = "country.name", destination = "iso3c", warn = FALSE)
-#     
-#     policy <- policy %>% 
-#       rename(country_code = CountryCode)
-#     
-#     global_gdp <- gdp_pop_2018 %>%
-#       full_join(policy, by = c("country_code")) %>%
-#       select(Country, country_code, pop_2018, gdp_2018, gdp_per_capita, log_confirmed, log_deaths, log_recovered) %>%
-#       filter(new_date == 2020-4-23) %>% 
-#       na.omit()
-# 
-#     if(input$caseInput == "Confirmed") {
-#       y_value <- global_gdp$log_confirmed
-#       y_axis <- "Total Confirmed Cases (log transformed)"
-#     }
-#     else if(input$caseInput == "Recovered") {
-#       y_value <- global_gdp$log_deaths
-#       y_axis <- "Total Recovered Cases (log transformed)"
-#     }
-#     else{
-#       y_value <- global_gdp$log_recovered
-#       y_axis <- "Total Deaths (log transformed)"
-#     }
-# 
-# 
-#     global_gdp %>%
-#       ggplot(aes(x = log(gdp_per_capita), y = y_value, label = CountryCode)) +
-#       geom_point() +
-#       geom_text() +
-#       labs(
-#         title = "Relationship between GDP Per Capita and the Number of Cases",
-#         subtitle = "By Type of Case",
-#         x = "GDP Per Capita (log transformed)",
-#         y = y_axis
-#       ) +
-#       theme_classic()
-# 
-# })
-# 
+     else if(input$countryInputs == "Italy") {
+       # y_value <- stock_cases %>%
+       #   #filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>%
+       # #  filter(new_date == 2020-04-01) %>%
+       #   filter(stock == "FTSE_Italy" ) %>%
+       #   pull(price)
+     }
+
+     else if(input$countryInput == "Italy") {
+       y_value <- stock_cases %>%
+         filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>%
+         filter(stock == "FTSE_Italy") %>%
+         pull(price)
+
+       y_axis <- "Index: FTSE"
+       subtitlex <- "In Italy"
+     }
+
+     else if(input$countryInputs == "Korea, South") {
+       # y_value <- stock_cases %>%
+       #   #filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>%
+       #  # filter(new_date == 2020-04-01) %>%
+       #   filter(stock == "KOSPI" ) %>%
+       #   pull(price)
+     }
+       
+     else if(input$countryInput == "South Korea") {
+       y_value <- stock_cases %>%
+         filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>%
+         filter(stock == "KOSPI") %>%
+         pull(price)
+
+       y_axis <- "Index: KOSPI"
+       subtitlex <- "In South Korea"
+     }
+
+     else if(input$countryInputs == "Spain") {
+       # y_value <- stock_cases %>%
+       #   #filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>%
+       #  # filter(new_date == 2020-04-01) %>%
+       #   filter(stock == "IBEX_Spain" ) %>%
+       #   pull(price)
+     }
+    
+     else if(input$countryInput == "Spain") {
+       y_value <- stock_cases %>%
+         filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>%
+         filter(stock == "IBEX_Spain") %>%
+         pull(price)
+
+       y_axis <- "Index: IBEX"
+       subtitlex <- "In Spain"
+     }
+     else {
+
+       # y_value <- stock_cases %>%
+       #   #filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>%
+       #  # filter(new_date == 2020-04-01) %>%
+       #   filter(stock == "NASDAQ") %>%
+       #   pull(price)
+
+       y_value <- stock_cases %>%
+         filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>%
+         filter(stock == "NASDAQ") %>%
+         pull(price)
+       y_axis <- "Index: NASDAQ"
+       subtitlex <- "In the United States"
+     }
+
+    # alter countryInput to fit Country variable options in economic_data
+    #
+    # if(input$countryInput == "South Korea") {
+    #   input$countryInput <- "Korea, South"
+    # }
+    # if(input$countryInput == "United States") {
+    #   input$countryInput <- "US"
+    # }
+   
+     if(input$caseInputs == "Confirmed") {
+       x_value <- "log_confirmed"
+       # x_value <- stock_cases %>%
+       #   # filter(Country == input$countryInput) %>%
+       #   # #filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>%
+       #   # filter(new_date == 2020-04-01) %>%
+       #   pull(log_confirmed)
+       x_axis <- "Number of Confirmed Cases (log transformed)"
+       titlex <- "Impact of Confirmed Cases on Stock Indices"
+     }
+     else if(input$caseInputs == "Recovered") {
+       x_value <- "log_recovered"
+       # x_value <- stock_cases %>%
+       #   # filter(Country == input$countryInput) %>%
+       #   # #filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>%
+       #   # filter(new_date == 2020-04-01) %>%
+       #   pull(log_recovered)
+       x_axis <- "Number of Recovered Cases (log transformed)"
+       titlex <- "Impact of Recovered Cases on Stock Indices"
+     }
+     else{
+       x_value <- "log_deaths"
+       # x_value <- stock_cases %>%
+       #   # filter(Country == input$countryInput) %>%
+       #   # #filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>%
+       #   # filter(new_date == 2020-04-01) %>%
+       #   pull(log_deaths)
+       x_axis <- "Number of Deaths (log transformed)"
+       titlex <- "Impact of Number of Deaths on Stock Indices"
+     }
+    
+   # Create plot for one country's response
+ 
+     stock_cases %>%
+       #filter(y_value != "NA", log_confirmed != "0") %>%
+
+       filter(Country == input$countryInputs, is.finite(price)) %>% 
+       #filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>%
+       #filter(new_date == 2020-04-01) %>% 
+       #filter(log_confirmed != "-Inf", price != "NA") %>% 
+       ggplot(aes_string(x = x_value)) +
+       geom_line(aes(y = price), linetype = "solid") +
+
+       filter(Country == input$countryInput) %>% 
+       filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>%
+       ggplot(aes(x = log_confirmed, y = y_value)) +
+       geom_line(linetype = "solid") +
+
+       labs(
+         title = titlex,
+         subtitle = subtitlex,
+         x = x_axis,
+         y = y_axis
+       ) +
+       theme_classic()
+ 
+   })
+
+   output$gdp_cases <- renderPlot({
+     
+     if(input$caseInput == "Confirmed") {
+       x_value <- "log_confirmed"
+       # x_value <- gdp_cases %>% 
+       #   filter(new_date == input$dateInput) %>% 
+       #   pull(log_confirmed)
+       x_axis <- "Confirmed cases (log transformed)"
+     }
+     else if(input$caseInput == "Recovered") {
+       x_value <- "log_recovered"
+       # x_value <- gdp_cases %>% 
+       #   filter(new_date == input$dateInput) %>% 
+       #   pull(log_recovered)
+       x_axis <- "Recoveries (log transformed)"
+     }
+     else{
+       x_value <- "log_deaths"
+       # x_value <- gdp_cases %>% 
+       #   filter(new_date == input$dateInput) %>% 
+       #   pull(log_deaths)
+       x_axis <- "Deaths (log transformed)"
+     }
+ 
+    # Plot cases vs. (static) GDP per capita levels
+ 
+     gdp_cases %>%
+       filter(new_date == input$dateInput) %>% 
+       ggplot(aes_string(x = x_value, label = "CountryCode", color = "sub.region")) +
+       geom_point(aes(y = log(gdp_per_capita))) +
+       geom_text(aes(y = log(gdp_per_capita))) +
+       labs(
+         title = "Relationship between GDP Per Capita and the Number of Cases",
+         subtitle = "By Type of Case",
+         x = x_axis,
+         y = "GDP Per Capita (log transformed)",
+         color = "Region"
+       ) +
+       theme_classic()
+ 
+ })
+ 
 }
-#   
+   
 
 # Run the application
 shinyApp(ui = ui, server = server)
