@@ -55,8 +55,8 @@ ui <- navbarPage("The COVID-19 Data Project",
                                  p("COVID-19 has spread more rapidly than most politicians and people, in general, expected.
                                  In some countries, the total number of confirmed cases and deaths exponentially increased
                                  over the early months of 2020. In other countries, the total number of confirmed cases is uncertain
-                                 due to a lack of testing. In “Spread”, we explore how COVID-19 spread in countries across the world and
-                                 the correlation with each country's ability to test."),
+                                 due to a lack of testing. In “Spread”, we explore the rate at which COVID-19 spread in countries across the world and
+                                 how this increase correlates with each country's ability to test."),
                                  br(),
                                  h4(em("Policy:")),
                                  p("Governments around the world have implemented a variety of measures to respond to 
@@ -79,16 +79,20 @@ ui <- navbarPage("The COVID-19 Data Project",
                  tabPanel("Spread",
                           h1("Visualizing the rate of spread across countries"),
                           p("The rapidity with which COVID-19 spread within countries surprised political leaders
-                            and society, as a whole. In the early months of 2020, most global citizens believed
+                            and society, as a whole. In the early months of 2020, most societies  believed
                             the Coronavirus to be a problem distant to their daily life, sequestered to a manufacturing
                             city in the heart of China. As the virus began spreading outside of Wuhan, society-at-large continued
-                            to believe it could be contained and would not impact daily life. The aim of the visualizations below
-                            are to dispel that belief, showing just how quickly Coronavirus has spread in countries across the world,
+                            to believe it could be contained and would not have a severe impact on daily life. The aim of this section is 
+                            to dispel that belief, showing just how quickly Coronavirus has spread in countries across the world,
                             it's devastation, and the eventual pathway to recovery."),
-                          # sidebarLayout(
-                            # sidebarPanel(
-                              h3("Select a country to see how the arc of COVID-19 cases and deaths"),
-                              selectInput("country_region", NULL,
+                           p("The first section allows users to see the incremental increase in case rate and deaths related to COVID-19
+                           for over 130 countries. The second section aims to see how a country's capacity to test influences it's total case reporting.
+                            We suspect that countries with a greater ability to test would report a greater number of cases,
+                            and vice versa."),
+                              tabsetPanel(
+                                tabPanel("Rate of Spread",
+                                  h3("Select a country to see how the arc of COVID-19 cases and deaths"),
+                                  selectInput("country_region", NULL,
                                           choices = c("Afghanistan",				
                                                       "Angola",			
                                                       "Albania",
@@ -232,16 +236,19 @@ ui <- navbarPage("The COVID-19 Data Project",
                                                       "Taiwan*"	)),
                             textOutput("selected_var"),
                             plotOutput("covidSpread"),
-                            plotOutput("covidDeaths"),
-                          br(),
-                          p("We aimed to understand if there was bias in the reporting of new COVID-19 cases.
-                            Specifically, how did a country's capacity to test influence it's total case reporting?
-                            We suspected that countries with a greater ability to test would report a greater number of cases,
-                            and vice versa."),
+                            plotOutput("covidDeaths")),
+                          tabPanel("Testing",
+                          h3("Cases compared to Testing"),
+                          p("The visualizations below compare a country's case reporting with its capability to test. Suspecting that
+                            countries with more testing infrastructure will report higher case rates, we used linear regressions to visualize the
+                            whether the relationship between these variables was positive or negative. The data we have shows that there is a correlation
+                            between a country's ability to test and it's overall reported cases. At the same time, it shows that country's with the highest
+                            number of testing units do not necessarily have the highest rate of testing for their populace."),
                           plotOutput("covidHighTests"),
                           plotOutput("covidMTests"),
                           plotOutput("covidLogTests"),
-                          plotOutput("covidLogMTests")),
+                          plotOutput("covidLogMTests")))
+                        ),
                  
                  # Add narrative about policy. One - three paragraphs.
                  # Add top two visualizations.
@@ -259,6 +266,7 @@ ui <- navbarPage("The COVID-19 Data Project",
                             controls, 8) testing policy, and 9) contact tracing. By comparing the change in number 
                             of cases with the stringency of the policy measure enacted, we can examine the efficacy 
                             of each given policy within each country analyzed."),
+                          br(),
                           sidebarLayout(
                             sidebarPanel(
                               helpText("Look at country-specific policy"),
@@ -416,7 +424,9 @@ ui <- navbarPage("The COVID-19 Data Project",
                                           min = as.Date("2020-01-22","%Y-%m-%d"),
                                           max = Sys.Date(),
                                           value = c(as.Date("2020-01-22"), Sys.Date()),
-                                          timeFormat = "%Y-%m-%d")
+                                          timeFormat = "%Y-%m-%d"),
+                              p("Solid line represents Confirmed Cases, \n Dashed line represents Deaths,\n Dotted line represents Recovered.")
+                      
                             ),
                             mainPanel(plotOutput("countryPolicy"))),
                           br(),
@@ -546,16 +556,12 @@ server <- function(input, output) {
   output$selected_var <- renderText({
     paste(input$country_region)
   })
-  
+
   output$worldometer_log <- renderPlot({
-    
+
     worldometer_log <- worldometer_data %>%
-      mutate(log_cases = log(total_cases),
-             log_deaths = log(total_deaths),
-             log_recovered = log(total_recovered),
-             log_tests = log(total_tests),
-             log_tests_1m = log(tests_1m_pop))
-    
+
+
     ggplot(worldometer_log, aes(log_cases, log_tests_1m, color = country_other)) +
       geom_point() +
       theme(legend.position = "none") +
@@ -563,62 +569,62 @@ server <- function(input, output) {
         title = "Logarithmic comparison of cases to tests",
         x = "Cases \n(x10,000)",
         y = "Tests per 1M \n(x10,000)"
-      ) 
-    
+      )
+
   })
-  
+
   output$covidSpread <- renderPlot({
-    
+
     covidGlobal %>%
       filter(country_region == input$country_region,
              increment_confirmed >= 0) %>%
-      ggplot(aes(x = new_date, y = increment_confirmed)) + 
+      ggplot(aes(x = new_date, y = increment_confirmed)) +
       geom_col() +
       labs(
         title = "Incremental Cases of COVID-19\nmeasured over time",
         x = "Date",
         y = "New Daily Cases"
-      ) 
-    
+      )
+
   })
-  
+
   output$covidDeaths <- renderPlot({
-    
+
     covidGlobal %>%
       filter(country_region == input$country_region,
              increment_confirmed >= 0) %>%
-      ggplot(aes(x = new_date, y = increment_deaths)) + 
+      ggplot(aes(x = new_date, y = increment_deaths)) +
       geom_col() +
       labs(
         title = "Incremental Deaths of COVID-19\nmeasured over time",
         x = "Date",
         y = "New Daily Deaths"
       )
-    
+
   })
-  
+
 options(scipen = 999)
-  
+
   # Normal
   worldometer_tests <- worldometer_data %>%
-    filter(total_cases >= 15000, 
+    filter(total_cases >= 15000,
             !is.na(total_tests))
-  
+
   # Logarithmic
-    
-  worldometer_log <- worldometer_data %>%
+
+  worldometer_log_data <- worldometer_data %>%
     mutate(log_cases = log(total_cases),
             log_deaths = log(total_deaths),
             log_recovered = log(total_recovered),
             log_tests = log(total_tests),
             log_tests_1m = log(tests_1m_pop))
-    
+
     output$covidHighTests <- renderPlot({
     # Visualizing total cases and total deaths against total tests. A good next step may be to filter by countries of interest and to get a good enough
     # sample of countries that have tested. Qualify a country based on total number of cases (>1000). Maybe there is a weak positive correlation.
-    
-    
-    ggplot(worldometer_tests, aes(total_cases, total_tests, color = country_other)) + 
+
+
+    ggplot(worldometer_tests, aes(total_cases, total_tests, color = country_other)) +
       geom_point() +
       geom_jitter() +
       theme_classic() +
@@ -629,13 +635,13 @@ options(scipen = 999)
         x = "Total Cases",
         y = "Tests per 1M",
         color = "Country"
-      ) 
-    
+      )
+
   })
 
   output$covidMTests <- renderPlot({
-  
-    ggplot(worldometer_tests, aes(total_cases, tests_1m_pop, color = country_other)) + 
+
+    ggplot(worldometer_tests, aes(total_cases, tests_1m_pop, color = country_other)) +
       geom_point() +
       geom_jitter() +
       theme_classic() +
@@ -647,14 +653,14 @@ options(scipen = 999)
         y = "Tests per 1M",
         color = "Country"
       )
-    
+
   })
-  
+
 
   output$covidLogTests <- renderPlot({
     # Logarithmic plot of total tests
-    
-    ggplot(worldometer_log, aes(log_cases, log_tests, color = country_other)) +
+
+    ggplot(worldometer_log_data, aes(log_cases, log_tests, color = country_other)) +
       geom_point() +
       theme(legend.position = "none") +
       labs(
@@ -662,23 +668,23 @@ options(scipen = 999)
         x = "Cases \n(x10,000)",
         y = "Tests \n(x10,000)"
       )
-    
+
   })
-    
+
   output$covidLogMTests <- renderPlot({
     # Logarithmic plot of tests per 1m
-    
-    ggplot(worldometer_log, aes(log_cases, log_tests_1m, color = country_other)) +
+
+    ggplot(worldometer_log_data, aes(log_cases, log_tests_1m, color = country_other)) +
       geom_point() +
       theme(legend.position = "none") +
       labs(
         title = "Logarithmic comparison of cases to tests",
         x = "Cases \n(x10,000)",
         y = "Tests per 1M \n(x10,000)"
-      ) 
-    
+      )
+
   })
-  
+
 # Policy
   
   output$countryPolicy <- renderPlot({
@@ -815,12 +821,13 @@ options(scipen = 999)
     
     
     # Create plot for one country's response
+
     
     policy %>%  
       filter(Country == input$countryInput) %>% 
       filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>%
       ggplot(aes(x = new_date, color = as.factor(color))) +
-      geom_line(aes(y = log_confirmed), linetype = "solid" ) +
+      geom_line(aes(y = log_confirmed), linetype = "solid") +
       geom_line(aes(y = log_deaths), linetype = "dashed") +
       geom_line(aes(y = log_recovered), linetype = "dotted") +
       scale_color_manual(
@@ -887,7 +894,6 @@ options(scipen = 999)
 
   output$stock_impact <- renderPlot({
    
-master
       if(input$countryInputs == "China") {
        # y_value <- stock_cases %>%
        #   #filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>%
@@ -903,22 +909,10 @@ master
        #  # filter(new_date == 2020-04-01) %>%
        #   filter(stock == "DAX" ) %>%
        #   pull(price)
-     if(input$countryInput == "China") {
-       y_value <- stock_cases %>%
-         filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>% 
-         filter(stock == "SSE_China") %>%
-         pull(price)
-       y_axis <- "Index: SSE"
-       subtitle <- "In China"
-     }
-     else if(input$countryInput == "Germany") {
-       y_value <- stock_cases %>%
-         filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>%
-         filter(stock == "DAX") %>%
-         pull(price)
        y_axis <- "Index: DAX"
        subtitlex <- "In Germany"
      }
+
 
      else if(input$countryInputs == "Italy") {
        # y_value <- stock_cases %>%
@@ -926,16 +920,10 @@ master
        # #  filter(new_date == 2020-04-01) %>%
        #   filter(stock == "FTSE_Italy" ) %>%
        #   pull(price)
-
-     else if(input$countryInput == "Italy") {
-       y_value <- stock_cases %>%
-         filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>%
-         filter(stock == "FTSE_Italy") %>%
-         pull(price)
-
        y_axis <- "Index: FTSE"
        subtitlex <- "In Italy"
      }
+
 
      else if(input$countryInputs == "Korea, South") {
        # y_value <- stock_cases %>%
@@ -943,16 +931,10 @@ master
        #  # filter(new_date == 2020-04-01) %>%
        #   filter(stock == "KOSPI" ) %>%
        #   pull(price)
-
-     else if(input$countryInput == "South Korea") {
-       y_value <- stock_cases %>%
-         filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>%
-         filter(stock == "KOSPI") %>%
-         pull(price)
-
        y_axis <- "Index: KOSPI"
        subtitlex <- "In South Korea"
      }
+       
 
      else if(input$countryInputs == "Spain") {
        # y_value <- stock_cases %>%
@@ -960,16 +942,11 @@ master
        #  # filter(new_date == 2020-04-01) %>%
        #   filter(stock == "IBEX_Spain" ) %>%
        #   pull(price)
-
-     else if(input$countryInput == "Spain") {
-       y_value <- stock_cases %>%
-         filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>%
-         filter(stock == "IBEX_Spain") %>%
-         pull(price)
-
        y_axis <- "Index: IBEX"
        subtitlex <- "In Spain"
      }
+    
+     
      else {
 
        # y_value <- stock_cases %>%
@@ -977,11 +954,6 @@ master
        #  # filter(new_date == 2020-04-01) %>%
        #   filter(stock == "NASDAQ") %>%
        #   pull(price)
-
-       y_value <- stock_cases %>%
-         filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>%
-         filter(stock == "NASDAQ") %>%
-         pull(price)
        y_axis <- "Index: NASDAQ"
        subtitlex <- "In the United States"
      }
@@ -1037,12 +1009,6 @@ master
        #filter(log_confirmed != "-Inf", price != "NA") %>% 
        ggplot(aes_string(x = x_value)) +
        geom_line(aes(y = price), linetype = "solid") +
-
-       filter(Country == input$countryInput) %>% 
-       filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>%
-       ggplot(aes(x = log_confirmed, y = y_value)) +
-       geom_line(linetype = "solid") +
-
        labs(
          title = titlex,
          subtitle = subtitlex,
