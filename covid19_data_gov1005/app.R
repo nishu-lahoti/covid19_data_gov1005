@@ -55,8 +55,8 @@ ui <- navbarPage("The COVID-19 Data Project",
                                  p("COVID-19 has spread more rapidly than most politicians and people, in general, expected.
                                  In some countries, the total number of confirmed cases and deaths exponentially increased
                                  over the early months of 2020. In other countries, the total number of confirmed cases is uncertain
-                                 due to a lack of testing. In “Spread”, we explore how COVID-19 spread in countries across the world and
-                                 the correlation with each country's ability to test."),
+                                 due to a lack of testing. In “Spread”, we explore the rate at which COVID-19 spread in countries across the world and
+                                 how this increase correlates with each country's ability to test."),
                                  br(),
                                  h4(em("Policy:")),
                                  p("Governments around the world have implemented a variety of measures to respond to 
@@ -79,12 +79,16 @@ ui <- navbarPage("The COVID-19 Data Project",
                  tabPanel("Spread",
                           h1("Visualizing the rate of spread across countries"),
                           p("The rapidity with which COVID-19 spread within countries surprised political leaders
-                            and society, as a whole. In the early months of 2020, most global citizens believed
+                            and society, as a whole. In the early months of 2020, most societies  believed
                             the Coronavirus to be a problem distant to their daily life, sequestered to a manufacturing
                             city in the heart of China. As the virus began spreading outside of Wuhan, society-at-large continued
-                            to believe it could be contained and would not impact daily life. The aim of the visualizations below
-                            are to dispel that belief, showing just how quickly Coronavirus has spread in countries across the world,
+                            to believe it could be contained and would not have a severe impact on daily life. The aim of this section is 
+                            to dispel that belief, showing just how quickly Coronavirus has spread in countries across the world,
                             it's devastation, and the eventual pathway to recovery."),
+                           p("The first section allows users to see the incremental increase in case rate and deaths related to COVID-19
+                           for over 130 countries. The second section aims to see how a country's capacity to test influences it's total case reporting.
+                            We suspect that countries with a greater ability to test would report a greater number of cases,
+                            and vice versa."),
                               tabsetPanel(
                                 tabPanel("Rate of Spread",
                                   h3("Select a country to see how the arc of COVID-19 cases and deaths"),
@@ -234,10 +238,12 @@ ui <- navbarPage("The COVID-19 Data Project",
                             plotOutput("covidSpread"),
                             plotOutput("covidDeaths")),
                           tabPanel("Testing",
-                          p("We aimed to understand if there was bias in the reporting of new COVID-19 cases.
-                            Specifically, how did a country's capacity to test influence it's total case reporting?
-                            We suspected that countries with a greater ability to test would report a greater number of cases,
-                            and vice versa."),
+                          h3("Cases compared to Testing"),
+                          p("The visualizations below compare a country's case reporting with its capability to test. Suspecting that
+                            countries with more testing infrastructure will report higher case rates, we used linear regressions to visualize the
+                            whether the relationship between these variables was positive or negative. The data we have shows that there is a correlation
+                            between a country's ability to test and it's overall reported cases. At the same time, it shows that country's with the highest
+                            number of testing units do not necessarily have the highest rate of testing for their populace."),
                           plotOutput("covidHighTests"),
                           plotOutput("covidMTests"),
                           plotOutput("covidLogTests"),
