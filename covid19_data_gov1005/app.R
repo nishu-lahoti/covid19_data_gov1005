@@ -888,7 +888,6 @@ options(scipen = 999)
 
   output$stock_impact <- renderPlot({
    
-master
       if(input$countryInputs == "China") {
        # y_value <- stock_cases %>%
        #   #filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>%
@@ -904,24 +903,10 @@ master
        #  # filter(new_date == 2020-04-01) %>%
        #   filter(stock == "DAX" ) %>%
        #   pull(price)
-     }
-    
-     if(input$countryInput == "China") {
-       y_value <- stock_cases %>%
-         filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>% 
-         filter(stock == "SSE_China") %>%
-         pull(price)
-       y_axis <- "Index: SSE"
-       subtitle <- "In China"
-     }
-     else if(input$countryInput == "Germany") {
-       y_value <- stock_cases %>%
-         filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>%
-         filter(stock == "DAX") %>%
-         pull(price)
        y_axis <- "Index: DAX"
        subtitlex <- "In Germany"
      }
+
 
      else if(input$countryInputs == "Italy") {
        # y_value <- stock_cases %>%
@@ -929,17 +914,10 @@ master
        # #  filter(new_date == 2020-04-01) %>%
        #   filter(stock == "FTSE_Italy" ) %>%
        #   pull(price)
-     }
-
-     else if(input$countryInput == "Italy") {
-       y_value <- stock_cases %>%
-         filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>%
-         filter(stock == "FTSE_Italy") %>%
-         pull(price)
-
        y_axis <- "Index: FTSE"
        subtitlex <- "In Italy"
      }
+
 
      else if(input$countryInputs == "Korea, South") {
        # y_value <- stock_cases %>%
@@ -947,17 +925,10 @@ master
        #  # filter(new_date == 2020-04-01) %>%
        #   filter(stock == "KOSPI" ) %>%
        #   pull(price)
-     }
-       
-     else if(input$countryInput == "South Korea") {
-       y_value <- stock_cases %>%
-         filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>%
-         filter(stock == "KOSPI") %>%
-         pull(price)
-
        y_axis <- "Index: KOSPI"
        subtitlex <- "In South Korea"
      }
+       
 
      else if(input$countryInputs == "Spain") {
        # y_value <- stock_cases %>%
@@ -965,17 +936,11 @@ master
        #  # filter(new_date == 2020-04-01) %>%
        #   filter(stock == "IBEX_Spain" ) %>%
        #   pull(price)
-     }
-    
-     else if(input$countryInput == "Spain") {
-       y_value <- stock_cases %>%
-         filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>%
-         filter(stock == "IBEX_Spain") %>%
-         pull(price)
-
        y_axis <- "Index: IBEX"
        subtitlex <- "In Spain"
      }
+    
+     
      else {
 
        # y_value <- stock_cases %>%
@@ -983,11 +948,6 @@ master
        #  # filter(new_date == 2020-04-01) %>%
        #   filter(stock == "NASDAQ") %>%
        #   pull(price)
-
-       y_value <- stock_cases %>%
-         filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>%
-         filter(stock == "NASDAQ") %>%
-         pull(price)
        y_axis <- "Index: NASDAQ"
        subtitlex <- "In the United States"
      }
@@ -1043,12 +1003,6 @@ master
        #filter(log_confirmed != "-Inf", price != "NA") %>% 
        ggplot(aes_string(x = x_value)) +
        geom_line(aes(y = price), linetype = "solid") +
-
-       filter(Country == input$countryInput) %>% 
-       filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>%
-       ggplot(aes(x = log_confirmed, y = y_value)) +
-       geom_line(linetype = "solid") +
-
        labs(
          title = titlex,
          subtitle = subtitlex,
