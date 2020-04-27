@@ -903,6 +903,8 @@ master
        #  # filter(new_date == 2020-04-01) %>%
        #   filter(stock == "DAX" ) %>%
        #   pull(price)
+     }
+    
      if(input$countryInput == "China") {
        y_value <- stock_cases %>%
          filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>% 
@@ -926,6 +928,7 @@ master
        # #  filter(new_date == 2020-04-01) %>%
        #   filter(stock == "FTSE_Italy" ) %>%
        #   pull(price)
+     }
 
      else if(input$countryInput == "Italy") {
        y_value <- stock_cases %>%
@@ -943,7 +946,8 @@ master
        #  # filter(new_date == 2020-04-01) %>%
        #   filter(stock == "KOSPI" ) %>%
        #   pull(price)
-
+     }
+       
      else if(input$countryInput == "South Korea") {
        y_value <- stock_cases %>%
          filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>%
@@ -960,7 +964,8 @@ master
        #  # filter(new_date == 2020-04-01) %>%
        #   filter(stock == "IBEX_Spain" ) %>%
        #   pull(price)
-
+     }
+    
      else if(input$countryInput == "Spain") {
        y_value <- stock_cases %>%
          filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>%
