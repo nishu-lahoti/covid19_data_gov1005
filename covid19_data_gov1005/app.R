@@ -455,8 +455,20 @@ ui <- navbarPage("The COVID-19 Data Project",
                  # Add narrative about policy. One - three paragraphs.
                  
                  tabPanel("Economic Impact",
-                          h1("Economic Impact of COVID-19"),
-                          p("More information on Economics..."),
+                          h1("Economic Implications of COVID-19"),
+                          p("The first visualization shows the relationship between the number of confirmed cases, 
+                          the number of deaths, and the number of recovered cases against a country’s respective 
+                          major stock index. This shows a glimpse into how corporations have been impacted in their 
+                          day to day interactions by the virus, as well as how consumers and market analysts have 
+                          responded in turn. The visualization tracks the logged cases and the closing price of the 
+                          stock indices and the number of confirmed type of case too gauge what effect the numerical 
+                          spread of the virus has on the economy. The countries tracked are: 
+                          China, where the virus originated 
+                          South Korea, one of the countries originally hit hardest by the virus 
+                          Germany, a country with the fourth highest number of cases, but one with comparatively few deaths  
+                          Italy, a country that had extensive shutdowns in response to rapid spread of the virus and the country with the third most cases worldwide
+                          Spain, another country that quickly closed borders and put shutdowns in place and the country with the second most cases worldwide
+                          The United States, currently the world leader in cases."),
                           sidebarLayout(
                             sidebarPanel(
                               helpText("Look at COVID-19's impact on stock prices for select countries"),
@@ -481,6 +493,13 @@ ui <- navbarPage("The COVID-19 Data Project",
                             mainPanel(plotOutput("stock_impact"))),
                           
                           br(),
+                          p("This second visual displays the relationship between the GDP per capita as of 2018 
+                            for countries against the number of cases (confirmed, deaths, or recovered) in said 
+                            country on any date after January 22nd. It aims to show the relationship between the 
+                            wealth of a country and the number of cases, the number of deaths, and the number of 
+                            recovered people to track a few variables: first, whether wealth has any play in the 
+                            spread of the virus; second, if wealth affects the number of deaths; and third, if 
+                            wealth affects the likelihood of recovering from the virus."),
                           sidebarLayout(
                             sidebarPanel(
                               helpText("Compare COVID-19's impact among countries of different GDP levels"),
