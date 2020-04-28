@@ -79,14 +79,14 @@ ui <- navbarPage("The COVID-19 Data Project",
                  tabPanel("Spread",
                           h1("Visualizing the rate of spread across countries"),
                           p("The rapidity with which COVID-19 spread within countries surprised political leaders
-                            and society, as a whole. In the early months of 2020, most societies  believed
+                            and society as a whole. In the early months of 2020, most societies believed
                             the Coronavirus to be a problem distant to their daily life, sequestered to a manufacturing
                             city in the heart of China. As the virus began spreading outside of Wuhan, society-at-large continued
-                            to believe it could be contained and would not have a severe impact on daily life. The aim of this section is 
+                            to believe that it could be contained and would not have a severe impact on daily life. The aim of this section is 
                             to dispel that belief, showing just how quickly Coronavirus has spread in countries across the world,
-                            it's devastation, and the eventual pathway to recovery."),
+                            its devastation, and the eventual pathway to recovery."),
                            p("The first section allows users to see the incremental increase in case rate and deaths related to COVID-19
-                           for over 130 countries. The second section aims to see how a country's capacity to test influences it's total case reporting.
+                           for over 130 countries. The second section aims to see how a country's capacity to test influences its total case reporting.
                             We suspect that countries with a greater ability to test would report a greater number of cases,
                             and vice versa."),
                               tabsetPanel(
@@ -242,7 +242,7 @@ ui <- navbarPage("The COVID-19 Data Project",
                           p("The visualizations below compare a country's case reporting with its capability to test. Suspecting that
                             countries with more testing infrastructure will report higher case rates, we used linear regressions to visualize the
                             whether the relationship between these variables was positive or negative. The data we have shows that there is a correlation
-                            between a country's ability to test and it's overall reported cases. At the same time, it shows that country's with the highest
+                            between a country's ability to test and its overall reported cases. At the same time, it shows that countries with the highest
                             number of testing units do not necessarily have the highest rate of testing for their populace."),
                           plotOutput("covidHighTests"),
                           plotOutput("covidMTests"),
@@ -250,22 +250,21 @@ ui <- navbarPage("The COVID-19 Data Project",
                           plotOutput("covidLogMTests")))
                         ),
                  
-                 # Add narrative about policy. One - three paragraphs.
-                 # Add top two visualizations.
-                 
                  tabPanel("Policy",
                           h1("How Countries Have Responded with Policy"),
+                          p("Governments have taken a wide range of seemingly drastic, yet necessary measures in response to 
+                            the pandemic, from prohibiting international travel early on to more recently enforcing lockdown and quarantine
+                            procedures that have interrupted education, economies, and daily life."),
                           p("The first visualization examines how, in a given country, the number of confirmed cases, 
-                            the number of deaths, and the number of recovered cases changes over time. 
+                            the number of deaths, and the number of recovered cases have changed over time. 
                             The graph is divided into time segments based on the stringency level of the policy 
-                            measure enacted during that time period. Stringency is measured on a scale of 0 to 2, 
-                            with 0 corresponding to mild actions, 1 corresponding to moderate actions, and 2 
-                            corresponding to severe actions taken. The policy measures include: 1) school closings, 
-                            2) workplace closings, 3) public event cancellations, 4) public transportations closures, 
-                            5) public info campaigns, 6) restrictions on internal movement, 7) international travel 
-                            controls, 8) testing policy, and 9) contact tracing. By comparing the change in number 
-                            of cases with the stringency of the policy measure enacted, we can examine the efficacy 
-                            of each given policy within each country analyzed."),
+                            measure enacted during that time period. Stringency is generally measured by indicators for 
+                            mild response, moderate response, and severe response, depending on the policy response in question.
+                            The policy responses measured include school and workplace disruptions, public event cancellations and public transportations closures, 
+                            the presence of public info campaigns, restrictions on internal movement and international travel,
+                            and testing policy and contact tracing. By comparing the change in cases with the stringency of the policy measure enacted over time, 
+                            we attempt to examine the efficacy of government policy in curbing the spread of the virus. We suspect that there is little universal
+                            correlation but hope to draw insights by comparing policy responses among specific countries."),
                           br(),
                           sidebarLayout(
                             sidebarPanel(
@@ -425,16 +424,19 @@ ui <- navbarPage("The COVID-19 Data Project",
                                           max = Sys.Date(),
                                           value = c(as.Date("2020-01-22"), Sys.Date()),
                                           timeFormat = "%Y-%m-%d"),
-                              p("Solid line represents Confirmed Cases, \n Dashed line represents Deaths,\n Dotted line represents Recovered.")
-                      
-                            ),
+                              p("Solid line represents Confirmed Cases, \n Dashed line represents Deaths,\n Dotted line represents Recovered.")),
                             mainPanel(plotOutput("countryPolicy"))),
                           br(),
-                          p("The second visualization plots the stringency level of each of the policy 
-                          measures versus the number of confirmed cases over time, for all of the countries 
-                          analyzed. We can compare the extent to which the number of confirmed cases, and the
-                          level of stringency of policy measures, differs between countries around the globe 
-                          for each given date."),
+                          p("The second visualization plots the stringency index of the aggregated policy 
+                          measures against the number of confirmed cases, recovered cases, or deaths over time, on a global level. 
+                          We can compare the extent to which the number of cases and the
+                          stringency of government policy responses differs among countries around the globe 
+                          for any given date. The data we have shows that some countries, such the US, are not as stringent 
+                          as one would anticipate given the number of cases. This effect is unfortunately underscored when one looks at deaths rather than confirmed cases or recoveries."),
+                          p("Note that the stringency index simply records the number and strictness of 
+                            government policies and should not be interpreted as ‘scoring’ the appropriateness 
+                            or effectiveness of a country’s response. A higher stringency index
+                            does not necessarily mean that a country's response is ‘better’ than those with lower stringency indices."),
                           
                           sidebarLayout(
                             sidebarPanel(
@@ -451,24 +453,19 @@ ui <- navbarPage("The COVID-19 Data Project",
                             ),
                             mainPanel(plotOutput("globalPolicy")))),
                  
-                 
-                 # Add narrative about policy. One - three paragraphs.
-                 
                  tabPanel("Economic Impact",
                           h1("Economic Implications of COVID-19"),
-                          p("The first visualization shows the relationship between the number of confirmed cases, 
-                          the number of deaths, and the number of recovered cases against a country’s respective 
-                          major stock index. This shows a glimpse into how corporations have been impacted in their 
-                          day to day interactions by the virus, as well as how consumers and market analysts have 
+                          p("The first visualization plots the number of confirmed cases, 
+                          the number of deaths, or the number of recoveries against a specific country’s
+                          major stock index. This provides a glimpse into how the pandemic has impacted corporations in their 
+                          day-to-day interactions, as well as how consumers and market analysts have 
                           responded in turn. The visualization tracks the logged cases and the closing price of the 
-                          stock indices and the number of confirmed type of case too gauge what effect the numerical 
-                          spread of the virus has on the economy. The countries tracked are: 
-                          China, where the virus originated 
-                          South Korea, one of the countries originally hit hardest by the virus 
-                          Germany, a country with the fourth highest number of cases, but one with comparatively few deaths  
-                          Italy, a country that had extensive shutdowns in response to rapid spread of the virus and the country with the third most cases worldwide
-                          Spain, another country that quickly closed borders and put shutdowns in place and the country with the second most cases worldwide
-                          The United States, currently the world leader in cases."),
+                          stock indices alongside the number of cases in order to gauge this impact on the economy. The countries tracked are: 
+                          China, where the virus originated; South Korea, one of the countries originally hit hardest by the virus; 
+                          Germany, a country with the fourth highest number of cases, but one with comparatively few deaths;  
+                          Italy, a country that had extensive shutdowns in response to rapid spread of the virus, and the country with the third most cases worldwide;
+                          Spain, another country that quickly closed borders and put shutdowns in place, and the country with the second most cases worldwide;
+                          and the United States, currently the world leader in cases."),
                           sidebarLayout(
                             sidebarPanel(
                               helpText("Look at COVID-19's impact on stock prices for select countries"),
@@ -493,11 +490,11 @@ ui <- navbarPage("The COVID-19 Data Project",
                             mainPanel(plotOutput("stock_impact"))),
                           
                           br(),
-                          p("This second visual displays the relationship between the GDP per capita as of 2018 
-                            for countries against the number of cases (confirmed, deaths, or recovered) in said 
-                            country on any date after January 22nd. It aims to show the relationship between the 
-                            wealth of a country and the number of cases, the number of deaths, and the number of 
-                            recovered people to track a few variables: first, whether wealth has any play in the 
+                          p("This second visualization displays the relationship between the GDP per capita as of 2018 
+                            against the number of cases (confirmed, deaths, or recovered), on a global level, on any date after January 22nd. 
+                            It aims to show the relationship between the 
+                            pre-existing wealth of a country and the number of cases in order to track a few variables: 
+                            first, whether wealth has any play in the 
                             spread of the virus; second, if wealth affects the number of deaths; and third, if 
                             wealth affects the likelihood of recovering from the virus."),
                           sidebarLayout(
@@ -579,8 +576,6 @@ server <- function(input, output) {
   output$worldometer_log <- renderPlot({
 
     worldometer_log <- worldometer_data %>%
-
-
     ggplot(worldometer_log, aes(log_cases, log_tests_1m, color = country_other)) +
       geom_point() +
       theme(legend.position = "none") +
@@ -588,7 +583,7 @@ server <- function(input, output) {
         title = "Logarithmic comparison of cases to tests",
         x = "Cases \n(x10,000)",
         y = "Tests per 1M \n(x10,000)"
-      )
+      ) 
 
   })
 
@@ -625,6 +620,7 @@ server <- function(input, output) {
 options(scipen = 999)
 
   # Normal
+
   worldometer_tests <- worldometer_data %>%
     filter(total_cases >= 15000,
             !is.na(total_tests))
@@ -638,10 +634,10 @@ options(scipen = 999)
             log_tests = log(total_tests),
             log_tests_1m = log(tests_1m_pop))
 
-    output$covidHighTests <- renderPlot({
+  output$covidHighTests <- renderPlot({
+    
     # Visualizing total cases and total deaths against total tests. A good next step may be to filter by countries of interest and to get a good enough
     # sample of countries that have tested. Qualify a country based on total number of cases (>1000). Maybe there is a weak positive correlation.
-
 
     ggplot(worldometer_tests, aes(total_cases, total_tests, color = country_other)) +
       geom_point() +
@@ -652,7 +648,7 @@ options(scipen = 999)
         title = "Comparing COVID-19 Cases versus Total Tests",
         subtitle = "Comparing total conducted tests \nfor countries with over 15,000 reported cases.",
         x = "Total Cases",
-        y = "Tests per 1M",
+        y = "Tests",
         color = "Country"
       )
 
@@ -677,6 +673,7 @@ options(scipen = 999)
 
 
   output$covidLogTests <- renderPlot({
+    
     # Logarithmic plot of total tests
 
     ggplot(worldometer_log_data, aes(log_cases, log_tests, color = country_other)) +
@@ -691,6 +688,7 @@ options(scipen = 999)
   })
 
   output$covidLogMTests <- renderPlot({
+    
     # Logarithmic plot of tests per 1m
 
     ggplot(worldometer_log_data, aes(log_cases, log_tests_1m, color = country_other)) +
@@ -838,9 +836,7 @@ options(scipen = 999)
       subtitle <- "Stringency Index"
     } 
     
-    
     # Create plot for one country's response
-
     
     policy %>%  
       filter(Country == input$countryInput) %>% 
@@ -931,8 +927,6 @@ options(scipen = 999)
        y_axis <- "Index: DAX"
        subtitlex <- "In Germany"
      }
-
-
      else if(input$countryInputs == "Italy") {
        # y_value <- stock_cases %>%
        #   #filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>%
@@ -942,8 +936,6 @@ options(scipen = 999)
        y_axis <- "Index: FTSE"
        subtitlex <- "In Italy"
      }
-
-
      else if(input$countryInputs == "Korea, South") {
        # y_value <- stock_cases %>%
        #   #filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>%
@@ -953,8 +945,6 @@ options(scipen = 999)
        y_axis <- "Index: KOSPI"
        subtitlex <- "In South Korea"
      }
-       
-
      else if(input$countryInputs == "Spain") {
        # y_value <- stock_cases %>%
        #   #filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>%
@@ -964,8 +954,6 @@ options(scipen = 999)
        y_axis <- "Index: IBEX"
        subtitlex <- "In Spain"
      }
-    
-     
      else {
 
        # y_value <- stock_cases %>%
@@ -1021,7 +1009,6 @@ options(scipen = 999)
  
      stock_cases %>%
        #filter(y_value != "NA", log_confirmed != "0") %>%
-
        filter(Country == input$countryInputs, is.finite(price)) %>% 
        #filter(new_date >= input$dateRange[1], new_date <= input$dateRange[2]) %>%
        #filter(new_date == 2020-04-01) %>% 
@@ -1078,7 +1065,7 @@ options(scipen = 999)
        ) +
        theme_classic()
  
- })
+  })
  
 }
    
