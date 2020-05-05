@@ -34,8 +34,20 @@ ui <- navbarPage("The COVID-19 Data Project",
                  theme = shinytheme("flatly"),
                  
                  tabPanel("About",
-                          column(8,
-                                 p("Over the past months, the spread of COVID-19 has upended the world, 
+                          fluidPage(
+                            br(),
+                            br(),
+                            
+                            # imageOutput("covid_image", width = "100%", height = "100%"),
+                            
+                            fluidRow(column(1), column(10,
+                                                       
+                            h1(tags$b("The Impact of COVID-19"), align = "center"),
+                            p(tags$b("Analyzing how the spread of COVID-19 has impacted governments and economies"), align = "center"),
+                            
+                            br(),
+                            
+                           p("Over the past months, the spread of COVID-19 has upended the world, 
                            with almost 3 million confirmed cases and 200,000 deaths reported to date. 
                            Cities, states, and entire nations have shut down, as travel-restrictions 
                            and stay-at-home orders have come into effect. In the U.S. alone, more than
@@ -51,25 +63,25 @@ ui <- navbarPage("The COVID-19 Data Project",
                            statistical analysis, as well as provide commentary on the data we have. 
                            This site is organized into three parts:"),
                                  br(),
-                                 h4(em("Spread:")),
+                                 h3(em("Spread")),
                                  p("COVID-19 has spread more rapidly than most politicians and people, in general, expected.
                                  In some countries, the total number of confirmed cases and deaths exponentially increased
                                  over the early months of 2020. In other countries, the total number of confirmed cases is uncertain
                                  due to a lack of testing. In “Spread”, we explore the rate at which COVID-19 spread in countries across the world and
                                  how this increase correlates with each country's ability to test."),
                                  br(),
-                                 h4(em("Policy:")),
+                                 h3(em("Policy")),
                                  p("Governments around the world have implemented a variety of measures to respond to 
                             the threat and spread of COVID-19, ranging from mild to severe. Such measures include schools and workplaces closing, 
                             international travel controls, and emergency investment in healthcare and vaccines. 
                             In “Policy”, we explore the stringency of common policy responses governments have taken 
                             and compare these responses across countries and regions."),
                                  br(),
-                                 h4(em("Economic Impact:")),
+                                 h3(em("Economic Impact")),
                                  p("Markets around the world have suffered in the face of COVID-19, with stay-at-home orders and quarantine 
                                  measures affecting non-essential businesses and productivity across the board. With the 
                                  focus on combatting the illness coming first and foremost, we hope to see the impact that 
-                                 the number of cases, deaths, and recovered individuals have on indices."))
+                                 the number of cases, deaths, and recovered individuals have on indices."))))
                  ),
                  
                  
@@ -566,6 +578,15 @@ ui <- navbarPage("The COVID-19 Data Project",
 
 # Define server logic
 server <- function(input, output) {
+
+# Images
+  
+  output$covid_image <- renderImage({
+    list(src = './covid19_data_gov1005/covid+global+map.jpg',
+         height = 300,
+         width = 600,
+         style = "display: block, margin-left: auto, margin-right:auto;")},
+    deleteFile = FALSE)
   
 # Spread
   
