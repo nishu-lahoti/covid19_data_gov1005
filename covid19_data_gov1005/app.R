@@ -544,69 +544,87 @@ ui <- navbarPage("The COVID-19 Data Project",
                                    )))),
                  
                  tabPanel("Economic Impact",
-                          h2("Economic Implications of COVID-19"),
                           
-                          p("The first visualization plots the number of confirmed cases, 
-                          the number of deaths, or the number of recoveries against a specific country’s
-                          major stock index. This provides a glimpse into how the pandemic has impacted corporations in their 
-                          day-to-day interactions, as well as how consumers and market analysts have 
-                          responded in turn. The visualization tracks the logged cases and the closing price of the 
-                          stock indices alongside the number of cases in order to gauge this impact on the economy. The countries tracked are: 
-                          China, where the virus originated; South Korea, one of the countries originally hit hardest by the virus; 
-                          Germany, a country with the fourth highest number of cases, but one with comparatively few deaths;  
-                          Italy, a country that had extensive shutdowns in response to rapid spread of the virus, and the country with the third most cases worldwide;
-                          Spain, another country that quickly closed borders and put shutdowns in place, and the country with the second most cases worldwide;
-                          and the United States, currently the world leader in cases."),
-                          
-                          sidebarLayout(
-                            sidebarPanel(
-                              helpText("Look at COVID-19's impact on stock prices for select countries"),
-                              selectInput("countryInputs", "Select a Country: ",
-                                          choices = c("China", 
-                                                      "Germany", 
-                                                      "Italy", 
-                                                      "Korea, South", 
-                                                      "Spain", 
-                                                      "US")),
-                              radioButtons("caseInputs", "Choose a case type",
-                                           choices = c("Confirmed", "Deaths", "Recovered"),
-                                           selected = "Confirmed")
-                              #,
-                              # sliderInput("dateRange",
-                              #             "Select a date range:",
-                              #             min = as.Date("2020-01-22","%Y-%m-%d"),
-                              #             max = Sys.Date(),
-                              #             value = c(as.Date("2020-01-22"), Sys.Date()),
-                              #             timeFormat = "%Y-%m-%d")
-                            ),
-                            mainPanel(plotOutput("stock_impact"))),
-                          
-                          br(),
-                          
-                          p("This second visualization displays the relationship between the GDP per capita as of 2018 
-                            against the number of cases (confirmed, deaths, or recovered), on a global level, on any date after January 22nd. 
-                            It aims to show the relationship between the 
-                            pre-existing wealth of a country and the number of cases in order to track a few variables: 
-                            first, whether wealth has any play in the 
-                            spread of the virus; second, if wealth affects the number of deaths; and third, if 
-                            wealth affects the likelihood of recovering from the virus."),
-                          
-                          sidebarLayout(
-                            sidebarPanel(
-                              helpText("Compare COVID-19's impact among countries of different GDP levels"),
-                              radioButtons("caseInput", "Choose a case type",
-                                           choices = c("Confirmed", "Deaths", "Recovered"),
-                                           selected = "Confirmed"),
-                              sliderInput("dateInput",
-                                          "Select a date:",
-                                          min = as.Date("2020-01-22","%Y-%m-%d"),
-                                          max = Sys.Date(),
-                                          value = as.Date("2020-01-22"),
-                                          timeFormat = "%Y-%m-%d")
-                            ),
+                          tabsetPanel(
+                            tabPanel("COVID & Stock Indices",
+                                     
+                                     fluidRow(column(2),
+                                              column(8,
+                                                     
+                                                     h2("Economic Implications of COVID-19", style = "text-align: center"),
+                                                     
+                                                     p("The first visualization plots the number of confirmed cases, 
+                                                    the number of deaths, or the number of recoveries against a specific country’s
+                                                    major stock index. This provides a glimpse into how the pandemic has impacted corporations in their 
+                                                    day-to-day interactions, as well as how consumers and market analysts have 
+                                                    responded in turn. The visualization tracks the logged cases and the closing price of the 
+                                                    stock indices alongside the number of cases in order to gauge this impact on the economy. The countries tracked are: 
+                                                    China, where the virus originated; South Korea, one of the countries originally hit hardest by the virus; 
+                                                    Germany, a country with the fourth highest number of cases, but one with comparatively few deaths;  
+                                                    Italy, a country that had extensive shutdowns in response to rapid spread of the virus, and the country with the third most cases worldwide;
+                                                    Spain, another country that quickly closed borders and put shutdowns in place, and the country with the second most cases worldwide;
+                                                    and the United States, currently the world leader in cases."),
+                                                     
+                                                     sidebarLayout(
+                                                       sidebarPanel(
+                                                         helpText("Look at COVID-19's impact on stock prices for select countries"),
+                                                         selectInput("countryInputs", "Select a Country: ",
+                                                                     choices = c("China", 
+                                                                                 "Germany", 
+                                                                                 "Italy", 
+                                                                                 "Korea, South", 
+                                                                                 "Spain", 
+                                                                                 "US")),
+                                                         radioButtons("caseInputs", "Choose a case type",
+                                                                      choices = c("Confirmed", "Deaths", "Recovered"),
+                                                                      selected = "Confirmed")
+                                                         
+                                                         #,
+                                                         # sliderInput("dateRange",
+                                                         #             "Select a date range:",
+                                                         #             min = as.Date("2020-01-22","%Y-%m-%d"),
+                                                         #             max = Sys.Date(),
+                                                         #             value = c(as.Date("2020-01-22"), Sys.Date()),
+                                                         #             timeFormat = "%Y-%m-%d")
+                                                       ),
+                                                       mainPanel(plotOutput("stock_impact"))))
+                                     )),
                             
-                            mainPanel(plotOutput("gdp_cases")))),
-                 
+                            tabPanel("COVID & GDP",
+                                     
+                                     fluidRow(column(2),
+                                              column(8,
+                                     
+                                     h2("Measuring COVID against country GDP", style = "text-align:center"),
+                                     
+                                     br(),
+                                     
+                                     p("This second visualization displays the relationship between the GDP per capita as of 2018 
+                                      against the number of cases (confirmed, deaths, or recovered), on a global level, on any date after January 22nd. 
+                                      It aims to show the relationship between the 
+                                      pre-existing wealth of a country and the number of cases in order to track a few variables: 
+                                      first, whether wealth has any play in the 
+                                      spread of the virus; second, if wealth affects the number of deaths; and third, if 
+                                      wealth affects the likelihood of recovering from the virus."),
+                                     
+                                     sidebarLayout(
+                                       sidebarPanel(
+                                         helpText("Compare COVID-19's impact among countries of different GDP levels"),
+                                         radioButtons("caseInput", "Choose a case type",
+                                                      choices = c("Confirmed", "Deaths", "Recovered"),
+                                                      selected = "Confirmed"),
+                                         sliderInput("dateInput",
+                                                     "Select a date:",
+                                                     min = as.Date("2020-01-22","%Y-%m-%d"),
+                                                     max = Sys.Date(),
+                                                     value = as.Date("2020-01-22"),
+                                                     timeFormat = "%Y-%m-%d")
+                                       ),
+                                       
+                                       mainPanel(plotOutput("gdp_cases"))))
+                          )))),
+                            
+                                            
                  tabPanel("Team",
                           column(6,
                                  h2("The Team"),
