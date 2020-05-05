@@ -68,9 +68,10 @@ us_daily_reports <- read.csv(url("https://raw.githubusercontent.com/CSSEGISandDa
 
 worldometer_url <- paste0("https://www.worldometers.info/coronavirus/")
 h <- read_html(worldometer_url)
-table <- html %>% 
-               html_nodes("table")
+table <- h %>% html_nodes("table")
 worldometer <- table[[1]] %>% html_table
+
+
 worldometer_data <- worldometer %>% 
   clean_names() %>%
   mutate_at(c("total_cases", "total_deaths", "total_recovered", "total_tests", "tests_1m_pop"), parse_number) %>%
@@ -78,21 +79,6 @@ worldometer_data <- worldometer %>%
                                 "Africa", "Oceania", "")) %>%
   select("country_other", "total_cases", "total_deaths", "total_recovered", "total_tests", "tests_1m_pop") %>%
   arrange(desc(total_cases))
-
-
-# worldometer$new_cases <- parse_number(worldometer$new_cases)worldometer_data <- worldometer %>%
-#   mutate(total_cases = parse_number(total_cases),
-#          new_cases = parse_number(new_cases),
-#          total_deaths = parse_number(total_deaths),
-#          new_deaths = parse_number(new_deaths),
-#          total_recovered = parse_number(total_recovered),
-#          active_cases = parse_number(active_cases),
-#          serious_critical = parse_number(serious_critical),
-#          total_tests = parse_number(total_tests),
-#          tests_1m_pop = parse_number(tests_1m_pop)) %>%
-#   filter(! country_other %in% c("World", "Total:", "Europe", "North America", "Asia", "South America", 
-#                                 "Africa", "Oceania", "")) %>%
-#   arrange(desc(total_cases))
 
 saveRDS(worldometer, file = "../team_data/worldometer.RDS")
 
@@ -240,10 +226,10 @@ us_data <- covidGlobal %>%
  
 # Will come back to this...
 
-     ggplot(us_data, aes(x = new_date)) +
-        geom_histogram(data = us_data$increment_confirmed, fill = "blue", alpha = 0.2) +
-        geom_histogram(data = us_data$increment_deaths, fill = "red", alpha = 0.2) +
-        geom_histogram(data = us_data$increment, fill = "green", alpha = 0.2)
+     # ggplot(us_data, aes(x = new_date)) +
+     #    geom_histogram(data = us_data$increment_confirmed, fill = "blue", alpha = 0.2) +
+     #    geom_histogram(data = us_data$increment_deaths, fill = "red", alpha = 0.2) +
+     #    geom_histogram(data = us_data$increment, fill = "green", alpha = 0.2)
 
 
 ```
@@ -256,14 +242,14 @@ us_data <- covidGlobal %>%
 options(scipen = 999)
 
 # Normal
-worldometer_tests <- worldometer %>%
+worldometer_tests <- worldometer_data %>%
   filter(total_cases >= 15000, 
          !is.na(total_tests))
 
 
 # Logarithmic
 
-worldometer_log <- worldometer %>%
+worldometer_log <- worldometer_data %>%
   mutate(log_cases = log(total_cases),
          log_deaths = log(total_deaths),
          log_recovered = log(total_recovered),
