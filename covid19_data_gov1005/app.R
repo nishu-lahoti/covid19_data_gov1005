@@ -307,10 +307,13 @@ ui <- navbarPage("The COVID-19 Data Project",
                                    )))),
                                   
                  tabPanel("Policy",
+                          
                           h2("How Countries Have Responded with Policy"),
+                          
                           p("Governments have taken a wide range of seemingly drastic, yet necessary measures in response to 
                             the pandemic, from prohibiting international travel early on to more recently enforcing lockdown and quarantine
                             procedures that have interrupted education, economies, and daily life."),
+                          
                           p("The first visualization examines how, in a given country, the number of confirmed cases, 
                             the number of deaths, and the number of recovered cases have changed over time. 
                             The graph is divided into time segments based on the stringency level of the policy 
@@ -321,7 +324,9 @@ ui <- navbarPage("The COVID-19 Data Project",
                             and testing policy and contact tracing. By comparing the change in cases with the stringency of the policy measure enacted over time, 
                             we attempt to examine the efficacy of government policy in curbing the spread of the virus. We suspect that there is little universal
                             correlation but hope to draw insights by comparing policy responses among specific countries."),
+                          
                           br(),
+                          
                           sidebarLayout(
                             sidebarPanel(
                               helpText("Look at country-specific policy"),
@@ -474,21 +479,28 @@ ui <- navbarPage("The COVID-19 Data Project",
                                                       "Zambia",				
                                                       "Zimbabwe",
                                                       "Taiwan*"	)),
+                              
                               sliderInput("dateRange",
                                           "Select a date range:",
                                           min = as.Date("2020-01-22","%Y-%m-%d"),
                                           max = Sys.Date(),
                                           value = c(as.Date("2020-01-22"), Sys.Date()),
                                           timeFormat = "%Y-%m-%d"),
+                              
                               p("Solid line represents Confirmed Cases, \n Dashed line represents Deaths,\n Dotted line represents Recovered.")),
+                            
                             mainPanel(plotOutput("countryPolicy"))),
+                          
                           br(),
+                          
                           p("The second visualization plots the stringency index of the aggregated policy 
                           measures against the number of confirmed cases, recovered cases, or deaths over time, on a global level. 
                           We can compare the extent to which the number of cases and the
                           stringency of government policy responses differs among countries around the globe 
                           for any given date. The data we have shows that some countries, such the US, are not as stringent 
-                          as one would anticipate given the number of cases. This effect is unfortunately underscored when one looks at deaths rather than confirmed cases or recoveries."),
+                          as one would anticipate given the number of cases. This effect is unfortunately underscored when one 
+                          looks at deaths rather than confirmed cases or recoveries."),
+                          
                           p("Note that the stringency index simply records the number and strictness of 
                             government policies and should not be interpreted as ‘scoring’ the appropriateness 
                             or effectiveness of a country’s response. A higher stringency index
@@ -511,6 +523,7 @@ ui <- navbarPage("The COVID-19 Data Project",
                  
                  tabPanel("Economic Impact",
                           h2("Economic Implications of COVID-19"),
+                          
                           p("The first visualization plots the number of confirmed cases, 
                           the number of deaths, or the number of recoveries against a specific country’s
                           major stock index. This provides a glimpse into how the pandemic has impacted corporations in their 
@@ -522,6 +535,7 @@ ui <- navbarPage("The COVID-19 Data Project",
                           Italy, a country that had extensive shutdowns in response to rapid spread of the virus, and the country with the third most cases worldwide;
                           Spain, another country that quickly closed borders and put shutdowns in place, and the country with the second most cases worldwide;
                           and the United States, currently the world leader in cases."),
+                          
                           sidebarLayout(
                             sidebarPanel(
                               helpText("Look at COVID-19's impact on stock prices for select countries"),
@@ -546,6 +560,7 @@ ui <- navbarPage("The COVID-19 Data Project",
                             mainPanel(plotOutput("stock_impact"))),
                           
                           br(),
+                          
                           p("This second visualization displays the relationship between the GDP per capita as of 2018 
                             against the number of cases (confirmed, deaths, or recovered), on a global level, on any date after January 22nd. 
                             It aims to show the relationship between the 
@@ -553,6 +568,7 @@ ui <- navbarPage("The COVID-19 Data Project",
                             first, whether wealth has any play in the 
                             spread of the virus; second, if wealth affects the number of deaths; and third, if 
                             wealth affects the likelihood of recovering from the virus."),
+                          
                           sidebarLayout(
                             sidebarPanel(
                               helpText("Compare COVID-19's impact among countries of different GDP levels"),
@@ -566,6 +582,7 @@ ui <- navbarPage("The COVID-19 Data Project",
                                           value = as.Date("2020-01-22"),
                                           timeFormat = "%Y-%m-%d")
                             ),
+                            
                             mainPanel(plotOutput("gdp_cases")))),
                  
                  tabPanel("Team",
