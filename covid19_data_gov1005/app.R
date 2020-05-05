@@ -640,7 +640,8 @@ ui <- navbarPage("The COVID-19 Data Project",
 # Define server logic
 server <- function(input, output) {
 
-# Images
+######### Images #########
+#########        #########  
   
   output$covid_image <- renderImage({
     list(src = './covid19_data_gov1005/covid+global+map.jpg',
@@ -649,7 +650,8 @@ server <- function(input, output) {
          style = "display: block, margin-left: auto, margin-right:auto;")},
     deleteFile = FALSE)
   
-# Spread
+######### Spread #########
+#########        #########  
   
   output$selected_var <- renderText({
     paste(input$country_region)
@@ -783,8 +785,12 @@ options(scipen = 999)
       )
 
   })
+  
+######### End Spread #########
+#########        #########
 
-# Policy
+######### Policy #########
+#########        #########
   
   output$countryPolicy <- renderPlot({
     
@@ -987,7 +993,12 @@ options(scipen = 999)
   })
   
   
-# Economic Impact
+######### End Policy #########
+#########        #########
+  
+
+######### Economic #########
+#########        #########
 
   output$stock_impact <- renderPlot({
    
@@ -1150,6 +1161,9 @@ options(scipen = 999)
   })
  
 }
+
+######### End Economic #########
+#########              #########
    
 
 # Run the application
