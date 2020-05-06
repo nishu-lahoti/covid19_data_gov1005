@@ -14,11 +14,13 @@ library(readr)
 library(rvest)
 library(janitor)
 library(skimr)
-library(sf)
-library(maps)
-library(tibble)
+# library(sf)
+# library(maps)
+# library(tibble)
 library(stringr)
 library(tibble)
+library(plotly)
+library(infer)
 
 # Import NYTimes Data
 
@@ -72,15 +74,33 @@ table <- h %>% html_nodes("table")
 worldometer <- table[[1]] %>% html_table
 
 
-worldometer_data <- worldometer %>% 
+world <- worldometer %>% 
   clean_names() %>%
   mutate_at(c("total_cases", "total_deaths", "total_recovered", "total_tests", "tests_1m_pop"), parse_number) %>%
   filter(! country_other %in% c("World", "Total:", "Europe", "North America", "Asia", "South America", 
                                 "Africa", "Oceania", "")) %>%
-  select("country_other", "total_cases", "total_deaths", "total_recovered", "total_tests", "tests_1m_pop") %>%
+  mutate(population_estimate = (total_tests * 1000000) / tests_1m_pop) %>%
+  select("country_other", "population_estimate", "total_cases", "total_deaths", "total_recovered", "total_tests", "tests_1m_pop") %>%
   arrange(desc(total_cases))
 
 saveRDS(worldometer, file = "../team_data/worldometer.RDS")
+
+
+# Region & Population Data
+
+regions <- read.csv(url("https://raw.githubusercontent.com/lukes/ISO-3166-Countries-with-Regional-Codes/master/all/all.csv")) %>% 
+  select(name, region, sub.region) %>% 
+  rename(Country = name) %>%
+  mutate(CountryCode = countrycode(Country, origin = 'country.name', destination = 'iso3c')) 
+
+population_data <- read_csv("../policy/API_pop.csv", skip = 3) %>% 
+  clean_names() %>% 
+ select(country_code, x2018) %>% 
+  rename(pop_2018 = x2018)
+
+country_population <- population_data %>%
+  left_join(regions, by = c("country_code" = "CountryCode")) %>%
+  select(Country, pop_2018)
 
 ```
 
@@ -160,7 +180,12 @@ covidUS <- confirmedCovidUS %>%
 covidGlobal <- confirmedCovidGlobal %>%
   inner_join(deathsCovidGlobal, by = c("country_region", "new_date"), suffix = c("_confirmed", "_deaths")) %>%
   inner_join(recoveredCovidGlobal, by = c("country_region", "new_date"), suffix = c("_confirmed", "_recovered")) %>%
-  select(country_region, new_date, confirmed, increment_confirmed, deaths, increment_deaths, recovered, increment)
+  inner_join(country_population, by = c("country_region" = "Country")) %>%
+  mutate(
+    cases_per_capita = confirmed / pop_2018,
+    deaths_per_capita = deaths / pop_2018
+  ) %>%
+  select(country_region, pop_2018, new_date, confirmed, increment_confirmed, deaths, increment_deaths, recovered, increment, cases_per_capita, deaths_per_capita)
 
 # Johns Hopkins US Daily Report. Used to gather testing rates by State.
 
@@ -257,66 +282,74 @@ us_data <- covidGlobal %>%
 options(scipen = 999)
 
 # Normal
-worldometer_tests <- worldometer_data %>%
+worldometer_tests <- world %>%
   filter(total_cases >= 15000, 
          !is.na(total_tests))
 
 # Logarithmic
 
-worldometer_log <- worldometer_data %>%
+worldometer_log <- world %>%
   mutate(log_cases = log(total_cases),
          log_deaths = log(total_deaths),
          log_recovered = log(total_recovered),
          log_tests = log(total_tests),
          log_tests_1m = log(tests_1m_pop))
 
-ggplot(worldometer_tests, aes(total_cases, total_tests, color = country_other)) + 
+ggplot(worldometer_tests, aes(total_tests, total_cases, color = country_other)) + 
   geom_point() +
   geom_jitter() +
   theme_classic() +
-  theme(legend.position = "top") +
+  theme(legend.position = "right") +
   labs(
     title = "Comparing COVID-19 Cases versus Total Tests",
     subtitle = "Comparing total conducted tests \nfor countries with over 15,000 reported cases.",
-    x = "Total Cases",
-    y = "Tests per 1M",
+    x = "Total Tests",
+    y = "Total Cases",
     color = "Country"
   )
 
-ggplot(worldometer_tests, aes(total_cases, tests_1m_pop, color = country_other)) + 
+ggplot(worldometer_tests, aes(tests_1m_pop, total_cases, color = country_other)) + 
   geom_point() +
   geom_jitter() +
   theme_classic() +
-  theme(legend.position = "top") +
+  theme(legend.position = "right") +
   labs(
     title = "COVID-19 Country Testing Capacity",
     subtitle = "Visualizing a country's case rate against testing rate\nfor countries with over 15,000 reported cases.",
-    x = "Total Cases",
-    y = "Tests per 1M",
+    x = "Tests per 1M",
+    y = "Cases",
     color = "Country"
   )
 
 # Logarithmic plot of total tests
 
-ggplot(worldometer_log, aes(log_cases, log_tests, color = country_other)) +
+log_test_plot <- ggplot(worldometer_log, aes(log_tests, log_cases, color = country_other)) +
   geom_point() +
   theme(legend.position = "none") +
   labs(
-    title = "Logarithmic comparison of cases to tests",
-    x = "Cases \n(x10,000)",
-    y = "Tests \n(x10,000)"
+    title = "Logarithmic comparison of tests to cases",
+    x = "Tests \n(x10,000)",
+    y = "Cases \n(x10,000)",
+    caption = "Disclaimer about logarithmic tests"
   )
+
+log_test_ply <- ggplotly(log_test_plot)
+log_test_ply
 
 # Logarithmic plot of tests per 1m
 
-ggplot(worldometer_log, aes(log_cases, log_tests_1m, color = country_other)) +
+log_1m_plot <- ggplot(worldometer_log, aes(log_tests_1m, log_cases, color = country_other)) +
   geom_point() +
   theme(legend.position = "none") +
   labs(
     title = "Logarithmic comparison of cases to tests",
-    x = "Cases \n(x10,000)",
-    y = "Tests per 1M \n(x10,000)"
+    x = "Tests per 1M \n(x10,000)",
+    y = "Cases \n(x10,000)",
+    caption = "Disclaimer about logarithmic tests"
   )
+
+log_1m_ply <- ggplotly(log_1m_plot)
+log_1m_ply
 
 ```
 
@@ -390,6 +423,28 @@ nystate_visual %>%
   theme_void()
 
 ```
+
+### Modeling
+
+```{r}
+
+worldometer_regression <- lm(total_cases ~ total_tests, data = world) %>%
+  tidy(conf.int = TRUE) %>%
+  select(term, estimate, conf.low, conf.high)
+
+
+worldometer_reps <- world %>%
+  filter(! is.na(total_tests)) %>%
+  select(country_other, total_cases, total_tests) %>%
+  rep_sample_n(size = nrow(world), replace = TRUE, reps = 1000) %>%
+  group_by(replicate) %>%
+  nest() %>%
+  mutate(mod = map(data, ~ lm(total_cases ~ total_tests, data = .)))
+
+
+```
+
+
 
 
 
