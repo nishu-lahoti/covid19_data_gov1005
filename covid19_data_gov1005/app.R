@@ -1122,9 +1122,9 @@ server <- function(input, output) {
         global_policy <- policy %>% 
             filter(new_date == input$dateInput) %>% 
             ggplot(aes(x = x_value, y = StringencyIndexForDisplay, color = sub.region, text = paste("</br> Country:", Country,
-                                                                                                    "</br> Count:", case_count,
+                                                                                                    "</br> Region:", sub.region,
                                                                                                     "</br> Stringency Index:", StringencyIndexForDisplay,
-                                                                                                    "</br> Region:", sub.region))) +
+                                                                                                    "</br> Count:", case_count))) +
             geom_point() +
             labs(
                 title = "Relationship between Number of Cases and Government Response",
