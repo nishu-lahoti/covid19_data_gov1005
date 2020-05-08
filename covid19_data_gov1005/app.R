@@ -48,58 +48,54 @@ ui <- navbarPage("The COVID-19 Data Project",
                                                          
                                                          br(),
                                                          
-                                                         p("Over the past months, the spread of COVID-19 has upended the world, 
-                           with almost 3 million confirmed cases and 200,000 deaths reported to date. 
-                           Cities, states, and entire nations have shut down, as travel-restrictions 
-                           and stay-at-home orders have come into effect. In the U.S. alone, more than
-                           26 million citizens have filed for unemployment, with jobless claim filings
-                           growing at a historically unprecedented pace. As politicians, researchers, 
-                           lawyers, and other experts scramble for answers, uncertainty about when the
-                           world can reopen and begin on a road-to-recovery has only continued to grow."),
+                                                         p("Over the past months, the spread of COVID-19 has upended the world,
+                                                         with almost 3 million confirmed cases and 200,000 deaths reported to date. 
+                                                         Cities, states, and entire nations have shut down, as travel-restrictions
+                                                         and stay-at-home orders have come into effect. In the U.S. alone, more than
+                                                         26 million citizens have filed for unemployment, with jobless claim filings
+                                                         growing at a historically unprecedented pace. As politicians, researchers, 
+                                                         lawyers, and other experts scramble for answers, uncertainty about when the
+                                                           world can reopen and begin on a road-to-recovery has only continued to grow."),
                                                          
                                                          br(),
                                                          
                                                          p("The purpose of this project is to analyze the spread and impact of the 
-                           coronavirus pandemic and to understand the efficacy of various policies 
-                           enacted around the globe in mitigating the crisis. We seek to shed light 
-                           on many different aspects of the pandemic using data visualization and 
-                           statistical analysis, as well as provide commentary on the data we have. 
-                           This site is organized into three parts:"),
+                                                         coronavirus pandemic and to understand the efficacy of various policies 
+                                                         enacted around the globe in mitigating the crisis. We seek to shed light 
+                                                         on many different aspects of the pandemic using data visualization and 
+                                                         statistical analysis, as well as provide commentary on the data we have. 
+                                                           This site is organized into three parts:"),
                                                          
                                                          br(),
                                                          
                                                          h3(em("Spread")),
                                                          
                                                          p("COVID-19 has spread more rapidly than most politicians and people, in general, expected.
-                                 In some countries, the total number of confirmed cases and deaths exponentially increased
-                                 over the early months of 2020. In other countries, the total number of confirmed cases is uncertain
-                                 due to a lack of testing. In “Spread”, we explore the rate at which COVID-19 spread in countries across the world and
-                                 how this increase correlates with each country's ability to test."),
+                                                         In some countries, the total number of confirmed cases and deaths exponentially increased
+                                                         over the early months of 2020. In other countries, the total number of confirmed cases is uncertain
+                                                         due to a lack of testing. In “Spread”, we explore the rate at which COVID-19 spread in countries across the world and
+                                                           how this increase correlates with each country's ability to test."),
                                                          
                                                          br(),
                                                          
                                                          h3(em("Policy")),
                                                          
                                                          p("Governments around the world have implemented a variety of measures to respond to 
-                                   the threat and spread of COVID-19, ranging from mild to severe. Such measures include schools and workplaces closing, 
-                                   international travel controls, and emergency investment in healthcare and vaccines. 
-                                   In “Policy”, we explore the stringency of common policy responses governments have taken 
-                                   and compare these responses across countries and regions."),
+                                                         the threat and spread of COVID-19, ranging from mild to severe. Such measures include schools and workplaces closing, 
+                                                         international travel controls, and emergency investment in healthcare and vaccines. 
+                                                         In “Policy”, we explore the stringency of common policy responses governments have taken 
+                                                           and compare these responses across countries and regions."),
                                                          
                                                          br(),
                                                          
                                                          h3(em("Economic Impact")),
                                                          
                                                          p("Markets around the world have suffered in the face of COVID-19, with stay-at-home orders and quarantine 
-                                 measures affecting non-essential businesses and productivity across the board. With the 
-                                 focus on combatting the illness coming first and foremost, we hope to see the impact that 
-                                 the number of cases, deaths, and recovered individuals have on indices."))))
+                                                         measures affecting non-essential businesses and productivity across the board. With the 
+                                                         focus on combatting the illness coming first and foremost, we hope to see the impact that 
+                                                           the number of cases, deaths, and recovered individuals have on indices."))))
                  ),
-                 
-                 
-                 # Add top two visualizations.
-                 
-                 
+                
                  tabPanel("Spread",
                           tabPanel("Rate of Spread",
                                    tabsetPanel(
@@ -116,10 +112,10 @@ ui <- navbarPage("The COVID-19 Data Project",
                                                            br(),
                                                            
                                                            p("In the early months of 2020, most societies believed the Coronavirus to be a problem distant to their daily life, 
-                                        sequestered to a manufacturing city in the heart of China. As the virus began spreading outside of Wuhan, society-at-largecontinued
-                                        to believe that it could be contained. The aim of this section is 
-                                        to dispel that belief, showing just how quickly Coronavirus has spread in countries across the world,
-                                        its devastation, and the eventual pathway to recovery."))),
+                                                           sequestered to a manufacturing city in the heart of China. As the virus began spreading outside of Wuhan, society-at-large continued
+                                                           to believe that it could be contained. The aim of this section is 
+                                                           to dispel that belief, showing just how quickly Coronavirus has spread in countries across the world,
+                                                             its devastation, and the eventual pathway to recovery."))),
                                                 
                                                 fluidRow(
                                                     column(2),
@@ -282,10 +278,10 @@ ui <- navbarPage("The COVID-19 Data Project",
                                                            
                                                            br(),
                                                            
-                                                           p("Suspecting that
-                                              countries with more testing infrastructure will report higher case rates, we created models to visualize the
-                                              relationship between testing and cases. The series of visualizations below aim to test whether a relationship exists between tests per million and cases per million in countries with
-                                              reported cases."))),
+                                                           p("Suspecting that countries with more testing infrastructure will report higher case rates, 
+                                                           we created models to visualize the relationship between testing and cases. 
+                                                           The series of visualizations below aim to test whether a relationship exists between tests 
+                                                           per million and cases per million in countries with reported cases."))),
                                                 
                                                 br(),
                                                 
@@ -306,8 +302,8 @@ ui <- navbarPage("The COVID-19 Data Project",
                                                                  
                                                                  h3("Logarithmic Comparison"),
                                                                     
-                                                                    p("Given the data in the first graph is clustered and challenging to visualize, we plotted it on a logarithmic
-                                                                      scale to better visualize any correlation.")),
+                                                                    p("Given the data in the first graph is clustered and challenging to visualize, 
+                                                                    we plotted it on a logarithmic scale to better visualize any correlation.")),
                                                                  
                                                                  mainPanel(
                                                                      plotOutput("covidLogMTests")
@@ -328,7 +324,6 @@ ui <- navbarPage("The COVID-19 Data Project",
                                                                  )),
                                                 )
                                        ))),
-                                    
                  
                  tabPanel("Policy",
                           tabsetPanel(
@@ -340,189 +335,190 @@ ui <- navbarPage("The COVID-19 Data Project",
                                                   h2("How Countries Have Responded with Policy", style = "text-align:center"),
                                                   br(),
                                                   p("Governments have taken a wide range of seemingly drastic, yet necessary measures in response to 
-                                                the pandemic, from prohibiting international travel early on to more recently enforcing lockdown and quarantine
-                                                procedures that have interrupted education, economies, and daily life."),
+                                                  the pandemic, from prohibiting international travel early on to more recently enforcing lockdown and quarantine
+                                                    procedures that have interrupted education, economies, and daily life."),
                                                   
                                                   br(),
                                                   br(),
                                                   
-                                                  p("The first visualization examines how, in a given country, the number of confirmed cases, 
-                                              the number of deaths, and the number of recovered cases have changed over time. 
-                                              The graph is divided into time segments based on the stringency level of the policy 
-                                              measure enacted during that time period. Stringency is generally measured by indicators for 
-                                              mild response, moderate response, and severe response, depending on the policy response in question.
-                                              The policy responses measured include school and workplace disruptions, public event cancellations and public transportations closures, 
-                                              the presence of public info campaigns, restrictions on internal movement and international travel,
-                                              and testing policy and contact tracing. By comparing the change in cases with the stringency of the policy measure enacted over time, 
-                                              we attempt to examine the efficacy of government policy in curbing the spread of the virus. We suspect that there is little universal
-                                              correlation but hope to draw insights by comparing policy responses among specific countries."),
-                                                  
-                                                  br(),
-                                                  
-                                                  sidebarLayout(
-                                                      sidebarPanel(
-                                                          helpText("Look at country-specific policy"),
-                                                          selectInput("indexInput", "Select a policy response",
-                                                                      choices = c("School closing", "Workplace closing", "Cancel public events", 
-                                                                                  "Public transport closings", "Public info campaigns", 
-                                                                                  "Restrictions on internal movement", "International travel controls", 
-                                                                                  # "Fiscal measures", "Monetary measures", "Emergency investment in healthcare",
-                                                                                  # "Investment in vaccines", 
-                                                                                  "Testing policy", "Contact tracing")),
-                                                          selectInput("countryInput", "Select a country",
-                                                                      choices = c("Afghanistan",				
-                                                                                  "Angola",			
-                                                                                  "Albania",
-                                                                                  "Algeria",	
-                                                                                  "Andorra",				
-                                                                                  "Argentina",		
-                                                                                  "Australia",		
-                                                                                  "Austria",				
-                                                                                  "Azerbaijan",			
-                                                                                  "Burundi",
-                                                                                  "Belgium",				
-                                                                                  "Burkina Faso",
-                                                                                  "Burma",		
-                                                                                  "Bangladesh",			
-                                                                                  "Bulgaria",			
-                                                                                  "Bahrain",				
-                                                                                  "Bosnia and Herzegovina",				
-                                                                                  "Belize",			
-                                                                                  "Bolivia",				
-                                                                                  "Brazil",				
-                                                                                  "Barbados",
-                                                                                  "Brunei",			
-                                                                                  "Botswana",				
-                                                                                  "Canada",			
-                                                                                  "Chile",				
-                                                                                  "China",				
-                                                                                  "Cameroon",				
-                                                                                  "Congo (Kinshasa)",				
-                                                                                  "Colombia",				
-                                                                                  "Costa Rica",
-                                                                                  "Cuba",				
-                                                                                  "Cyprus",				
-                                                                                  "Czechia",				
-                                                                                  "Germany",				
-                                                                                  "Djibouti",				
-                                                                                  "Dominica",				
-                                                                                  "Denmark",				
-                                                                                  "Dominican Republic",				
-                                                                                  "Ecuador",
-                                                                                  "Egypt",				
-                                                                                  "Spain",				
-                                                                                  "Estonia",				
-                                                                                  "Ethiopia",				
-                                                                                  "Finland",				
-                                                                                  "France",				
-                                                                                  "Gabon",				
-                                                                                  "Ghana",				
-                                                                                  "Gambia",
-                                                                                  "Greece",				
-                                                                                  "Guatemala",				
-                                                                                  "Guyana",				
-                                                                                  "Honduras",				
-                                                                                  "Croatia",				
-                                                                                  "Hungary",				
-                                                                                  "Indonesia",				
-                                                                                  "India",				
-                                                                                  "Ireland",				
-                                                                                  "Iran",
-                                                                                  "Iraq",				
-                                                                                  "Iceland",			
-                                                                                  "Israel",				
-                                                                                  "Italy",				
-                                                                                  "Jamaica",				
-                                                                                  "Jordan",				
-                                                                                  "Japan",				
-                                                                                  "Kazakhstan",				
-                                                                                  "Kenya",				
-                                                                                  "Kyrgyzstan",
-                                                                                  "Korea, South",				
-                                                                                  "Kuwait",				
-                                                                                  "Laos",				
-                                                                                  "Lebanon",				
-                                                                                  "Libya",				
-                                                                                  "Sri Lanka",				
-                                                                                  "Luxembourg",			
-                                                                                  "Morocco",				
-                                                                                  "Moldova",				
-                                                                                  "Madagascar",
-                                                                                  "Mexico",				
-                                                                                  "Mali",				
-                                                                                  "Mongolia",				
-                                                                                  "Mozambique",			
-                                                                                  "Mauritania",			
-                                                                                  "Mauritius",				
-                                                                                  "Malawi",				
-                                                                                  "Malaysia",				
-                                                                                  "Namibia",
-                                                                                  "Niger",				
-                                                                                  "Nigeria",				
-                                                                                  "Nicaragua",				
-                                                                                  "Netherlands",				
-                                                                                  "Norway",				
-                                                                                  "New Zealand",				
-                                                                                  "Oman",				
-                                                                                  "Pakistan",			
-                                                                                  "Panama",			
-                                                                                  "Peru",
-                                                                                  "Philippines",				
-                                                                                  "Papua New Guinea",			
-                                                                                  "Poland",				
-                                                                                  "Portugal",				
-                                                                                  "Paraguay",				
-                                                                                  "West Bank and Gaza",			
-                                                                                  "Qatar",				
-                                                                                  "Romania",				
-                                                                                  "Russia",				
-                                                                                  "Rwanda",
-                                                                                  "Saudi Arabia",			
-                                                                                  "Sudan",				
-                                                                                  "Singapore",				
-                                                                                  "Sierra Leone",				
-                                                                                  "El Salvador",				
-                                                                                  "San Marino",				
-                                                                                  "Serbia",				
-                                                                                  "South Sudan",				
-                                                                                  "Slovakia",				
-                                                                                  "Slovenia",
-                                                                                  "Sweden",
-                                                                                  "Switzerland",	
-                                                                                  "Eswatini",				
-                                                                                  "Seychelles",				
-                                                                                  "Syria",				
-                                                                                  "Chad",				
-                                                                                  "Thailand",				
-                                                                                  "Trinidad and Tobago",				
-                                                                                  "Tunisia",				
-                                                                                  "Turkey",				
-                                                                                  "Tanzania",				
-                                                                                  "Uganda",				
-                                                                                  "Ukraine",	
-                                                                                  "United Kingdom",
-                                                                                  "United Arab Emirates",
-                                                                                  "Uruguay",			
-                                                                                  "US",			
-                                                                                  "Uzbekistan",				
-                                                                                  "Venezuela",				
-                                                                                  "Vietnam",				
-                                                                                  "South Africa",				
-                                                                                  "Zambia",				
-                                                                                  "Zimbabwe",
-                                                                                  "Taiwan*"	)),
-                                                          
-                                                          sliderInput("dateRange",
-                                                                      "Select a date range:",
-                                                                      min = as.Date("2020-01-22","%Y-%m-%d"),
-                                                                      max = Sys.Date(),
-                                                                      value = c(as.Date("2020-01-22"), Sys.Date()),
-                                                                      timeFormat = "%Y-%m-%d"),
-                                                          
-                                                          p("Solid line represents Confirmed Cases, \n Dashed line represents Deaths,\n Dotted line represents Recovered.")),
-                                                      
-                                                      mainPanel(plotOutput("countryPolicy")))
-                                           ))),
+                                                  p("This visualization examines how, in a given country, the number of confirmed cases, 
+                                                  the number of deaths, and the number of recovered cases have changed over time. 
+                                                  The graph is divided into time segments based on the stringency level of the policy 
+                                                  measure enacted during that time period. Stringency is generally measured by indicators for 
+                                                  mild response, moderate response, and severe response, depending on the policy response in question.
+                                                  The policy responses measured include school and workplace disruptions, public event cancellations and 
+                                                  public transportations closures, the presence of public info campaigns, restrictions on internal movement 
+                                                  and international travel, and testing policy and contact tracing. By comparing the change in cases with 
+                                                  the stringency of the policy measure enacted over time, we attempt to examine the efficacy of government 
+                                                  policy in curbing the spread of the virus. We suspect that there is little universal correlation but 
+                                                    hope to draw insights by comparing policy responses among specific countries."))),
+                                       
+                                       br(),
+                                       
+                                       sidebarLayout(
+                                         sidebarPanel(
+                                           helpText("Look at country-specific policy"),
+                                           selectInput("indexInput", "Select a policy response",
+                                                       choices = c("School closing", "Workplace closing", "Cancel public events",
+                                                                   "Public transport closings", "Public info campaigns", 
+                                                                   "Restrictions on internal movement", "International travel controls",
+                                                                   # "Fiscal measures", "Monetary measures", "Emergency investment in healthcare",
+                                                                   # "Investment in vaccines", 
+                                                                   "Testing policy", "Contact tracing")),
+                                           selectInput("countryInput", "Select a country",
+                                                       choices = c("Afghanistan",
+                                                                   "Angola",			
+                                                                   "Albania",
+                                                                   "Algeria",	
+                                                                   "Andorra",				
+                                                                   "Argentina",		
+                                                                   "Australia",		
+                                                                   "Austria",				
+                                                                   "Azerbaijan",			
+                                                                   "Burundi",
+                                                                   "Belgium",				
+                                                                   "Burkina Faso",
+                                                                   "Burma",		
+                                                                   "Bangladesh",			
+                                                                   "Bulgaria",			
+                                                                   "Bahrain",				
+                                                                   "Bosnia and Herzegovina",				
+                                                                   "Belize",			
+                                                                   "Bolivia",				
+                                                                   "Brazil",				
+                                                                   "Barbados",
+                                                                   "Brunei",			
+                                                                   "Botswana",				
+                                                                   "Canada",			
+                                                                   "Chile",				
+                                                                   "China",				
+                                                                   "Cameroon",				
+                                                                   "Congo (Kinshasa)",				
+                                                                   "Colombia",				
+                                                                   "Costa Rica",
+                                                                   "Cuba",				
+                                                                   "Cyprus",				
+                                                                   "Czechia",				
+                                                                   "Germany",				
+                                                                   "Djibouti",				
+                                                                   "Dominica",				
+                                                                   "Denmark",				
+                                                                   "Dominican Republic",				
+                                                                   "Ecuador",
+                                                                   "Egypt",				
+                                                                   "Spain",				
+                                                                   "Estonia",				
+                                                                   "Ethiopia",				
+                                                                   "Finland",				
+                                                                   "France",				
+                                                                   "Gabon",				
+                                                                   "Ghana",				
+                                                                   "Gambia",
+                                                                   "Greece",				
+                                                                   "Guatemala",				
+                                                                   "Guyana",				
+                                                                   "Honduras",				
+                                                                   "Croatia",				
+                                                                   "Hungary",				
+                                                                   "Indonesia",				
+                                                                   "India",				
+                                                                   "Ireland",				
+                                                                   "Iran",
+                                                                   "Iraq",				
+                                                                   "Iceland",			
+                                                                   "Israel",				
+                                                                   "Italy",				
+                                                                   "Jamaica",				
+                                                                   "Jordan",				
+                                                                   "Japan",				
+                                                                   "Kazakhstan",				
+                                                                   "Kenya",				
+                                                                   "Kyrgyzstan",
+                                                                   "Korea, South",				
+                                                                   "Kuwait",				
+                                                                   "Laos",				
+                                                                   "Lebanon",				
+                                                                   "Libya",				
+                                                                   "Sri Lanka",				
+                                                                   "Luxembourg",			
+                                                                   "Morocco",				
+                                                                   "Moldova",				
+                                                                   "Madagascar",
+                                                                   "Mexico",				
+                                                                   "Mali",				
+                                                                   "Mongolia",				
+                                                                   "Mozambique",			
+                                                                   "Mauritania",			
+                                                                   "Mauritius",				
+                                                                   "Malawi",				
+                                                                   "Malaysia",				
+                                                                   "Namibia",
+                                                                   "Niger",				
+                                                                   "Nigeria",				
+                                                                   "Nicaragua",				
+                                                                   "Netherlands",				
+                                                                   "Norway",				
+                                                                   "New Zealand",				
+                                                                   "Oman",				
+                                                                   "Pakistan",			
+                                                                   "Panama",			
+                                                                   "Peru",
+                                                                   "Philippines",				
+                                                                   "Papua New Guinea",			
+                                                                   "Poland",				
+                                                                   "Portugal",				
+                                                                   "Paraguay",				
+                                                                   "West Bank and Gaza",			
+                                                                   "Qatar",				
+                                                                   "Romania",				
+                                                                   "Russia",				
+                                                                   "Rwanda",
+                                                                   "Saudi Arabia",			
+                                                                   "Sudan",				
+                                                                   "Singapore",				
+                                                                   "Sierra Leone",				
+                                                                   "El Salvador",				
+                                                                   "San Marino",				
+                                                                   "Serbia",				
+                                                                   "South Sudan",				
+                                                                   "Slovakia",				
+                                                                   "Slovenia",
+                                                                   "Sweden",
+                                                                   "Switzerland",	
+                                                                   "Eswatini",				
+                                                                   "Seychelles",				
+                                                                   "Syria",				
+                                                                   "Chad",				
+                                                                   "Thailand",				
+                                                                   "Trinidad and Tobago",				
+                                                                   "Tunisia",				
+                                                                   "Turkey",				
+                                                                   "Tanzania",				
+                                                                   "Uganda",				
+                                                                   "Ukraine",	
+                                                                   "United Kingdom",
+                                                                   "United Arab Emirates",
+                                                                   "Uruguay",			
+                                                                   "US",			
+                                                                   "Uzbekistan",				
+                                                                   "Venezuela",				
+                                                                   "Vietnam",				
+                                                                   "South Africa",				
+                                                                   "Zambia",				
+                                                                   "Zimbabwe",
+                                                                   "Taiwan*"	)),
+                                           sliderInput("dateRange",
+                                                       "Select a date range:",
+                                                       min = as.Date("2020-01-22","%Y-%m-%d"),
+                                                       max = Sys.Date(),
+                                                       value = c(as.Date("2020-01-22"), Sys.Date()),
+                                                       timeFormat = "%Y-%m-%d"),
+                                           
+                                           p("Solid line represents Confirmed Cases, \n Dashed line represents Deaths,\n Dotted line represents Recovered.")),
+                                         
+                                         mainPanel(plotOutput("countryPolicy")))
+                                       
+                                       )),
                               
                               br(),
                               
@@ -535,37 +531,56 @@ ui <- navbarPage("The COVID-19 Data Project",
                                                        br(),
                                                        br(),
                                                        
-                                                       
-                                                       p("The second visualization plots the stringency index of the aggregated policy 
-                                            measures against the number of confirmed cases, recovered cases, or deaths over time, on a global level. 
-                                            We can compare the extent to which the number of cases and the
-                                            stringency of government policy responses differs among countries around the globe 
-                                            for any given date. The data we have shows that some countries, such the US, are not as stringent 
-                                            as one would anticipate given the number of cases. This effect is unfortunately underscored when one 
-                                            looks at deaths rather than confirmed cases or recoveries."),
+                                                       p("This visualization plots the stringency index of the aggregated policy 
+                                                       measures against the number of confirmed cases, recovered cases, or deaths over time, on a global level. 
+                                                       We can compare the extent to which the number of cases and the
+                                                       stringency of government policy responses differs among countries around the globe 
+                                                       for any given date. The data we have shows that some countries, such the US, are not as stringent in government
+                                                       response as one might anticipate given the number of cases. This observation is unfortunately underscored when one 
+                                                         looks at deaths rather than confirmed cases or recoveries."),
                                                        
                                                        br(),
                                                        
                                                        p("Note that the stringency index simply records the number and strictness of 
-                                            government policies and should not be interpreted as ‘scoring’ the appropriateness 
-                                            or effectiveness of a country’s response. A higher stringency index
-                                            does not necessarily mean that a country's response is ‘better’ than those with lower stringency indices."),
-                                                       
-                                                       sidebarLayout(
-                                                           sidebarPanel(
-                                                               helpText("Compare global policy"),
-                                                               radioButtons("caseInput", "Choose a case type",
-                                                                            choices = c("Confirmed", "Deaths", "Recovered"),
-                                                                            selected = "Confirmed"),
-                                                               sliderInput("dateInput",
-                                                                           "Select a date:",
-                                                                           min = as.Date("2020-01-22","%Y-%m-%d"),
-                                                                           max = Sys.Date(),
-                                                                           value = as.Date("2020-01-22"),
-                                                                           timeFormat = "%Y-%m-%d")
-                                                           ),
-                                                           mainPanel(plotOutput("globalPolicy"))))
-                                       )))),
+                                                       government policies and should not be interpreted as ‘scoring’ the appropriateness 
+                                                       or effectiveness of a country’s response. A higher stringency index does not necessarily 
+                                                         mean that a country's response is ‘better’ than those with lower stringency indices."))),
+                                       
+                                       sidebarLayout(
+                                         sidebarPanel(
+                                           helpText("Compare global policy"),
+                                           radioButtons("caseInput", "Choose a case type",
+                                                        choices = c("Confirmed", "Deaths", "Recovered"),
+                                                        selected = "Confirmed"),
+                                           sliderInput("dateInput",
+                                                       "Select a date:",
+                                                       min = as.Date("2020-01-22","%Y-%m-%d"),
+                                                       max = Sys.Date(),
+                                                       value = as.Date("2020-01-22"),
+                                                       timeFormat = "%Y-%m-%d")
+                                         ),
+                                         
+                                         mainPanel(plotOutput("globalPolicy"))),
+                                       
+                                       # Regressions
+                                       
+                                       br(),
+                                       
+                                       sidebarLayout(
+                                         sidebarPanel(column(4),
+                                                      
+                                                      h3("Error Rate"),
+                                                      
+                                                      p("Finally, seeing that a correlation seemed plausible, we wanted to test for uncertainty. By replicating
+                                                                      the data we have available 1000 times, we have 1000 samples on which to assess a potential correlation between
+                                                                      testing and cases. We segmented the data by total case rate and conducted a linear regression. Our models showed us
+                                                                      that 95% of the time we can expect a low correlation between testing and case rates.")),
+                                         
+                                         mainPanel(
+                                           plotOutput("covidCorrelation")
+                                         ))
+                                       
+                                       )),
                  
                  tabPanel("Economic Impact",
                           
@@ -577,17 +592,18 @@ ui <- navbarPage("The COVID-19 Data Project",
                                                        
                                                        h2("Economic Implications of COVID-19", style = "text-align: center"),
                                                        
-                                                       p("The first visualization plots the number of confirmed cases, 
-                                                    the number of deaths, or the number of recoveries against a specific country’s
-                                                    major stock index. This provides a glimpse into how the pandemic has impacted corporations in their 
-                                                    day-to-day interactions, as well as how consumers and market analysts have 
-                                                    responded in turn. The visualization tracks the logged cases and the closing price of the 
-                                                    stock indices alongside the number of cases in order to gauge this impact on the economy. The countries tracked are: 
-                                                    China, where the virus originated; South Korea, one of the countries originally hit hardest by the virus; 
-                                                    Germany, a country with the fourth highest number of cases, but one with comparatively few deaths;  
-                                                    Italy, a country that had extensive shutdowns in response to rapid spread of the virus, and the country with the third most cases worldwide;
-                                                    Spain, another country that quickly closed borders and put shutdowns in place, and the country with the second most cases worldwide;
-                                                    and the United States, currently the world leader in cases."),
+                                                       p("This visualization plots the number of confirmed cases, the number of deaths, 
+                                                       or the number of recoveries against a specific country’s major stock index. 
+                                                       This provides a glimpse into how the pandemic has impacted corporations in their day-to-day interactions, 
+                                                       as well as how consumers and market analysts have responded in turn. 
+                                                       The visualization tracks the logged cases and the closing price of the stock indices alongside 
+                                                       the number of cases in order to gauge this impact on the economy. The countries tracked are: 
+                                                       China, where the virus originated; South Korea, one of the countries originally hit hardest by the virus; 
+                                                       Germany, a country with the fourth highest number of cases, but one with comparatively few deaths; 
+                                                       Italy, a country that had extensive shutdowns in response to rapid spread of the virus, 
+                                                       and the country with the third most cases worldwide; Spain, another country that quickly closed borders and 
+                                                       put shutdowns in place, and the country with the second most cases worldwide; 
+                                                         and the United States, currently the world leader in cases."),
                                                        
                                                        sidebarLayout(
                                                            sidebarPanel(
@@ -623,13 +639,12 @@ ui <- navbarPage("The COVID-19 Data Project",
                                                        
                                                        br(),
                                                        
-                                                       p("This second visualization displays the relationship between the GDP per capita as of 2018 
-                                      against the number of cases (confirmed, deaths, or recovered), on a global level, on any date after January 22nd. 
-                                      It aims to show the relationship between the 
-                                      pre-existing wealth of a country and the number of cases in order to track a few variables: 
-                                      first, whether wealth has any play in the 
-                                      spread of the virus; second, if wealth affects the number of deaths; and third, if 
-                                      wealth affects the likelihood of recovering from the virus."),
+                                                       p("This visualization displays the relationship between the GDP per capita as of 2018 
+                                                       against the number of cases (confirmed, deaths, or recovered), on a global level, on any date after January 22nd. 
+                                                       It aims to show the relationship between the pre-existing wealth of a country and the number of cases 
+                                                       in order to track a few variables: first, whether wealth has any play in the spread of the virus; 
+                                                       second, if wealth affects the number of deaths; and third, if wealth affects the likelihood of 
+                                                         recovering from the virus."),
                                                        
                                                        sidebarLayout(
                                                            sidebarPanel(
@@ -647,7 +662,6 @@ ui <- navbarPage("The COVID-19 Data Project",
                                                            
                                                            mainPanel(plotOutput("gdp_cases"))))
                                        )))),
-                 
                  
                  tabPanel("Team",
                           column(6,
@@ -784,7 +798,6 @@ server <- function(input, output) {
                log_tests = log(total_tests),
                log_tests_1m = log(tests_1m_pop))
     
-    
     output$covidMTests <- renderPlot({
         
         ggplot(worldometer_tests, aes(tests_1m_pop, total_cases, color = country_other)) +
@@ -802,7 +815,6 @@ server <- function(input, output) {
         
     })
     
-    
     output$covidLogMTests <- renderPlot({
         
         # Logarithmic plot of tests per 1m
@@ -819,7 +831,6 @@ server <- function(input, output) {
             )
         
     })
-    
     
     output$covidCorrelation <- renderPlot({
         
@@ -864,7 +875,6 @@ server <- function(input, output) {
             add_row(index = "1,000+ Cases", conf_low = world_low[1], point_estimate = world_low[2], conf_high = world_low[3]) %>%
             add_row(index = "Less than 1,000 Cases", conf_low = world_bottom[1], point_estimate = world_bottom[2], conf_high = world_bottom[3])
         
-        
         ggplot(updated_world_tibble, aes(y = point_estimate)) +
             geom_errorbar(aes(x = index, ymin = conf_low, ymax = conf_high), width = 0.1, color = "#0D47A1") +
             theme_classic() +
@@ -876,10 +886,9 @@ server <- function(input, output) {
                 y = "Correlation"
             )
         
-        
     })
     
-    ######### End Spread #########
+    ####### End Spread #######
     #########        #########
     
     ######### Policy #########
@@ -1086,11 +1095,11 @@ server <- function(input, output) {
     })
     
     
-    ######### End Policy #########
+    ####### End Policy #######
     #########        #########
     
     
-    ######### Economic #########
+    ######## Economic ########
     #########        #########
     
     output$stock_impact <- renderPlot({
