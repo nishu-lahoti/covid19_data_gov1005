@@ -91,7 +91,7 @@ world <- worldometer %>%
   select("country_other", "population_estimate", "total_cases", "total_deaths", "total_recovered", "total_tests", "tests_1m_pop", incidence) %>%
   arrange(desc(total_cases))
 
-saveRDS(world, file = "../team_data/worldometer.RDS")
+saveRDS(world, file = "../covid19_data_gov1005/worldometer.RDS")
 
 ```
 
