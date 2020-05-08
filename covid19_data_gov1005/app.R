@@ -823,7 +823,7 @@ server <- function(input, output) {
     
     output$covidMTests <- renderPlot({
         
-        covidMTests <- ggplot(worldometer_tests, aes(tests_1m_pop, total_cases, color = country_other)) +
+        ggplot(worldometer_tests, aes(tests_1m_pop, total_cases, color = country_other)) +
             geom_point() +
             geom_jitter() +
             theme_classic() +
@@ -846,7 +846,7 @@ server <- function(input, output) {
         
         # Logarithmic plot of tests per 1m
         
-        covidLogMTests <- ggplot(worldometer_log_data, aes(log_tests_1m, log_cases, color = country_other)) +
+        ggplot(worldometer_log_data, aes(log_tests_1m, log_cases, color = country_other)) +
             geom_point() +
             geom_smooth() +
             theme_classic() +
