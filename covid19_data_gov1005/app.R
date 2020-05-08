@@ -100,9 +100,8 @@ ui <- navbarPage("The COVID-19 Data Project",
                  
                  
                  tabPanel("Spread",
-                          tabPanel("Rate of Spread",
-                                   tabsetPanel(
-                                     tabPanel("Rate of Spread",
+                          tabsetPanel(
+                            tabPanel("Rate of Spread",
                                   
                                    fluidRow(
                                      column(2),
@@ -300,7 +299,7 @@ ui <- navbarPage("The COVID-19 Data Project",
                                             plotOutput("covidCorrelation")
                                               )
                                             )
-                                   )))),
+                                   ))),
                                   
                  tabPanel("Policy",
                           tabsetPanel(
