@@ -76,40 +76,32 @@ us_daily_reports <- read.csv(url("https://raw.githubusercontent.com/CSSEGISandDa
 
 # Webscrape Worldometer Data
 
+# Webscrape Worldometer Data
+
 worldometer_url <- paste0("https://www.worldometers.info/coronavirus/")
 h <- read_html(worldometer_url)
-table <- h %>% 
-               html_nodes("table")
+table <- h %>% html_nodes("table")
 worldometer <- table[[1]] %>% html_table
-worldometer_data <- worldometer %>% 
+
+
+world <- worldometer %>% 
   clean_names() %>%
   mutate_at(c("total_cases", "total_deaths", "total_recovered", "total_tests", "tests_1m_pop"), parse_number) %>%
   filter(! country_other %in% c("World", "Total:", "Europe", "North America", "Asia", "South America", 
                                 "Africa", "Oceania", "")) %>%
-  select("country_other", "total_cases", "total_deaths", "total_recovered", "total_tests", "tests_1m_pop") %>%
+  mutate(incidence = case_when(
+    total_cases > 100000 ~ "100,000+ Cases",
+    total_cases >= 10000 ~ "10,000+ Cases",
+    total_cases >= 1000 ~ "1,000+ Cases",
+    TRUE ~ "Less than 1000+ Cases"
+  ),
+  population_estimate = (total_tests * 1000000) / tests_1m_pop,
+         per_capita_cases = total_cases / population_estimate,
+         per_capita_tests = total_tests / population_estimate) %>%
+  select("country_other", "population_estimate", "total_cases", "total_deaths", "total_recovered", "total_tests", "tests_1m_pop", incidence) %>%
   arrange(desc(total_cases))
-# 
-# # Clean worldometer data, changing column types to reflect numbers where
-# # necessary.
-# 
-# worldometer_new <- worldometer %>%
-#   mutate_all(parse_number)
-# 
-# worldometer_data <- worldometer %>%
-#   mutate(total_cases_updated = parse_number(total_cases),
-#          new_cases_updated = parse_number(new_cases),
-#          total_deaths_updated = parse_number(total_deaths),
-#          new_deaths_updated = parse_number(new_deaths),
-#          total_recovered_updated = parse_number(total_recovered),
-#          active_cases_updated = parse_number(active_cases),
-#          serious_critical_updated = parse_number(serious_critical),
-#          total_tests_updated = parse_number(total_tests),
-#          tests_1m_pop_updated = parse_number(tests_1m_pop)) %>%
-#          filter(! country_other %in% c("World", "Total:", "Europe", "North America", "Asia", "South America",
-#                                 "Africa", "Oceania", "")) %>%
-#         arrange(desc(total_cases_updated))
 
-saveRDS(worldometer_data, file = "worldometer.RDS")
+saveRDS(world, file = "worldometer.RDS")
 ```
 
 ```{r Spread with Increments, echo=FALSE}
