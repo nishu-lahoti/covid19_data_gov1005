@@ -46,7 +46,7 @@ ui <- navbarPage("The COVID-19 Data Project",
                             p(tags$b("Analyzing how the spread of COVID-19 has impacted governments and economies"), align = "center"),
                             
                             br(),
-                            
+                          
                            p("Over the past months, the spread of COVID-19 has upended the world, 
                            with almost 3 million confirmed cases and 200,000 deaths reported to date. 
                            Cities, states, and entire nations have shut down, as travel-restrictions 
@@ -267,8 +267,7 @@ ui <- navbarPage("The COVID-19 Data Project",
                                                              "Taiwan")),
                                      textOutput("selected_var"),
                                      plotOutput("covidSpread"),
-                                     plotOutput("covidDeaths")),
-                                   )),
+                                     plotOutput("covidDeaths")))),
                                    
                                    tabPanel("Testing",
                                             
