@@ -263,8 +263,8 @@ ui <- navbarPage("The COVID-19 Data Project",
                                                                                    "Zimbabwe",
                                                                                    "Taiwan")),
                                                            textOutput("selected_var"),
-                                                           plotOutput("covidSpread"),
-                                                           plotOutput("covidDeaths")),
+                                                           plotlyOutput("covidSpread"),
+                                                           plotlyOutput("covidDeaths")),
                                                 )),
                                        
                                        tabPanel("Testing",
@@ -293,7 +293,7 @@ ui <- navbarPage("The COVID-19 Data Project",
                                                                    total cases for countries with over 15,000 reported cases.")),
                                                     
                                                     mainPanel( 
-                                                      plotOutput("covidMTests")
+                                                      plotlyOutput("covidMTests")
                                                     )),
                                                 
                                                 sidebarLayout(
@@ -305,7 +305,7 @@ ui <- navbarPage("The COVID-19 Data Project",
                                                                     we plotted it on a logarithmic scale to better visualize any correlation.")),
                                                     
                                                     mainPanel(
-                                                      plotOutput("covidLogMTests")
+                                                      plotlyOutput("covidLogMTests")
                                                     )),
                                                 
                                                 sidebarLayout(
@@ -772,36 +772,45 @@ server <- function(input, output) {
         
     })
     
-    output$covidSpread <- renderPlot({
+    output$covidSpread <- renderPlotly({
         
-        covidGlobal %>%
+        confirmed_plot <- covidGlobal %>%
             filter(country_region == input$country_region,
                    increment_confirmed >= 0) %>%
-            ggplot(aes(x = new_date, y = increment_confirmed)) +
+            ggplot(aes(x = new_date, y = increment_confirmed, text = paste("</br> Date:", new_date,
+                                                                           "</br> New Cases:", increment_confirmed))) +
             geom_col(fill = "#0D47A1") +
-            geom_smooth(se = FALSE, color = "black") + 
+            geom_smooth(method = "lm", se = FALSE, color = "black") + 
             labs(
-                title = "Incremental Cases of COVID-19\nmeasured over time",
+                title = "Incremental Cases of COVID-19 measured over time",
                 x = "Date",
                 y = "New Daily Cases"
             )
         
+        confirmed_plot <- ggplotly(confirmed_plot, tooltip = "text")
+        
+        confirmed_plot
+        
     })
     
-    output$covidDeaths <- renderPlot({
+    output$covidDeaths <- renderPlotly({
         
-        covidGlobal %>%
+        deaths_plot <- covidGlobal %>%
             filter(country_region == input$country_region,
                    increment_confirmed >= 0) %>%
-            ggplot(aes(x = new_date, y = increment_deaths)) +
+            ggplot(aes(x = new_date, y = increment_deaths, text = paste("</br> Date:", new_date,
+                                                                        "</br> New Deaths:", increment_deaths))) +
             geom_col(fill = "#E64A19") +
             geom_smooth(se = FALSE, color = "black") + 
             labs(
-                title = "Incremental Deaths of COVID-19\nmeasured over time",
+                title = "Incremental Deaths of COVID-19 measured over time",
                 x = "Date",
                 y = "New Daily Deaths"
             )
         
+        deaths_plot <- ggplotly(deaths_plot, tooltip = "text")
+        
+        deaths_plot
     })
     
     options(scipen = 999)
@@ -821,13 +830,15 @@ server <- function(input, output) {
                log_tests = log(total_tests),
                log_tests_1m = log(tests_1m_pop))
     
-    output$covidMTests <- renderPlot({
+    output$covidMTests <- renderPlotly({
         
-        ggplot(worldometer_tests, aes(tests_1m_pop, total_cases, color = country_other)) +
+        covidMTests <- ggplot(worldometer_tests, aes(tests_1m_pop, total_cases, color = country_other, text = paste("</br> Country:", country_other,
+                                                                                                                    "</br> Tests per 1 million:", tests_1m_pop,
+                                                                                                                    "</br> Total Cases:", total_cases))) +
             geom_point() +
             geom_jitter() +
             theme_classic() +
-            theme(legend.position = "top") +
+            theme(legend.position = "none") +
             labs(
                 title = "COVID-19 Country Testing Capacity",
                 subtitle = "Visualizing a country's testing rate against case rate\nfor countries with over 15,000 reported cases.",
@@ -836,17 +847,19 @@ server <- function(input, output) {
                 color = "Country"
             )
         
-        #covidMTests <- ggplotly(covidMTests)
+        covidMTests <- ggplotly(covidMTests, tooltip = "text")
         
-        #covidMTests
+        covidMTests
         
     })
     
-    output$covidLogMTests <- renderPlot({
+    output$covidLogMTests <- renderPlotly({
         
         # Logarithmic plot of tests per 1m
         
-        ggplot(worldometer_log_data, aes(log_tests_1m, log_cases, color = country_other)) +
+        covidLogMTests <- ggplot(worldometer_log_data, aes(log_tests_1m, log_cases, color = country_other, text = paste("</br> Country:", country_other,
+                                                                                                                        "</br> Tests per 1 million (log transformed):", log_tests_1m,
+                                                                                                                        "</br> Total Cases (log transformed):", log_cases))) +
             geom_point() +
             geom_smooth() +
             theme_classic() +
@@ -857,9 +870,9 @@ server <- function(input, output) {
                 y = "Cases \n(x10,000)"
             )
         
-        #covidLogMTests <- ggplotly(covidLogMTests)
+        covidLogMTests <- ggplotly(covidLogMTests, tooltip = "text")
         
-        #covidLogMTests
+        covidLogMTests
         
     })
     
