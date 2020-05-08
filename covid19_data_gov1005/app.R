@@ -758,19 +758,6 @@ server <- function(input, output) {
         paste(input$country_region)
     })
     
-    output$worldometer_log <- renderPlot({
-        
-        worldometer_log <- worldometer_data %>%
-            ggplot(worldometer_log, aes(log_cases, log_tests_1m, color = country_other)) +
-            geom_point() +
-            theme(legend.position = "none") +
-            labs(
-                title = "Logarithmic comparison of cases to tests",
-                x = "Cases \n(x10,000)",
-                y = "Tests per 1M \n(x10,000)"
-            ) 
-        
-    })
     
     output$covidSpread <- renderPlotly({
         
@@ -801,7 +788,7 @@ server <- function(input, output) {
             ggplot(aes(x = new_date, y = increment_deaths, text = paste("</br> Date:", new_date,
                                                                         "</br> New Deaths:", increment_deaths))) +
             geom_col(fill = "#E64A19") +
-            geom_smooth(se = FALSE, color = "black") + 
+            geom_smooth(method = "lm", se = FALSE, color = "black") + 
             labs(
                 title = "Incremental Deaths of COVID-19 measured over time",
                 x = "Date",
