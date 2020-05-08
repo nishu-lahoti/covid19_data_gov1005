@@ -273,7 +273,7 @@ ui <- navbarPage("The COVID-19 Data Project",
                                                 )),
                                        
                                        tabPanel("Testing",
-                                                
+                                            
                                                 fluidRow(
                                                     column(2),
                                                     column(8,
@@ -283,28 +283,52 @@ ui <- navbarPage("The COVID-19 Data Project",
                                                            br(),
                                                            
                                                            p("Suspecting that
-                                              countries with more testing infrastructure will report higher case rates, we created a model linear regressions to visualize the
-                                              relationship between these variables. The first visualization the relationship between tests per million and cases per million in countries with
-                                              reported cases. The second visualization shows that a slight correlation exists between testing and case rates and how that shifts depending on a country's
-                                              case rate."))),
+                                              countries with more testing infrastructure will report higher case rates, we created models to visualize the
+                                              relationship between testing and cases. The series of visualizations below aim to test whether a relationship exists between tests per million and cases per million in countries with
+                                              reported cases."))),
                                                 
                                                 br(),
-                                                br(),
                                                 
-                                                fluidRow(
-                                                    column(2),
-                                                    column(8,
-                                                           
-                                                           br(),
-                                                           
-                                                           plotOutput("covidHighTests"),
-                                                           plotOutput("covidMTests"),
-                                                           plotOutput("covidLogTests"),
-                                                           plotOutput("covidLogMTests"),
-                                                           plotOutput("covidCorrelation")
-                                                    )
+                                                sidebarLayout(
+                                                    sidebarPanel(column(4),
+                                                                 
+                                                        h3("Raw Comparison"),          
+                                                                 
+                                                        p("We started by plotting raw figures. The graph to the right shows total tests per 1M people compared against
+                                                          total cases for countries with over 15,000 reported cases.")),
+                                                    
+                                                    mainPanel( 
+                                                        plotOutput("covidMTests")
+                                                    )),
+                                                
+                                                sidebarLayout(
+                                                    sidebarPanel(column(4),
+                                                                 
+                                                                 h3("Logarithmic Comparison"),
+                                                                    
+                                                                    p("Given the data in the first graph is clustered and challenging to visualize, we plotted it on a logarithmic
+                                                                      scale to better visualize any correlation.")),
+                                                                 
+                                                                 mainPanel(
+                                                                     plotOutput("covidLogMTests")
+                                                                 )),
+                                                
+                                                sidebarLayout(
+                                                    sidebarPanel(column(4),
+                                                                 
+                                                                 h3("Error Rate"),
+                                                                    
+                                                                    p("Finally, seeing that a correlation seemed plausible, we wanted to test for uncertainty. By replicating
+                                                                      the data we have available 1000 times, we have 1000 samples on which to assess a potential correlation between
+                                                                      testing and cases. We segmented the data by total case rate and conducted a linear regression. Our models showed us
+                                                                      that 95% of the time we can expect a low correlation between testing and case rates.")),
+                                                                 
+                                                                 mainPanel(
+                                                                     plotOutput("covidCorrelation")
+                                                                 )),
                                                 )
-                                       )))),
+                                       ))),
+                                    
                  
                  tabPanel("Policy",
                           tabsetPanel(
@@ -717,7 +741,8 @@ server <- function(input, output) {
             filter(country_region == input$country_region,
                    increment_confirmed >= 0) %>%
             ggplot(aes(x = new_date, y = increment_confirmed)) +
-            geom_col() +
+            geom_col(fill = "#0D47A1") +
+            geom_smooth(se = FALSE, color = "black") + 
             labs(
                 title = "Incremental Cases of COVID-19\nmeasured over time",
                 x = "Date",
@@ -732,7 +757,8 @@ server <- function(input, output) {
             filter(country_region == input$country_region,
                    increment_confirmed >= 0) %>%
             ggplot(aes(x = new_date, y = increment_deaths)) +
-            geom_col() +
+            geom_col(fill = "#E64A19") +
+            geom_smooth(se = FALSE, color = "black") + 
             labs(
                 title = "Incremental Deaths of COVID-19\nmeasured over time",
                 x = "Date",
@@ -758,55 +784,20 @@ server <- function(input, output) {
                log_tests = log(total_tests),
                log_tests_1m = log(tests_1m_pop))
     
-    output$covidHighTests <- renderPlot({
-        
-        # Visualizing total cases and total deaths against total tests. A good next step may be to filter by countries of interest and to get a good enough
-        # sample of countries that have tested. Qualify a country based on total number of cases (>1000). Maybe there is a weak positive correlation.
-        
-        ggplot(worldometer_tests, aes(total_tests, total_cases, color = country_other)) +
-            geom_point() +
-            geom_jitter() +
-            theme_classic() +
-            theme(legend.position = "top") +
-            labs(
-                title = "Comparing COVID-19 Tests versus Total Cases",
-                subtitle = "Comparing total conducted tests \nfor countries with over 15,000 reported cases.",
-                x = "Total Tests",
-                y = "Total Cases",
-                color = "Country"
-            )
-        
-    })
     
     output$covidMTests <- renderPlot({
         
-        ggplot(worldometer_tests, aes(total_cases, tests_1m_pop, color = country_other)) +
+        ggplot(worldometer_tests, aes(tests_1m_pop, total_cases, color = country_other)) +
             geom_point() +
             geom_jitter() +
             theme_classic() +
             theme(legend.position = "top") +
             labs(
                 title = "COVID-19 Country Testing Capacity",
-                subtitle = "Visualizing a country's case rate against testing rate\nfor countries with over 15,000 reported cases.",
-                x = "Total Cases",
-                y = "Tests per 1M",
+                subtitle = "Visualizing a country's testing rate against case rate\nfor countries with over 15,000 reported cases.",
+                x = "Tests per 1M",
+                y = "Total Cases",
                 color = "Country"
-            )
-        
-    })
-    
-    
-    output$covidLogTests <- renderPlot({
-        
-        # Logarithmic plot of total tests
-        
-        ggplot(worldometer_log_data, aes(log_cases, log_tests, color = country_other)) +
-            geom_point() +
-            theme(legend.position = "none") +
-            labs(
-                title = "Logarithmic comparison of cases to tests",
-                x = "Cases \n(x10,000)",
-                y = "Tests \n(x10,000)"
             )
         
     })
@@ -816,16 +807,16 @@ server <- function(input, output) {
         
         # Logarithmic plot of tests per 1m
         
-        log_million <- ggplot(worldometer_log_data, aes(log_tests_1m, log_cases, color = country_other)) +
+        ggplot(worldometer_log_data, aes(log_tests_1m, log_cases, color = country_other)) +
             geom_point() +
+            geom_smooth() +
+            theme_classic() +
             theme(legend.position = "none") +
             labs(
                 title = "Logarithmic comparison of cases to tests",
                 x = "Tests per 1M \n(x10,000)",
                 y = "Cases \n(x10,000)"
             )
-        
-        ggplotly(log_million)
         
     })
     
