@@ -97,7 +97,6 @@ ui <- navbarPage("The COVID-19 Data Project",
                  ),
                 
                  tabPanel("Spread",
-                          tabPanel("Rate of Spread",
                                    tabsetPanel(
                                        tabPanel("Rate of Spread",
                                                 
@@ -302,7 +301,7 @@ ui <- navbarPage("The COVID-19 Data Project",
                                                                  
                                                                  h3("Logarithmic Comparison"),
                                                                     
-                                                                    p("Given the data in the first graph is clustered and challenging to visualize, 
+                                                                  p("Given the data in the first graph is clustered and challenging to visualize, 
                                                                     we plotted it on a logarithmic scale to better visualize any correlation.")),
                                                     
                                                     mainPanel(
@@ -323,7 +322,7 @@ ui <- navbarPage("The COVID-19 Data Project",
                                                       plotOutput("covidCorrelation")
                                                     )),
                                                 )
-                                       ))),
+                                       )),
                  
                  tabPanel("Policy",
                           tabsetPanel(
