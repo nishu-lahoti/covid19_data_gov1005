@@ -512,7 +512,7 @@ ui <- navbarPage("The COVID-19 Data Project",
                                                    br(),
                                                    
                           
-                                            p("The second visualization plots the stringency index of the aggregated policy 
+                                            p("This visualization plots the stringency index of the aggregated policy 
                                             measures against the number of confirmed cases, recovered cases, or deaths over time, on a global level. 
                                             We can compare the extent to which the number of cases and the
                                             stringency of government policy responses differs among countries around the globe 
@@ -541,6 +541,50 @@ ui <- navbarPage("The COVID-19 Data Project",
                                                       timeFormat = "%Y-%m-%d")
                                         ),
                                         mainPanel(plotOutput("globalPolicy"))))
+                                   )),
+                                      
+                                      
+                                      br(),
+                                      
+                                      tabPanel("Policy Regression",
+                                               
+                                               fluidRow(column(2),
+                                                        column(8,
+                                                               
+                                                               h2("Regression of Policy Effects", style = "text-align:center"),
+                                                               br(),
+                                                               br(),
+                                                               
+                                                               
+                                                               p("This visualization plots the stringency index of the aggregated policy 
+                                            measures against the number of confirmed cases, recovered cases, or deaths over time, on a global level. 
+                                            We can compare the extent to which the number of cases and the
+                                            stringency of government policy responses differs among countries around the globe 
+                                            for any given date. The data we have shows that some countries, such the US, are not as stringent 
+                                            as one would anticipate given the number of cases. This effect is unfortunately underscored when one 
+                                            looks at deaths rather than confirmed cases or recoveries."),
+                                                               
+                                                               br(),
+                                                               
+                                                               p("Note that the stringency index simply records the number and strictness of 
+                                            government policies and should not be interpreted as ‘scoring’ the appropriateness 
+                                            or effectiveness of a country’s response. A higher stringency index
+                                            does not necessarily mean that a country's response is ‘better’ than those with lower stringency indices."),
+                                                               
+                                                               sidebarLayout(
+                                                                 sidebarPanel(
+                                                                   helpText("Compare global policy"),
+                                                                   radioButtons("caseInput", "Choose a case type",
+                                                                                choices = c("Confirmed", "Deaths", "Recovered"),
+                                                                                selected = "Confirmed"),
+                                                                   sliderInput("dateInput",
+                                                                               "Select a date:",
+                                                                               min = as.Date("2020-01-22","%Y-%m-%d"),
+                                                                               max = Sys.Date(),
+                                                                               value = as.Date("2020-01-22"),
+                                                                               timeFormat = "%Y-%m-%d")
+                                                                 ),
+                                                                 mainPanel(plotOutput("globalPolicy"))))
                                    )))),
                  
                  tabPanel("Economic Impact",
@@ -553,7 +597,7 @@ ui <- navbarPage("The COVID-19 Data Project",
                                                      
                                                      h2("Economic Implications of COVID-19", style = "text-align: center"),
                                                      
-                                                     p("The first visualization plots the number of confirmed cases, 
+                                                     p("This visualization plots the number of confirmed cases, 
                                                     the number of deaths, or the number of recoveries against a specific country’s
                                                     major stock index. This provides a glimpse into how the pandemic has impacted corporations in their 
                                                     day-to-day interactions, as well as how consumers and market analysts have 
@@ -599,7 +643,7 @@ ui <- navbarPage("The COVID-19 Data Project",
                                      
                                      br(),
                                      
-                                     p("This second visualization displays the relationship between the GDP per capita as of 2018 
+                                     p("This visualization displays the relationship between the GDP per capita as of 2018 
                                       against the number of cases (confirmed, deaths, or recovered), on a global level, on any date after January 22nd. 
                                       It aims to show the relationship between the 
                                       pre-existing wealth of a country and the number of cases in order to track a few variables: 
