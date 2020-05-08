@@ -1,0 +1,168 @@
+---
+title: "spread_worldometer"
+author: "Nishu Lahoti"
+date: "5/5/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(dplyr)
+library(readr)
+library(rvest)
+library(janitor)
+library(plotly)
+library(infer)
+library(broom)
+
+
+# Webscrape Worldometer Data
+
+worldometer_url <- paste0("https://www.worldometers.info/coronavirus/")
+h <- read_html(worldometer_url)
+table <- h %>% html_nodes("table")
+worldometer <- table[[1]] %>% html_table
+
+
+world <- worldometer %>% 
+  clean_names() %>%
+  mutate_at(c("total_cases", "total_deaths", "total_recovered", "total_tests", "tests_1m_pop"), parse_number) %>%
+  filter(! country_other %in% c("World", "Total:", "Europe", "North America", "Asia", "South America", 
+                                "Africa", "Oceania", "")) %>%
+  mutate(population_estimate = (total_tests * 1000000) / tests_1m_pop,
+         per_capita_cases = total_cases / population_estimate,
+         per_capita_tests = total_tests / population_estimate) %>%
+  select("country_other", "population_estimate", "total_cases", "total_deaths", 
+         "total_recovered", "total_tests", "tests_1m_pop", "per_capita_cases", "per_capita_tests") %>%
+  arrange(desc(total_cases))
+
+```
+
+
+#### Worldometer Data
+```{r worldometer_exploration, echo = FALSE}
+# Visualizing total cases and total deaths against total tests. A good next step may be to filter by countries of interest and to get a good enough
+# sample of countries that have tested. Qualify a country based on total number of cases (>1000). Maybe there is a weak positive correlation.
+
+
+x <- ggplot(world, aes(per_capita_tests, per_capita_cases)) +
+  geom_point()
+
+g <- ggplotly(x)
+g
+
+
+options(scipen = 999)
+
+# Normal
+worldometer_tests <- world %>%
+  filter(total_cases >= 15000, 
+         !is.na(total_tests))
+
+# Logarithmic
+
+worldometer_log <- world %>%
+  mutate(log_cases = log(total_cases),
+         log_deaths = log(total_deaths),
+         log_recovered = log(total_recovered),
+         log_tests = log(total_tests),
+         log_tests_1m = log(tests_1m_pop))
+
+ggplot(worldometer_tests, aes(total_tests, total_cases, color = country_other)) + 
+  geom_point() +
+  geom_jitter() +
+  theme_classic() +
+  theme(legend.position = "right") +
+  labs(
+    title = "Comparing COVID-19 Cases versus Total Tests",
+    subtitle = "Comparing total conducted tests \nfor countries with over 15,000 reported cases.",
+    x = "Total Tests",
+    y = "Total Cases",
+    color = "Country"
+  )
+
+ggplot(worldometer_tests, aes(tests_1m_pop, total_cases, color = country_other)) + 
+  geom_point() +
+  geom_jitter() +
+  theme_classic() +
+  theme(legend.position = "right") +
+  labs(
+    title = "COVID-19 Country Testing Capacity",
+    subtitle = "Visualizing a country's case rate against testing rate\nfor countries with over 15,000 reported cases.",
+    x = "Tests per 1M",
+    y = "Cases",
+    color = "Country"
+  )
+
+# Logarithmic plot of total tests
+
+log_test_plot <- ggplot(worldometer_log, aes(log_tests, log_cases, color = country_other)) +
+  geom_point() +
+  theme(legend.position = "none") +
+  labs(
+    title = "Logarithmic comparison of tests to cases",
+    x = "Tests \n(x10,000)",
+    y = "Cases \n(x10,000)",
+    caption = "Disclaimer about logarithmic tests"
+  )
+
+log_test_ply <- ggplotly(log_test_plot)
+log_test_ply
+
+# Logarithmic plot of tests per 1m
+
+log_1m_plot <- ggplot(worldometer_log, aes(log_tests_1m, log_cases, color = country_other)) +
+  geom_point() +
+  theme(legend.position = "none") +
+  labs(
+    title = "Logarithmic comparison of cases to tests",
+    x = "Tests per 1M \n(x10,000)",
+    y = "Cases \n(x10,000)",
+    caption = "Disclaimer about logarithmic tests"
+  )
+
+log_1m_ply <- ggplotly(log_1m_plot)
+log_1m_ply
+
+```
+
+
+```{r}
+
+worldometer_regression <- lm(total_cases ~ total_tests, data = world) %>%
+  tidy(conf.int = TRUE) %>%
+  select(term, estimate, conf.low, conf.high)
+
+
+worldometer_reps <- world %>%
+  filter(! is.na(total_tests)) %>%
+  select(country_other, total_cases, total_tests) %>%
+  rep_sample_n(size = nrow(world), replace = TRUE, reps = 1000) %>%
+  group_by(replicate) %>%
+  nest() %>%
+  mutate(mod = map(data, ~ lm(total_cases ~ total_tests, data = .)),
+         reg_results = map(mod, ~ tidy(., conf.int = TRUE)),
+         disp_coef = map_dbl(reg_results, ~ filter(., term == "total_tests") %>% pull(estimate)),
+         lower_bound = map_dbl(reg_results, ~ filter(., term == "total_tests") %>% pull(conf.low)),
+         upper_bound = map_dbl(reg_results, ~ filter(., term == "total_tests") %>% pull(conf.high)))
+
+world_int <- worldometer_reps %>%
+  pull(disp_coef) %>%
+  quantile(c(0.025, 0.5, 0.975))
+
+# Relationship between testing and locations - is it better in certain regions. Could also show relationships with stringency.
+# Subset by case rates. Or test rates. Could also consider population density compared to square miles by places.
+
+
+
+world_tibble <- tibble(index = "relationship", conf_low = world_int[1], point_estimate = world_int[2], conf_high = world_int[3])
+
+ggplot(world_tibble, aes(y = point_estimate)) +
+  geom_errorbar(aes(x = index, ymin = conf_low, ymax = conf_high), width = 0.1, color = "blue") +
+  theme_classic() +
+  ylim(0, .2)
+
+```
+
