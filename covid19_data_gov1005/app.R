@@ -792,58 +792,6 @@ options(scipen = 999)
             log_tests = log(total_tests),
             log_tests_1m = log(tests_1m_pop))
 
-  output$covidHighTests <- renderPlot({
-    
-    # Visualizing total cases and total deaths against total tests. A good next step may be to filter by countries of interest and to get a good enough
-    # sample of countries that have tested. Qualify a country based on total number of cases (>1000). Maybe there is a weak positive correlation.
-
-    ggplot(worldometer_tests, aes(total_cases, total_tests, color = country_other)) +
-      geom_point() +
-      geom_jitter() +
-      theme_classic() +
-      theme(legend.position = "top") +
-      labs(
-        title = "Comparing COVID-19 Cases versus Total Tests",
-        subtitle = "Comparing total conducted tests \nfor countries with over 15,000 reported cases.",
-        x = "Total Cases",
-        y = "Tests",
-        color = "Country"
-      )
-
-  })
-
-  output$covidMTests <- renderPlot({
-
-    ggplot(worldometer_tests, aes(total_cases, tests_1m_pop, color = country_other)) +
-      geom_point() +
-      geom_jitter() +
-      theme_classic() +
-      theme(legend.position = "top") +
-      labs(
-        title = "COVID-19 Country Testing Capacity",
-        subtitle = "Visualizing a country's case rate against testing rate\nfor countries with over 15,000 reported cases.",
-        x = "Total Cases",
-        y = "Tests per 1M",
-        color = "Country"
-      )
-
-  })
-
-
-  output$covidLogTests <- renderPlot({
-    
-    # Logarithmic plot of total tests
-
-    ggplot(worldometer_log_data, aes(log_cases, log_tests, color = country_other)) +
-      geom_point() +
-      theme(legend.position = "none") +
-      labs(
-        title = "Logarithmic comparison of cases to tests",
-        x = "Cases \n(x10,000)",
-        y = "Tests \n(x10,000)"
-      )
-
-  })
 
   output$covidLogMTests <- renderPlot({
     
