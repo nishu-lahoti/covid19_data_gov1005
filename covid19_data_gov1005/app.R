@@ -114,11 +114,9 @@ ui <- navbarPage("The COVID-19 Data Project",
                                       
                                       br(),
                                       
-                                      p("The rapidity with which COVID-19 spread within countries surprised political leaders
-                                        and society as a whole. In the early months of 2020, most societies believed
-                                        the Coronavirus to be a problem distant to their daily life, sequestered to a manufacturing
-                                        city in the heart of China. As the virus began spreading outside of Wuhan, society-at-large continued
-                                        to believe that it could be contained and would not have a severe impact on daily life. The aim of this section is 
+                                      p("In the early months of 2020, most societies believed the Coronavirus to be a problem distant to their daily life, 
+                                        sequestered to a manufacturing city in the heart of China. As the virus began spreading outside of Wuhan, society-at-large continued
+                                        to believe that it could be contained. The aim of this section is 
                                         to dispel that belief, showing just how quickly Coronavirus has spread in countries across the world,
                                         its devastation, and the eventual pathway to recovery."))),
                                      
@@ -283,11 +281,11 @@ ui <- navbarPage("The COVID-19 Data Project",
                                               
                                               br(),
                                                      
-                                              p("The visualizations below compare a country's case reporting with its capability to test. Suspecting that
-                                              countries with more testing infrastructure will report higher case rates, we used linear regressions to visualize the
-                                              whether the relationship between these variables was positive or negative. The data we have shows that there is a correlation
-                                              between a country's ability to test and its overall reported cases. At the same time, it shows that countries with the highest
-                                              number of testing units do not necessarily have the highest rate of testing for their populace."))),
+                                              p("Suspecting that
+                                              countries with more testing infrastructure will report higher case rates, we created a model linear regressions to visualize the
+                                              relationship between these variables. The first visualization the relationship between tests per million and cases per million in countries with
+                                              reported cases. The second visualization shows that a slight correlation exists between testing and case rates and how that shifts depending on a country's
+                                              case rate."))),
                                             
                                             br(),
                                             br(),
@@ -298,10 +296,8 @@ ui <- navbarPage("The COVID-19 Data Project",
                                                      
                                             br(),
                                             
-                                            plotOutput("covidHighTests"),
-                                            plotOutput("covidMTests"),
-                                            plotOutput("covidLogTests"),
-                                            plotOutput("covidLogMTests")
+                                            plotOutput("covidLogMTests"),
+                                            plotOutput("covidCorrelation")
                                               )
                                             )
                                    )))),
@@ -333,7 +329,6 @@ ui <- navbarPage("The COVID-19 Data Project",
                                               we attempt to examine the efficacy of government policy in curbing the spread of the virus. We suspect that there is little universal
                                               correlation but hope to draw insights by comparing policy responses among specific countries."),
                           
-                                            br(),
                           
                                             sidebarLayout(
                                               sidebarPanel(
@@ -500,7 +495,6 @@ ui <- navbarPage("The COVID-19 Data Project",
                                               mainPanel(plotOutput("countryPolicy")))
                                             ))),
                           
-                          br(),
                           
                           tabPanel("Stringency Index",
                                    
@@ -543,10 +537,7 @@ ui <- navbarPage("The COVID-19 Data Project",
                                         mainPanel(plotOutput("globalPolicy"))))
                                    )),
                                       
-                                      
-                                      br(),
-                                      
-                                      tabPanel("Policy Regression",
+                                  tabPanel("Policy Regression",
                                                
                                                fluidRow(column(2),
                                                         column(8,
@@ -859,16 +850,79 @@ options(scipen = 999)
     
     # Logarithmic plot of tests per 1m
 
-    ggplot(worldometer_log_data, aes(log_cases, log_tests_1m, color = country_other)) +
+    log_million <- ggplot(worldometer_log_data, aes(log_tests_1m, log_cases, color = country_other)) +
       geom_point() +
       theme(legend.position = "none") +
       labs(
         title = "Logarithmic comparison of cases to tests",
-        x = "Cases \n(x10,000)",
-        y = "Tests per 1M \n(x10,000)"
+        x = "Tests per 1M \n(x10,000)",
+        y = "Cases \n(x10,000)"
       )
+    
+    ggplotly(log_million)
 
   })
+  
+  
+  output$covidCorrelation <- renderPlot({
+    
+    worldometer_model <- worldometer_data %>%
+      filter(! is.na(total_tests)) %>%
+      select(country_other, incidence, total_cases, total_tests) %>%
+      rep_sample_n(size = nrow(worldometer_data), replace = TRUE, reps = 1000) %>%
+      group_by(replicate, incidence) %>%
+      nest() %>%
+      mutate(mod = map(data, ~ lm(total_cases ~ total_tests, data = .)),
+             reg_results = map(mod, ~ tidy(., conf.int = TRUE)),
+             disp_coef = map_dbl(reg_results, ~ filter(., term == "total_tests") %>% pull(estimate)))
+    # lower_bound = map_dbl(reg_results, ~ filter(., term == "total_tests") %>% pull(conf.low)),
+    # upper_bound = map_dbl(reg_results, ~ filter(., term == "total_tests") %>% pull(conf.high)))
+    
+    world_high <- worldometer_model %>%
+      select(replicate, incidence, disp_coef) %>%
+      filter(incidence == "100,000+ Cases") %>%
+      pull(disp_coef) %>%
+      quantile(c(0.025, 0.5, 0.975))
+    
+    world_med <- worldometer_model %>%
+      select(replicate, incidence, disp_coef) %>%
+      filter(incidence == "10,000+ Cases") %>%
+      pull(disp_coef) %>%
+      quantile(c(0.025, 0.5, 0.975))
+    
+    world_low <- worldometer_model %>%
+      select(replicate, incidence, disp_coef) %>%
+      filter(incidence == "1,000+ Cases") %>%
+      pull(disp_coef) %>%
+      quantile(c(0.025, 0.5, 0.975))
+    
+    world_bottom <- worldometer_model %>%
+      select(replicate, incidence, disp_coef) %>%
+      filter(incidence == "Less than 1000+ Cases") %>%
+      pull(disp_coef) %>%
+      quantile(c(0.025, 0.5, 0.975))
+    
+    updated_world_tibble <- tibble(index = "100,000+ Cases", conf_low = world_high[1], point_estimate = world_high[2], conf_high = world_high[3]) %>%
+      add_row(index = "10,000+ Cases", conf_low = world_med[1], point_estimate = world_med[2], conf_high = world_med[3]) %>%
+      add_row(index = "1,000+ Cases", conf_low = world_low[1], point_estimate = world_low[2], conf_high = world_low[3]) %>%
+      add_row(index = "Less than 1,000 Cases", conf_low = world_bottom[1], point_estimate = world_bottom[2], conf_high = world_bottom[3])
+    
+    
+    ggplot(updated_world_tibble, aes(y = point_estimate)) +
+      geom_errorbar(aes(x = index, ymin = conf_low, ymax = conf_high), width = 0.1, color = "#0D47A1") +
+      theme_classic() +
+      ylim(-0.05, .2) %>%
+      labs(
+        title = "Correlation between Total Tests and Total Cases",
+        subtitle = "Modeled by running a linear regression \ncomparing case and test rates 1000 times",
+        x = "Cases by Country",
+        y = "Correlation"
+      )
+    
+    
+  })
+  
+  
   
 ######### End Spread #########
 #########        #########

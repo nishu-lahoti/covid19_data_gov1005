@@ -31,8 +31,11 @@ world <- worldometer %>%
   mutate_at(c("total_cases", "total_deaths", "total_recovered", "total_tests", "tests_1m_pop"), parse_number) %>%
   filter(! country_other %in% c("World", "Total:", "Europe", "North America", "Asia", "South America", 
                                 "Africa", "Oceania", "")) %>%
-  mutate(population_estimate = (total_tests * 1000000) / tests_1m_pop) %>%
-  select("country_other", "population_estimate", "total_cases", "total_deaths", "total_recovered", "total_tests", "tests_1m_pop") %>%
+  mutate(population_estimate = (total_tests * 1000000) / tests_1m_pop,
+         per_capita_cases = total_cases / population_estimate,
+         per_capita_tests = total_tests / population_estimate) %>%
+  select("country_other", "population_estimate", "total_cases", "total_deaths", 
+         "total_recovered", "total_tests", "tests_1m_pop", "per_capita_cases", "per_capita_tests") %>%
   arrange(desc(total_cases))
 
 ```
@@ -42,6 +45,14 @@ world <- worldometer %>%
 ```{r worldometer_exploration, echo = FALSE}
 # Visualizing total cases and total deaths against total tests. A good next step may be to filter by countries of interest and to get a good enough
 # sample of countries that have tested. Qualify a country based on total number of cases (>1000). Maybe there is a weak positive correlation.
+
+
+x <- ggplot(world, aes(per_capita_tests, per_capita_cases)) +
+  geom_point()
+
+g <- ggplotly(x)
+g
+
 
 options(scipen = 999)
 
@@ -137,11 +148,21 @@ worldometer_reps <- world %>%
          lower_bound = map_dbl(reg_results, ~ filter(., term == "total_tests") %>% pull(conf.low)),
          upper_bound = map_dbl(reg_results, ~ filter(., term == "total_tests") %>% pull(conf.high)))
 
-ggplot(worldometer_reps, aes(x = replicate, y = disp_coef)) +
-  # geom_errorbar(aes(x=replicate, ymin = lower_bound, ymax = upper_bound), color = "blue") +
-  geom_point(aes(x = replicate, y = disp_coef), color = "blue") + 
+world_int <- worldometer_reps %>%
+  pull(disp_coef) %>%
+  quantile(c(0.025, 0.5, 0.975))
+
+# Relationship between testing and locations - is it better in certain regions. Could also show relationships with stringency.
+# Subset by case rates. Or test rates. Could also consider population density compared to square miles by places.
+
+
+
+world_tibble <- tibble(index = "relationship", conf_low = world_int[1], point_estimate = world_int[2], conf_high = world_int[3])
+
+ggplot(world_tibble, aes(y = point_estimate)) +
+  geom_errorbar(aes(x = index, ymin = conf_low, ymax = conf_high), width = 0.1, color = "blue") +
   theme_classic() +
-  geom_smooth(se = FALSE, color = "black")
+  ylim(0, .2)
 
 ```
 

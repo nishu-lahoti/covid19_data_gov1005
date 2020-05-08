@@ -79,28 +79,19 @@ world <- worldometer %>%
   mutate_at(c("total_cases", "total_deaths", "total_recovered", "total_tests", "tests_1m_pop"), parse_number) %>%
   filter(! country_other %in% c("World", "Total:", "Europe", "North America", "Asia", "South America", 
                                 "Africa", "Oceania", "")) %>%
-  mutate(population_estimate = (total_tests * 1000000) / tests_1m_pop) %>%
-  select("country_other", "population_estimate", "total_cases", "total_deaths", "total_recovered", "total_tests", "tests_1m_pop") %>%
+  mutate(incidence = case_when(
+    total_cases > 100000 ~ "100,000+ Cases",
+    total_cases >= 10000 ~ "10,000+ Cases",
+    total_cases >= 1000 ~ "1,000+ Cases",
+    TRUE ~ "Less than 1000+ Cases"
+  ),
+  population_estimate = (total_tests * 1000000) / tests_1m_pop,
+         per_capita_cases = total_cases / population_estimate,
+         per_capita_tests = total_tests / population_estimate) %>%
+  select("country_other", "population_estimate", "total_cases", "total_deaths", "total_recovered", "total_tests", "tests_1m_pop", incidence) %>%
   arrange(desc(total_cases))
 
-saveRDS(worldometer, file = "../team_data/worldometer.RDS")
-
-
-# Region & Population Data
-
-regions <- read.csv(url("https://raw.githubusercontent.com/lukes/ISO-3166-Countries-with-Regional-Codes/master/all/all.csv")) %>% 
-  select(name, region, sub.region) %>% 
-  rename(Country = name) %>%
-  mutate(CountryCode = countrycode(Country, origin = 'country.name', destination = 'iso3c')) 
-
-population_data <- read_csv("../policy/API_pop.csv", skip = 3) %>% 
-  clean_names() %>% 
- select(country_code, x2018) %>% 
-  rename(pop_2018 = x2018)
-
-country_population <- population_data %>%
-  left_join(regions, by = c("country_code" = "CountryCode")) %>%
-  select(Country, pop_2018)
+saveRDS(world, file = "../team_data/worldometer.RDS")
 
 ```
 
@@ -435,11 +426,75 @@ worldometer_regression <- lm(total_cases ~ total_tests, data = world) %>%
 
 worldometer_reps <- world %>%
   filter(! is.na(total_tests)) %>%
-  select(country_other, total_cases, total_tests) %>%
+  select(country_other, incidence, total_cases, total_tests) %>%
   rep_sample_n(size = nrow(world), replace = TRUE, reps = 1000) %>%
   group_by(replicate) %>%
   nest() %>%
-  mutate(mod = map(data, ~ lm(total_cases ~ total_tests, data = .)))
+  mutate(mod = map(data, ~ lm(total_cases ~ total_tests, data = .)),
+         reg_results = map(mod, ~ tidy(., conf.int = TRUE)),
+         disp_coef = map_dbl(reg_results, ~ filter(., term == "total_tests") %>% pull(estimate)),
+         lower_bound = map_dbl(reg_results, ~ filter(., term == "total_tests") %>% pull(conf.low)),
+         upper_bound = map_dbl(reg_results, ~ filter(., term == "total_tests") %>% pull(conf.high)))
+
+world_int <- worldometer_reps %>%
+  pull(disp_coef) %>%
+  quantile(c(0.025, 0.5, 0.975))
+
+
+
+worldometer_model <- world %>%
+  filter(! is.na(total_tests)) %>%
+  select(country_other, incidence, total_cases, total_tests) %>%
+  rep_sample_n(size = nrow(world), replace = TRUE, reps = 1000) %>%
+  group_by(replicate, incidence) %>%
+  nest() %>%
+  mutate(mod = map(data, ~ lm(total_cases ~ total_tests, data = .)),
+         reg_results = map(mod, ~ tidy(., conf.int = TRUE)),
+         disp_coef = map_dbl(reg_results, ~ filter(., term == "total_tests") %>% pull(estimate)))
+         # lower_bound = map_dbl(reg_results, ~ filter(., term == "total_tests") %>% pull(conf.low)),
+         # upper_bound = map_dbl(reg_results, ~ filter(., term == "total_tests") %>% pull(conf.high)))
+
+world_high <- worldometer_model %>%
+  select(replicate, incidence, disp_coef) %>%
+  filter(incidence == "100,000+ Cases") %>%
+  pull(disp_coef) %>%
+  quantile(c(0.025, 0.5, 0.975))
+
+world_med <- worldometer_model %>%
+  select(replicate, incidence, disp_coef) %>%
+  filter(incidence == "10,000+ Cases") %>%
+  pull(disp_coef) %>%
+  quantile(c(0.025, 0.5, 0.975))
+
+world_low <- worldometer_model %>%
+  select(replicate, incidence, disp_coef) %>%
+  filter(incidence == "1,000+ Cases") %>%
+  pull(disp_coef) %>%
+  quantile(c(0.025, 0.5, 0.975))
+
+world_bottom <- worldometer_model %>%
+  select(replicate, incidence, disp_coef) %>%
+  filter(incidence == "Less than 1000+ Cases") %>%
+  pull(disp_coef) %>%
+  quantile(c(0.025, 0.5, 0.975))
+ 
+updated_world_tibble <- tibble(index = "100,000+ Cases", conf_low = world_high[1], point_estimate = world_high[2], conf_high = world_high[3]) %>%
+  add_row(index = "10,000+ Cases", conf_low = world_med[1], point_estimate = world_med[2], conf_high = world_med[3]) %>%
+  add_row(index = "1,000+ Cases", conf_low = world_low[1], point_estimate = world_low[2], conf_high = world_low[3]) %>%
+  add_row(index = "Less than 1,000 Cases", conf_low = world_bottom[1], point_estimate = world_bottom[2], conf_high = world_bottom[3])
+
+
+ggplot(updated_world_tibble, aes(y = point_estimate)) +
+  geom_errorbar(aes(x = index, ymin = conf_low, ymax = conf_high), width = 0.1, color = "#0D47A1") +
+  theme_classic() +
+  ylim(-0.05, .2) %>%
+  labs(
+    title = "Correlation between Total Tests and Total Cases",
+    subtitle = "Modeled by running a linear regression \ncomparing case and test rates 1000 times",
+    x = "Cases by Country",
+    y = "Correlation"
+  )
+
 
 
 ```
