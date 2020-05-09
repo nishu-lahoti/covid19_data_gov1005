@@ -471,4 +471,63 @@ stock_cases <- policy %>%
 saveRDS(stock_cases, file = "stock_cases.RDS")
 ```
 
+```{r}
+
+    stringency_model <- policy %>%
+          select(Country, new_date, recovered, region, StringencyIndexForDisplay) %>%
+          filter(!is.na(StringencyIndexForDisplay), new_date == "2020-05-01") %>%
+          rep_sample_n(size = nrow(policy), replace = TRUE, reps = 3) %>%
+          group_by(replicate, region) %>%
+          nest() %>%
+          mutate(mod = map(data, ~ lm(StringencyIndexForDisplay ~ recovered, data = .)),
+                 reg_results = map(mod, ~ tidy(., conf.int = TRUE)),
+                 disp_coef = map_dbl(reg_results, ~ filter(., term == "recovered") %>% pull(estimate)))
+        # lower_bound = map_dbl(reg_results, ~ filter(., term == "total_tests") %>% pull(conf.low)),
+        # upper_bound = map_dbl(reg_results, ~ filter(., term == "total_tests") %>% pull(conf.high)))
+        
+        Americas <- stringency_model %>%
+          select(replicate, region, disp_coef) %>%
+          filter(region == "Americas") %>%
+          pull(disp_coef) %>%
+          quantile(c(0.025, 0.5, 0.975))
+        
+        Africa <- stringency_model %>%
+          select(replicate, region, disp_coef) %>%
+          filter(region == "Africa") %>%
+          pull(disp_coef) %>%
+          quantile(c(0.025, 0.5, 0.975))
+        
+        Europe <- stringency_model %>%
+          select(replicate, region, disp_coef) %>%
+          filter(region == "Europe") %>%
+          pull(disp_coef) %>%
+          quantile(c(0.025, 0.5, 0.975))
+        
+        Asia <- stringency_model %>%
+          select(replicate, region, disp_coef) %>%
+          filter(region == "Asia") %>%
+          pull(disp_coef) %>%
+          quantile(c(0.025, 0.5, 0.975))
+        
+        Oceania <- stringency_model %>%
+          select(replicate, region, disp_coef) %>%
+          filter(region == "Oceania") %>%
+          pull(disp_coef) %>%
+          quantile(c(0.025, 0.5, 0.975))
+        
+        Other <- stringency_model %>% 
+          select(replicate, region, disp_coef) %>%
+          filter(is.na(region)) %>%
+          pull(disp_coef) %>%
+          quantile(c(0.025, 0.5, 0.975))
+        
+        updated_policy_tibble <- tibble(index = "Americas", conf_low = Americas[1], point_estimate = Americas[2], conf_high = Americas[3]) %>%
+          add_row(index = "Africa", conf_low = Africa[1], point_estimate = Africa[2], conf_high = Africa[3]) %>%
+          add_row(index = "Europe", conf_low = Europe[1], point_estimate = Europe[2], conf_high = Europe[3]) %>%
+          add_row(index = "Asia", conf_low = Asia[1], point_estimate = Asia[2], conf_high = Asia[3]) %>% 
+          add_row(index = "Oceania", conf_low = Oceania[1], point_estimate = Oceania[2], conf_high = Oceania[3]) %>% 
+          add_row(index = "Other, including US and UK", conf_low = Other[1], point_estimate = Other[2], conf_high = Other[3])
+
+
+```
 
