@@ -577,13 +577,23 @@ ui <- navbarPage("The COVID-19 Data Project",
                                        br(),
                                        
                                        sidebarLayout(
-                                         sidebarPanel(column(4),
-                                                      
-                                                      h3("Stringency versus Cases"),
-                                                      
-                                                      p("[linear regression] finally, seeing that a correlation seemed plausible, we wanted to test for uncertainty. By replicating
-                                                      the data we have available 1000 times, we have 1000 samples on which to assess a potential correlation between
-                                                      testing and cases...")),
+                                         sidebarPanel(
+                                           h3("Stringency versus Cases"),
+                                           p("Finally, seeing that a correlation seemed plausible, we wanted to test for uncertainty. By replicating
+                                             the data we have available 1000 times, we have 1000 samples on which to assess a potential correlation between
+                                             testing and cases. We segmented the data by total case rate and conducted a linear regression. Our models showed us
+                                             that 95% of the time we can expect a low correlation between testing and case rates."),
+                                           
+                                           radioButtons("caseInput", "Choose a case type",
+                                                        choices = c("Confirmed", "Deaths", "Recovered"),
+                                                        selected = "Confirmed"),
+                                           sliderInput("dateInput",
+                                                       "Select a date:",
+                                                       min = as.Date("2020-01-22","%Y-%m-%d"),
+                                                       max = Sys.Date(),
+                                                       value = as.Date("2020-01-22"),
+                                                       timeFormat = "%Y-%m-%d")
+                                         ),
                                          
                                          mainPanel(
                                            plotOutput("stringencyCorrelation")
@@ -1140,18 +1150,221 @@ server <- function(input, output) {
         
     })
     
-    # Correlation between stringency index and number of cases
+    # Correlation between stringency index and number of cases, by continent
     
-    #output$stringencyCorrelation <- renderPlot({
+    output$stringencyCorrelation <- renderPlot({
       
+      # Set case type based on input 
       
+      if(input$caseInput == "Confirmed") {
+        title <- "Correlation between Stringency Index and Total Confirmed Cases"
+        x_axis <- "Total Confirmed Cases, by Region"
+        
+        # Model for confirmed cases
+        
+        stringency_model <- policy %>%
+          filter(!is.na(StringencyIndexForDisplay)) %>% 
+          select(Country, new_date, confirmed, region, StringencyIndexForDisplay) %>%
+          filter(new_date == "2020-05-01") %>% 
+          rep_sample_n(size = nrow(policy), replace = TRUE, reps = 1000) %>%
+          group_by(replicate, region) %>%
+          nest() %>%
+          mutate(mod = map(data, ~ lm(confirmed ~ StringencyIndexForDisplay, data = .)),
+                 reg_results = map(mod, ~ tidy(., conf.int = TRUE)),
+                 disp_coef = map_dbl(reg_results, ~ filter(., term == "StringencyIndexForDisplay") %>% pull(estimate)))
+        # lower_bound = map_dbl(reg_results, ~ filter(., term == "total_tests") %>% pull(conf.low)),
+        # upper_bound = map_dbl(reg_results, ~ filter(., term == "total_tests") %>% pull(conf.high)))
+        
+        Americas <- stringency_model %>%
+          select(replicate, region, disp_coef) %>%
+          filter(region == "Americas") %>%
+          pull(disp_coef) %>%
+          quantile(c(0.025, 0.5, 0.975))
+        
+        Africa <- stringency_model %>%
+          select(replicate, region, disp_coef) %>%
+          filter(region == "Africa") %>%
+          pull(disp_coef) %>%
+          quantile(c(0.025, 0.5, 0.975))
+        
+        Europe <- stringency_model %>%
+          select(replicate, region, disp_coef) %>%
+          filter(region == "Europe") %>%
+          pull(disp_coef) %>%
+          quantile(c(0.025, 0.5, 0.975))
+        
+        Asia <- stringency_model %>%
+          select(replicate, region, disp_coef) %>%
+          filter(region == "Asia") %>%
+          pull(disp_coef) %>%
+          quantile(c(0.025, 0.5, 0.975))
+        
+        Oceania <- stringency_model %>%
+          select(replicate, region, disp_coef) %>%
+          filter(region == "Oceania") %>%
+          pull(disp_coef) %>%
+          quantile(c(0.025, 0.5, 0.975))
+        
+        Other <- stringency_model %>% 
+          select(replicate, region, disp_coef) %>%
+          filter(is.na(region)) %>%
+          pull(disp_coef) %>%
+          quantile(c(0.025, 0.5, 0.975))
+        
+        updated_policy_tibble <- tibble(index = "Americas", conf_low = Americas[1], point_estimate = Americas[2], conf_high = Americas[3]) %>%
+          add_row(index = "Africa", conf_low = Africa[1], point_estimate = Africa[2], conf_high = Africa[3]) %>%
+          add_row(index = "Europe", conf_low = Europe[1], point_estimate = Europe[2], conf_high = Europe[3]) %>%
+          add_row(index = "Asia", conf_low = Asia[1], point_estimate = Asia[2], conf_high = Asia[3]) %>% 
+          add_row(index = "Oceania", conf_low = Oceania[1], point_estimate = Oceania[2], conf_high = Oceania[3]) %>% 
+          add_row(index = "Other, including US and UK", conf_low = Other[1], point_estimate = Other[2], conf_high = Other[3])
       
-    #})
-    
+        }
+      
+      else if(input$caseInput == "Recovered") {
+        title <- "Correlation between Stringency Index and Total Recoveries"
+        x_axis <- "Total Recoveries, by Region"
+        
+        # Model for recoveries
+        
+        stringency_model <- policy %>%
+          filter(!is.na(StringencyIndexForDisplay)) %>% 
+          select(Country, new_date, recovered, region, StringencyIndexForDisplay) %>%
+          filter(new_date == "2020-05-01") %>% 
+          rep_sample_n(size = nrow(policy), replace = TRUE, reps = 1000) %>%
+          group_by(replicate, region) %>%
+          nest() %>%
+          mutate(mod = map(data, ~ lm(recovered ~ StringencyIndexForDisplay, data = .)),
+                 reg_results = map(mod, ~ tidy(., conf.int = TRUE)),
+                 disp_coef = map_dbl(reg_results, ~ filter(., term == "StringencyIndexForDisplay") %>% pull(estimate)))
+        # lower_bound = map_dbl(reg_results, ~ filter(., term == "total_tests") %>% pull(conf.low)),
+        # upper_bound = map_dbl(reg_results, ~ filter(., term == "total_tests") %>% pull(conf.high)))
+        
+        Americas <- stringency_model %>%
+          select(replicate, region, disp_coef) %>%
+          filter(region == "Americas") %>%
+          pull(disp_coef) %>%
+          quantile(c(0.025, 0.5, 0.975))
+        
+        Africa <- stringency_model %>%
+          select(replicate, region, disp_coef) %>%
+          filter(region == "Africa") %>%
+          pull(disp_coef) %>%
+          quantile(c(0.025, 0.5, 0.975))
+        
+        Europe <- stringency_model %>%
+          select(replicate, region, disp_coef) %>%
+          filter(region == "Europe") %>%
+          pull(disp_coef) %>%
+          quantile(c(0.025, 0.5, 0.975))
+        
+        Asia <- stringency_model %>%
+          select(replicate, region, disp_coef) %>%
+          filter(region == "Asia") %>%
+          pull(disp_coef) %>%
+          quantile(c(0.025, 0.5, 0.975))
+        
+        Oceania <- stringency_model %>%
+          select(replicate, region, disp_coef) %>%
+          filter(region == "Oceania") %>%
+          pull(disp_coef) %>%
+          quantile(c(0.025, 0.5, 0.975))
+        
+        Other <- stringency_model %>% 
+          select(replicate, region, disp_coef) %>%
+          filter(is.na(region)) %>%
+          pull(disp_coef) %>%
+          quantile(c(0.025, 0.5, 0.975))
+        
+        updated_policy_tibble <- tibble(index = "Americas", conf_low = Americas[1], point_estimate = Americas[2], conf_high = Americas[3]) %>%
+          add_row(index = "Africa", conf_low = Africa[1], point_estimate = Africa[2], conf_high = Africa[3]) %>%
+          add_row(index = "Europe", conf_low = Europe[1], point_estimate = Europe[2], conf_high = Europe[3]) %>%
+          add_row(index = "Asia", conf_low = Asia[1], point_estimate = Asia[2], conf_high = Asia[3]) %>% 
+          add_row(index = "Oceania", conf_low = Oceania[1], point_estimate = Oceania[2], conf_high = Oceania[3]) %>% 
+          add_row(index = "Other, including US and UK", conf_low = Other[1], point_estimate = Other[2], conf_high = Other[3])
+        
+      }
+      
+      else{
+        title <- "Correlation between Stringency Index and Total Deaths"
+        x_axis <- "Total Deaths, by Region"
+        
+        # Model for deaths
+        
+        stringency_model <- policy %>%
+          filter(!is.na(StringencyIndexForDisplay)) %>% 
+          select(Country, new_date, deaths, region, StringencyIndexForDisplay) %>%
+          filter(new_date == "2020-05-01") %>% 
+          rep_sample_n(size = nrow(policy), replace = TRUE, reps = 1000) %>%
+          group_by(replicate, region) %>%
+          nest() %>%
+          mutate(mod = map(data, ~ lm(deaths ~ StringencyIndexForDisplay, data = .)),
+                 reg_results = map(mod, ~ tidy(., conf.int = TRUE)),
+                 disp_coef = map_dbl(reg_results, ~ filter(., term == "StringencyIndexForDisplay") %>% pull(estimate)))
+        # lower_bound = map_dbl(reg_results, ~ filter(., term == "total_tests") %>% pull(conf.low)),
+        # upper_bound = map_dbl(reg_results, ~ filter(., term == "total_tests") %>% pull(conf.high)))
+        
+        Americas <- stringency_model %>%
+          select(replicate, region, disp_coef) %>%
+          filter(region == "Americas") %>%
+          pull(disp_coef) %>%
+          quantile(c(0.025, 0.5, 0.975))
+        
+        Africa <- stringency_model %>%
+          select(replicate, region, disp_coef) %>%
+          filter(region == "Africa") %>%
+          pull(disp_coef) %>%
+          quantile(c(0.025, 0.5, 0.975))
+        
+        Europe <- stringency_model %>%
+          select(replicate, region, disp_coef) %>%
+          filter(region == "Europe") %>%
+          pull(disp_coef) %>%
+          quantile(c(0.025, 0.5, 0.975))
+        
+        Asia <- stringency_model %>%
+          select(replicate, region, disp_coef) %>%
+          filter(region == "Asia") %>%
+          pull(disp_coef) %>%
+          quantile(c(0.025, 0.5, 0.975))
+        
+        Oceania <- stringency_model %>%
+          select(replicate, region, disp_coef) %>%
+          filter(region == "Oceania") %>%
+          pull(disp_coef) %>%
+          quantile(c(0.025, 0.5, 0.975))
+        
+        Other <- stringency_model %>% 
+          select(replicate, region, disp_coef) %>%
+          filter(is.na(region)) %>%
+          pull(disp_coef) %>%
+          quantile(c(0.025, 0.5, 0.975))
+        
+        updated_policy_tibble <- tibble(index = "Americas", conf_low = Americas[1], point_estimate = Americas[2], conf_high = Americas[3]) %>%
+          add_row(index = "Africa", conf_low = Africa[1], point_estimate = Africa[2], conf_high = Africa[3]) %>%
+          add_row(index = "Europe", conf_low = Europe[1], point_estimate = Europe[2], conf_high = Europe[3]) %>%
+          add_row(index = "Asia", conf_low = Asia[1], point_estimate = Asia[2], conf_high = Asia[3]) %>% 
+          add_row(index = "Oceania", conf_low = Oceania[1], point_estimate = Oceania[2], conf_high = Oceania[3]) %>% 
+          add_row(index = "Other, including US and UK", conf_low = Other[1], point_estimate = Other[2], conf_high = Other[3])
+        
+      }
+      
+      # Plot error bars
+      
+      ggplot(updated_policy_tibble, aes(y = point_estimate)) +
+        geom_errorbar(aes(x = index, ymin = conf_low, ymax = conf_high), width = 0.1, color = "#0D47A1") +
+        #ylim(-0.05, .2) %>%
+        labs(
+          title = title,
+          subtitle = "Modeled by running a linear regression \ncomparing Stringency Index and number of cases 1000 times",
+          x = x_axis,
+          y = "Correlation"
+        ) +
+        theme_classic()
+      
+    })
     
     ####### End Policy #######
     #########        #########
-    
     
     ######## Economic ########
     #########        #########
